@@ -27,6 +27,10 @@ def test_benchmark_has_ten_real_papers_and_controlled_mutations():
         task = ROOT / "benchmark/tasks" / row["task_id"]
         assert (task / "main.tex").exists()
         assert (task / "references.bib").exists()
+        if row["mutation_type"] == "hallucinated_reference":
+            assert row["gold_reference_status"] == "NOT_FOUND"
+            assert row["gold_support"] == "INSUFFICIENT_EVIDENCE"
+            assert row["source_paper"]["title"] not in row["reference"]["title"]
 
     for paper in manifest["papers"]:
         assert (ROOT / paper["local_pdf"]).exists()

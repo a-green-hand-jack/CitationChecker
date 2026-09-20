@@ -28,6 +28,23 @@ CLAIMS = {
     "bayes-adaptive-rl-reasoning": "Large Language Models (LLMs) trained via Reinforcement Learning (RL) have exhibited strong reasoning capabilities and emergent reflective behaviors, such as rethinking and error correction, as a form of in-context exploration.",
 }
 
+# These titles are deliberately unrelated to the source-paper titles. Keeping
+# them explicit prevents the hallucination mutation from leaking a recoverable
+# title cue into the bibliography while retaining reproducible, hand-written
+# cases.
+HALLUCINATED_TITLES = {
+    "atlas-transfer-scaling": "Zyphor-17: Universal Guarantees for Adaptive Token Routing",
+    "transformers-succinct": "Kestrel-9: Succinct Memory Codes for Sequence Models",
+    "rl-dataset-distillation": "Beryl: Synthetic Control Variates for Hidden-Control Tasks",
+    "time-series-calibration": "Orpheus Forecasting Under Adversarial Sensor Drift",
+    "black-box-privacy-attacks": "Obsidian: Anonymous Task Leakage from Shared Encoders",
+    "kolmogorov-transformers": "MDL-Prime: A Benchmark for Description-Length Heuristics",
+    "evolutionary-transformer-learning": "EvoPulse: Continual Adaptation Without Contextual Memory",
+    "adversarial-mdp-dec": "HexaMDP: Structured Control Under Latent Observations",
+    "dp-sgd-square-roots": "RootWeave: Private Matrix Sketching for Long-Horizon Training",
+    "bayes-adaptive-rl-reasoning": "BayesForge: Reflective Search in Open-Loop Language Agents",
+}
+
 
 def base_reference(paper: dict) -> dict:
     return {
@@ -97,7 +114,7 @@ def main() -> None:
         ))
         fake_key = f"hallucinated_{slug.replace('-', '_')}"
         fake = {
-            "title": f"{paper['title']} — Extended Results and Universal Guarantees",
+            "title": HALLUCINATED_TITLES[slug],
             "authors": ["A. Nonexistent", "B. Fabricated"],
             "year": ref["year"],
             "arxiv_id": "9999.99999",
@@ -108,7 +125,7 @@ def main() -> None:
             claim=claim, citation_key=fake_key, reference=fake,
             gold_ref="NOT_FOUND", gold_support="INSUFFICIENT_EVIDENCE",
             mutation={"kind": "fabricated_reference", "replaces": key},
-            notes="The title, authors, and arXiv id are fabricated and do not identify a real work.",
+            notes="The title, authors, and arXiv id are independently fabricated and do not identify a real work or leak the source-paper title.",
         ))
         swap_paper = papers[(i + 1) % len(papers)]
         swap_ref = refs[swap_paper["slug"]]

@@ -40,8 +40,10 @@ The retrieved source does not support the claim, contradicts it, or addresses a
 materially different proposition.
 
 ### INSUFFICIENT_EVIDENCE
-The source is real, but only weak metadata or incomplete text is available, so a
-support judgment would be speculative.
+No credible source evidence is available, or only weak metadata/incomplete text
+is available, so a support judgment would be speculative. Use this status when
+the reference status is `NOT_FOUND` or `UNVERIFIABLE`; use `UNSUPPORTED` only
+after retrieving a real source that does not support the claim.
 
 ## 4. Evidence discipline
 

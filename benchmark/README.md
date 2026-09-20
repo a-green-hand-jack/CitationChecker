@@ -22,11 +22,15 @@ There are 40 cases: four for each paper.
 | --- | --- | --- |
 | `valid` | exact self-reference | supported |
 | `wrong-year` | same paper, year changed | metadata mismatch; claim remains recoverable |
-| `hallucinated` | fabricated title/authors/arXiv id | not found; insufficient evidence |
+| `hallucinated` | independently fabricated title/authors/arXiv id | not found; insufficient evidence |
 | `real-swap` | another real ICLR 2026 paper | verified reference; unsupported claim |
 
 `cases.jsonl` is the gold source of truth. Every mutation is explicit in the
-`mutation` field. Each generated task directory contains only `main.tex` and
+`mutation` field. The hallucinated titles are hand-written and intentionally do
+not contain the source-paper title, so the model cannot pass the case by
+recovering a title suffix. A `NOT_FOUND` reference is scored with
+`INSUFFICIENT_EVIDENCE`; `UNSUPPORTED` is reserved for a real retrieved paper
+that fails to support the claim. Each generated task directory contains only `main.tex` and
 `references.bib`, so gold metadata cannot be staged into the manuscript sent to
 Pi even when a task directory is passed directly.
 

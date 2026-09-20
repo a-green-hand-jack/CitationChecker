@@ -96,6 +96,10 @@ methodological, causal, comparative, or prior-work claim:
    - `PARTIALLY_SUPPORTED`
    - `UNSUPPORTED`
    - `INSUFFICIENT_EVIDENCE`
+   If the reference is `NOT_FOUND` or `UNVERIFIABLE`, assign
+   `INSUFFICIENT_EVIDENCE` because no credible source was retrieved. Reserve
+   `UNSUPPORTED` for a real retrieved source that contradicts or does not
+   support the claim.
 9. Record a short reason and, when available, the strongest evidence passage or a concise paraphrase with source location.
 
 Do not infer support from title similarity alone. A paper being topically relevant is not enough. Pay special attention to changed numbers, population/scope shifts, causal language, modality (may vs. does), and claims generalized beyond the cited study.
