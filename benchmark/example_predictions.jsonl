@@ -1,0 +1,12 @@
+{"task_id": "roberta_bert_pos", "reference_status": "VERIFIED", "support": "SUPPORTED"}
+{"task_id": "roberta_bert_metadata_neg", "reference_status": "METADATA_MISMATCH", "support": "SUPPORTED"}
+{"task_id": "roberta_transformer_pos", "reference_status": "VERIFIED", "support": "SUPPORTED"}
+{"task_id": "roberta_transformer_swap_neg", "reference_status": "VERIFIED", "support": "UNSUPPORTED"}
+{"task_id": "efficient_transformer_pos", "reference_status": "VERIFIED", "support": "SUPPORTED"}
+{"task_id": "efficient_transformer_claim_neg", "reference_status": "VERIFIED", "support": "UNSUPPORTED"}
+{"task_id": "layernorm_pos", "reference_status": "VERIFIED", "support": "SUPPORTED"}
+{"task_id": "layernorm_metadata_neg", "reference_status": "METADATA_MISMATCH", "support": "SUPPORTED"}
+{"task_id": "rag_pos", "reference_status": "VERIFIED", "support": "SUPPORTED"}
+{"task_id": "rag_claim_neg", "reference_status": "VERIFIED", "support": "UNSUPPORTED"}
+{"task_id": "led_pos", "reference_status": "VERIFIED", "support": "SUPPORTED"}
+{"task_id": "led_swap_neg", "reference_status": "VERIFIED", "support": "UNSUPPORTED"}
