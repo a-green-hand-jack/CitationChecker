@@ -1,0 +1,25 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "citation-checker-agent"
+version = "0.1.0"
+description = "A lightweight Pi-based agent for auditing academic citations with RefChecker, paper-search-mcp, and PyMuPDF4LLM."
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [{name = "CitationChecker contributors"}]
+dependencies = [
+  "pymupdf4llm>=0.0.17",
+]
+
+[project.scripts]
+citationchecker = "citation_checker.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/citation_checker"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+addopts = "-q"
