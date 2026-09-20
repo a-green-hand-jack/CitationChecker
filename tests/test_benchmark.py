@@ -24,9 +24,17 @@ def test_benchmark_has_ten_real_papers_and_controlled_mutations():
         "reference_swap",
     }
     for row in rows:
-        task = ROOT / "benchmark/tasks" / row["task_id"]
+        public_id = row["public_task_id"]
+        task = ROOT / "benchmark/tasks" / public_id
         assert (task / "main.tex").exists()
         assert (task / "references.bib").exists()
+        staged = (task / "main.tex").read_text()
+        bib = (task / "references.bib").read_text()
+        assert public_id in task.as_posix()
+        assert row["task_id"] not in task.as_posix()
+        assert row["citation_key"] not in staged
+        assert "ref_a" in staged and "ref_a" in bib
+        assert not any(token in task.as_posix() for token in ("valid", "wrong-year", "hallucinated", "real-swap"))
         if row["mutation_type"] == "hallucinated_reference":
             assert row["gold_reference_status"] == "NOT_FOUND"
             assert row["gold_support"] == "INSUFFICIENT_EVIDENCE"

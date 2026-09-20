@@ -31,6 +31,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--model", default=DEFAULT_MODEL, help=f"Pi model (default: {DEFAULT_MODEL})")
     p.add_argument("--thinking")
     p.add_argument("--timeout", type=int, default=1800)
+    p.add_argument("--max-steps", type=int, default=12, help="Maximum model requests")
+    p.add_argument("--max-tokens", type=int, default=80_000, help="Cumulative input+output+cache tokens; 0 disables the cap")
+    p.add_argument("--max-output-tokens", type=int, default=4096, help="Maximum output tokens per request")
+    p.add_argument("--disable-paper-search", action="store_true", help="Ablation mode: expose RefChecker without paper retrieval")
     p.add_argument("--dry-run", action="store_true")
 
     p = sub.add_parser("verify", help="Mechanically verify citation-report.md + JSON")
@@ -61,6 +65,10 @@ def main() -> None:
                 thinking=args.thinking,
                 timeout=args.timeout,
                 dry_run=args.dry_run,
+                max_steps=args.max_steps,
+                max_tokens=args.max_tokens,
+                max_output_tokens=args.max_output_tokens,
+                disable_paper_search=args.disable_paper_search,
             )
         )
     if args.command == "verify":

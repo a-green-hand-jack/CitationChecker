@@ -6,6 +6,8 @@ import shutil
 import subprocess
 from dataclasses import asdict, dataclass
 
+EXPECTED_PI_VERSION = "0.85.1"
+
 
 @dataclass
 class Check:
@@ -45,8 +47,12 @@ def _probe_python_package(name: str, module: str) -> Check:
 
 
 def run_doctor(as_json: bool = False) -> int:
+    pi = _probe("Pi harness", "pi", ["--version"])
+    if pi.found and pi.detail != EXPECTED_PI_VERSION:
+        pi.found = False
+        pi.detail = f"requires {EXPECTED_PI_VERSION}; found {pi.detail}"
     checks = [
-        _probe("Pi harness", "pi", ["--help"]),
+        pi,
         _probe("RefChecker", "academic-refchecker", ["--help"]),
         _probe("paper-search-mcp CLI", "paper-search", ["sources"]),
         _probe_python_package("PDF conversion", "pymupdf4llm"),

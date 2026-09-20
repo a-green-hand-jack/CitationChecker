@@ -1,0 +1,4 @@
+{"task_id": "case-0001", "reference_status": "VERIFIED", "support": "SUPPORTED"}
+{"task_id": "case-0002", "reference_status": "METADATA_MISMATCH", "support": "SUPPORTED"}
+{"task_id": "case-0003", "reference_status": "NOT_FOUND", "support": "INSUFFICIENT_EVIDENCE"}
+{"task_id": "case-0004", "reference_status": "VERIFIED", "support": "UNSUPPORTED"}

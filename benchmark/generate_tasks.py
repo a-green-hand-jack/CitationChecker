@@ -55,19 +55,22 @@ def generate(cases_path: Path, out: Path, clean: bool) -> int:
                 child.unlink()
     out.mkdir(parents=True, exist_ok=True)
     for case in cases:
-        task = out / case["task_id"]
+        task_id = case.get("public_task_id", case["task_id"])
+        citation_key = case.get("public_citation_key", "ref_a")
+        task = out / task_id
         task.mkdir(parents=True, exist_ok=True)
         (task / "main.tex").write_text(
             "\\documentclass{article}\n"
             "\\usepackage[numbers]{natbib}\n"
             "\\begin{document}\n"
-            f"{latex_escape(case['claim'])}~\\citep{{{case['citation_key']}}}.\n"
+            f"{latex_escape(case['claim'])}~\\citep{{{citation_key}}}.\n"
             "\\bibliographystyle{plainnat}\n"
             "\\bibliography{references}\n"
             "\\end{document}\n",
             encoding="utf-8",
         )
-        (task / "references.bib").write_text(bibtex(case), encoding="utf-8")
+        public_case = {**case, "citation_key": citation_key}
+        (task / "references.bib").write_text(bibtex(public_case), encoding="utf-8")
     print(f"generated {len(cases)} tasks under {out}")
     return len(cases)
 

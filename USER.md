@@ -61,6 +61,11 @@ For a no-execution preview:
 citationchecker check manuscript.pdf --dry-run
 ```
 
+Bounded runs accept `--max-steps`, `--max-tokens`, `--max-output-tokens`, and
+`--timeout`. `--disable-paper-search` is the paired ablation mode. A run is
+accepted only when `receipt.json` says `stop_reason=completed`; inspect
+`trajectory.jsonl` for the redacted replayable event log.
+
 ## 4. Inspect staging metadata
 
 ```bash
@@ -101,5 +106,10 @@ python benchmark/evaluate.py benchmark/runs/predictions.jsonl
 ```
 
 Use `--limit 4` for one mutation of each type and `--workers 1` for a serial
-run. The benchmark is controlled and diagnostic; it is not a broad performance
-estimate.
+run. To run the paired mechanism comparison:
+
+```bash
+python benchmark/ablate.py --per-mutation 1
+```
+
+The benchmark is controlled and diagnostic; it is not a broad performance estimate.

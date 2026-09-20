@@ -1,0 +1,59 @@
+{
+  "schema_version": 2,
+  "provider": "apex-deepseek",
+  "model": "deepseek-v4-flash",
+  "max_steps": 2,
+  "max_tokens": 1000,
+  "max_output_tokens": 256,
+  "timeout_seconds": 180,
+  "exit_code": 0,
+  "runner_exit_code": 2,
+  "verified": false,
+  "stop_reason": "token_limit",
+  "elapsed_seconds": 7.749,
+  "trajectory": "benchmark/runs/issue1-token-stop/trajectory.jsonl",
+  "trajectory_summary": {
+    "events": 34,
+    "messages": 7,
+    "tool_counts": {
+      "inspect_workspace": 1
+    },
+    "usage": {
+      "input": 3233,
+      "output": 55,
+      "cache_read": 0,
+      "cache_write": 0,
+      "total": 3288
+    },
+    "protocol_errors": 0,
+    "secrets_redacted": true
+  },
+  "state_summary": {
+    "schema_version": 2,
+    "steps": 1,
+    "processed_citation_ids": [],
+    "pending_citation_ids": [],
+    "citation_aliases": {},
+    "registered": false,
+    "tool_counts": {},
+    "artifacts": [],
+    "errors": [],
+    "last_error": null,
+    "usage": {
+      "input": 3233,
+      "output": 55,
+      "cache_read": 0,
+      "cache_write": 0,
+      "total": 3288
+    },
+    "usage_known": true,
+    "max_steps": 2,
+    "max_tokens": 1000,
+    "max_output_tokens": 256,
+    "stop_reason": "token_limit",
+    "report_verified": false,
+    "final_assistant_stop": "toolUse"
+  },
+  "usage_scope": "Pi model requests only; external CLI model usage excluded",
+  "secrets_redacted": true
+}

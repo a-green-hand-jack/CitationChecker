@@ -13,8 +13,10 @@ These files define how the agent audits citations.
 
 - `runtime/staging.py`: detect source type, stage LaTeX, or convert PDF to Markdown with PyMuPDF4LLM; freeze skill
 - `runtime/doctor.py`: detect Pi, RefChecker, paper-search, and PyMuPDF4LLM
-- `runtime/runner.py`: launch Pi headlessly
-- `runtime/verify.py`: validate final artifact shape
+- `runtime/runner.py`: launch pinned Pi headlessly, enforce budgets, clean up process groups, and write receipts
+- `runtime/trajectory.py`: normalize Pi JSONL events into a replayable redacted trajectory
+- `runtime/verify.py`: validate final artifact shape and summary counts
+- `pi_extension.ts`: thin typed-tool adapter for staged inspection, RefChecker, paper-search, and report submission
 - `runtime/main.py`: CLI parser
 
 Do not move scientific judgment into Python. If the definition of `SUPPORTED` or how evidence should be retrieved changes, change the skill/reference guide.
@@ -28,6 +30,10 @@ Every run writes:
 ```text
 workspace/input/manifest.json
 ```
+
+Each run also writes `trajectory.jsonl`, `state.json`, `tool-contracts.json`,
+and a schema-2 `receipt.json`. Receipt usage covers Pi model requests;
+external tool activity remains in its saved artifacts.
 
 Important fields include:
 
@@ -71,7 +77,8 @@ python benchmark/create_cases.py
 python benchmark/generate_tasks.py --clean
 ```
 
-Do not execute manuscript code. The benchmark task fixtures are citation cards;
+Generated model-visible task directories use neutral `case-0001` IDs and the
+`ref_a` citation key; mutation labels remain evaluator-side. Do not execute manuscript code. The benchmark task fixtures are citation cards;
 the full TeX source and compiled PDF remain available under `benchmark/corpus/`
 for provenance and future full-paper fixtures.
 
@@ -80,6 +87,7 @@ Run evaluator checks with:
 ```bash
 pytest tests/test_benchmark.py
 python benchmark/evaluate.py benchmark/example_predictions.jsonl
+python benchmark/ablate.py --per-mutation 1
 ```
 
 Development benchmark runs default to `apex-deepseek/deepseek-v4-flash`; pass

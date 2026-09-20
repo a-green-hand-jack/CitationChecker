@@ -30,9 +30,10 @@ There are 40 cases: four for each paper.
 not contain the source-paper title, so the model cannot pass the case by
 recovering a title suffix. A `NOT_FOUND` reference is scored with
 `INSUFFICIENT_EVIDENCE`; `UNSUPPORTED` is reserved for a real retrieved paper
-that fails to support the claim. Each generated task directory contains only `main.tex` and
-`references.bib`, so gold metadata cannot be staged into the manuscript sent to
-Pi even when a task directory is passed directly.
+that fails to support the claim. Each generated task directory uses a neutral `case-0001` style ID and
+the neutral `ref_a` citation key. It contains only `main.tex` and
+`references.bib`, so gold metadata and mutation names cannot be staged into the
+manuscript sent to Pi even when a task directory is passed directly.
 
 ## Rebuild or verify the corpus
 
@@ -78,6 +79,18 @@ python benchmark/run.py --provider apex-deepseek --model deepseek-v4-flash --lim
 The evaluator reports reference-status accuracy, support-label accuracy, exact
 match, and exact match by mutation type. These are controlled diagnostic cases,
 not a broad estimate of citation-checking performance.
+
+Run a paired mechanism ablation on one case of each mutation type:
+
+```bash
+python benchmark/ablate.py --per-mutation 1
+```
+
+Both modes use the same neutral tasks, model, and budgets. `full` exposes paper
+retrieval; `no-paper-search` removes that tool from the Pi allowlist.
+`ablation.json` records predictions, failures, reference and support accuracy,
+joint exact match, per-mutation scores, tool calls, model tokens, and elapsed
+time for both modes.
 
 The latest tracked real run is published under
 [`results/iclr2026-deepseek-v4-flash-2026-09-20/`](results/iclr2026-deepseek-v4-flash-2026-09-20/).

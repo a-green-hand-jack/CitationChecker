@@ -6,6 +6,7 @@ import concurrent.futures
 import json
 import subprocess
 import os
+import sys
 from pathlib import Path
 
 
@@ -14,15 +15,19 @@ DEFAULT_MODEL = os.environ.get("CITATIONCHECKER_MODEL", "deepseek-v4-flash")
 
 
 def _run_case(case: dict, *, index: int, total: int, args: argparse.Namespace, here: Path) -> tuple[int, dict | None, str]:
-    tid = case["task_id"]
+    tid = case.get("public_task_id", case["task_id"])
     task = here / "tasks" / tid / "main.tex"
     run_dir = args.out / tid
     cmd = [
-        "citationchecker", "check", str(task), "--out", str(run_dir),
+        sys.executable, "-m", "citation_checker.cli", "check", str(task), "--out", str(run_dir),
         "--provider", args.provider, "--model", args.model,
+        "--max-steps", str(args.max_steps), "--max-tokens", str(args.max_tokens),
+        "--max-output-tokens", str(args.max_output_tokens),
     ]
     if args.thinking:
         cmd += ["--thinking", args.thinking]
+    if args.disable_paper_search:
+        cmd += ["--disable-paper-search"]
     proc = subprocess.run(cmd, check=False, capture_output=True, text=True)
     report = run_dir / "workspace" / "output" / "citation-report.json"
     if proc.returncode != 0 or not report.exists():
@@ -50,6 +55,11 @@ def main() -> int:
     parser.add_argument("--out", type=Path, default=here / "runs")
     parser.add_argument("--limit", type=int)
     parser.add_argument("--workers", type=int, default=1, help="Concurrent CitationChecker tasks (default: 1)")
+    parser.add_argument("--max-steps", type=int, default=10)
+    parser.add_argument("--max-tokens", type=int, default=90000)
+    parser.add_argument("--max-output-tokens", type=int, default=4096)
+    parser.add_argument("--disable-paper-search", action="store_true")
+    parser.add_argument("--task-ids", help="Comma-separated neutral task IDs; default runs cases in file order")
     args = parser.parse_args()
     if args.workers < 1:
         parser.error("--workers must be at least 1")
@@ -57,7 +67,16 @@ def main() -> int:
     cases = [json.loads(x) for x in (here / "cases.jsonl").read_text(encoding="utf-8").splitlines() if x.strip()]
     if args.limit:
         cases = cases[: args.limit]
+    if args.task_ids:
+        wanted = set(filter(None, (x.strip() for x in args.task_ids.split(","))))
+        cases = [case for case in cases if case.get("public_task_id", case["task_id"]) in wanted]
     args.out.mkdir(parents=True, exist_ok=True)
+    (args.out / "run_config.json").write_text(json.dumps({
+        "provider": args.provider, "model": args.model, "thinking": args.thinking,
+        "max_steps": args.max_steps, "max_tokens": args.max_tokens,
+        "max_output_tokens": args.max_output_tokens, "paper_search_enabled": not args.disable_paper_search,
+        "task_ids": [case.get("public_task_id", case["task_id"]) for case in cases],
+    }, indent=2) + "\n", encoding="utf-8")
     indexed_predictions: dict[int, dict] = {}
     print(f"running {len(cases)} cases with {args.workers} worker(s)")
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as pool:

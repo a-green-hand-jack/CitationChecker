@@ -137,6 +137,9 @@ def main() -> None:
             mutation={"kind": "real_reference_swap", "replaces": key, "replacement_paper": swap_paper["slug"]},
             notes="A real ICLR 2026 paper from the corpus replaces the intended self-reference; it is unrelated to this claim.",
         ))
+    for index, case in enumerate(rows, start=1):
+        case["public_task_id"] = f"case-{index:04d}"
+        case["public_citation_key"] = "ref_a"
     CASES.write_text("\n".join(json.dumps(x, ensure_ascii=False) for x in rows) + "\n", encoding="utf-8")
     print(f"wrote {len(rows)} cases to {CASES}")
 

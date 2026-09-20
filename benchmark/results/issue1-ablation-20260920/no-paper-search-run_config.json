@@ -1,0 +1,15 @@
+{
+  "provider": "apex-deepseek",
+  "model": "deepseek-v4-flash",
+  "thinking": "medium",
+  "max_steps": 10,
+  "max_tokens": 90000,
+  "max_output_tokens": 4096,
+  "paper_search_enabled": false,
+  "task_ids": [
+    "case-0001",
+    "case-0002",
+    "case-0003",
+    "case-0004"
+  ]
+}

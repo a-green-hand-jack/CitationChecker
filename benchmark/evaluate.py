@@ -57,7 +57,8 @@ def main() -> int:
 
     for case in gold:
         tid = case["task_id"]
-        pred = preds.get(tid)
+        public_id = case.get("public_task_id", tid)
+        pred = preds.get(public_id) or preds.get(tid)
         if not pred:
             missing.append(tid)
             by_mutation[case["mutation_type"]][1] += 1

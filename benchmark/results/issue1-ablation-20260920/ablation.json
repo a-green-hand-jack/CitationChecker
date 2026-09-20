@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "paired_task_ids": [
+    "case-0001",
+    "case-0002",
+    "case-0003",
+    "case-0004"
+  ],
+  "configuration": {
+    "provider": "apex-deepseek",
+    "model": "deepseek-v4-flash",
+    "thinking": "medium",
+    "max_steps": 10,
+    "max_tokens": 90000,
+    "max_output_tokens": 4096,
+    "same_task_set": true
+  },
+  "modes": {
+    "full": {
+      "run_exit": 0,
+      "metrics": {
+        "tasks": 4,
+        "predictions": 4,
+        "failures": 0,
+        "reference_accuracy": 1.0,
+        "support_accuracy": 1.0,
+        "joint_exact": 1.0,
+        "by_mutation": {
+          "hallucinated_reference": {
+            "exact": 1,
+            "tasks": 1,
+            "accuracy": 1.0
+          },
+          "metadata_corruption": {
+            "exact": 1,
+            "tasks": 1,
+            "accuracy": 1.0
+          },
+          "none": {
+            "exact": 1,
+            "tasks": 1,
+            "accuracy": 1.0
+          },
+          "reference_swap": {
+            "exact": 1,
+            "tasks": 1,
+            "accuracy": 1.0
+          }
+        },
+        "tool_calls": 40,
+        "model_tokens": 198700,
+        "elapsed_seconds": 497.043
+      }
+    },
+    "no-paper-search": {
+      "run_exit": 0,
+      "metrics": {
+        "tasks": 4,
+        "predictions": 4,
+        "failures": 0,
+        "reference_accuracy": 1.0,
+        "support_accuracy": 0.5,
+        "joint_exact": 0.5,
+        "by_mutation": {
+          "hallucinated_reference": {
+            "exact": 1,
+            "tasks": 1,
+            "accuracy": 1.0
+          },
+          "metadata_corruption": {
+            "exact": 0,
+            "tasks": 1,
+            "accuracy": 0.0
+          },
+          "none": {
+            "exact": 0,
+            "tasks": 1,
+            "accuracy": 0.0
+          },
+          "reference_swap": {
+            "exact": 1,
+            "tasks": 1,
+            "accuracy": 1.0
+          }
+        },
+        "tool_calls": 36,
+        "model_tokens": 172672,
+        "elapsed_seconds": 495.084
+      }
+    }
+  }
+}

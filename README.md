@@ -12,7 +12,10 @@ It deliberately reuses existing tools instead of rebuilding them:
 - [paper-search-mcp](https://github.com/openags/paper-search-mcp) through its `paper-search` CLI for paper discovery, abstract/full-text retrieval, and evidence access.
 - [PyMuPDF4LLM](https://github.com/pymupdf/pymupdf4llm) for **PDF-only manuscript normalization** into LLM-readable Markdown.
 
-Pi is the agent harness. The model decides when to call scholarly tools and how to interpret their results. Python remains deterministic and shallow.
+Pi 0.85.1 is the low-level provider/session harness; it is not treated as a
+high-level agent framework for this assignment. The model decides when to call
+the registered scholarly tools, while the adapter and Python runtime own state,
+budgets, report acceptance, and receipts.
 
 ## Architecture
 
@@ -149,6 +152,10 @@ runs/<timestamp>-<paper>/
 │       ├── citation-report.json
 │       └── papers/
 ├── response.txt
+├── trajectory.jsonl
+├── state.json
+├── extension/
+│   └── citation_tools.ts
 └── receipt.json
 ```
 
@@ -159,6 +166,13 @@ Verify an existing report mechanically:
 ```bash
 citationchecker verify runs/.../workspace/output/citation-report.md
 ```
+
+`check` also accepts explicit loop controls: `--max-steps`, `--max-tokens`,
+`--max-output-tokens`, `--timeout`, and `--disable-paper-search` for the
+paired ablation. A completed run has `stop_reason=completed`; budget,
+provider, tool, timeout, and report failures remain non-success receipts.
+`trajectory.jsonl` is the replayable event log and `state.json` is the
+code-maintained task state. The Pi adapter is pinned to 0.85.1 in the receipt.
 
 ## Why this is an agent rather than a fixed pipeline
 
@@ -209,11 +223,14 @@ compiled PDF, extracted source tree, and SHA-256 provenance manifest. Every pape
 has four manually specified citation cases: a valid self-reference, a wrong-year
 mutation, a fabricated reference, and a swap to another real but irrelevant paper.
 
-Development runs default to `apex-deepseek/deepseek-v4-flash`:
+The model-visible task directories use neutral `case-0001` identifiers and
+`ref_a` citation keys; gold mutation labels stay in the evaluator-side
+`cases.jsonl`:
 
 ```bash
-python benchmark/run.py --workers 8
+python benchmark/run.py --workers 1 --limit 4
 python benchmark/evaluate.py benchmark/runs/predictions.jsonl
+python benchmark/ablate.py --per-mutation 1
 ```
 
 Use `--workers 1` for a serial run, or change the worker count to match the
@@ -222,6 +239,11 @@ provider quota. Use `--provider` and `--model` to override the development defau
 generation, case semantics, and provenance. The latest tracked DeepSeek run is
 published in
 [`benchmark/results/iclr2026-deepseek-v4-flash-2026-09-20/`](benchmark/results/iclr2026-deepseek-v4-flash-2026-09-20/).
+
+The Assignment 1 paired result is recorded in
+[`benchmark/results/issue1-ablation-20260920/`](benchmark/results/issue1-ablation-20260920/),
+with sanitized receipts and checksums; raw trajectories stay in the ignored
+run directory named by the result README.
 
 ## Scope
 
