@@ -1,0 +1,45 @@
+\begin{figure}[h!]
+\centering
+\begin{minted}[
+  frame=single,
+  framesep=2mm, 
+  fontsize=\fontsize{8}{9}\selectfont\ttfamily,
+  ]{python}
+from alta import program_builder as pb
+
+def build_program_spec(program_input: list[int]) -> pb.ProgramSpec:
+  """Returns ALTA program spec for populating program tape."""
+
+  variables = {
+      "done": pb.var(2),
+      "is_start": pb.input_var(2, init_fn=lambda x: x == START),
+      "head": pb.input_var(2, init_fn=lambda x: x == START),
+      "symbol": pb.input_var(2),
+      "program_index": pb.var(len(program_input)),
+  }
+  attention_heads = {
+      "head_left": pb.v_relative("head", -1),
+  }
+
+  def ffn_fn(x):
+    if x["program_index"] == len(program_input):
+      x["done"] = 1
+      return
+
+    if x["head"]:
+      x["symbol"] = int(program_input[x["program_index"]])
+      x["head"] = 0
+
+    if not x["is_start"] and x["head_left"]:
+      x["head"] = 1
+
+    x["program_index"] = x["program_index"] + 1
+
+  return pb.program_spec(
+      ffn_fn=ffn_fn, variables=variables, heads=attention_heads,
+      output_name="symbol", input_range=2, position_range=None,
+  )
+\end{minted}
+\caption{ALTA program specification for populating a program tape given a program encoded in the MLP layer.}
+\label{fig:populate_program}
+\end{figure}

@@ -1,0 +1,129 @@
+\addcontentsline{toc}{section}{Appendix}
+\part{Appendix} 
+\parttoc
+\newpage
+
+\input{sections/8-related-work}
+
+\input{sections/90-appendix-chapters/91-app-methods-general}
+
+\input{sections/90-appendix-chapters/94-app-methods-finetune}
+
+\input{sections/90-appendix-chapters/92-app-methods-langtrans}
+
+\input{sections/90-appendix-chapters/93-app-methods-capacity}
+
+\input{sections/90-appendix-chapters/95-app-results-scaling-laws}
+
+
+
+
+% \section{alt}
+
+% Niklas example formulation:
+
+% Say $D_{B \rightarrow A}$ is how much language B is worth in A terms and vice verca for $D_{A \rightarrow B}$. Consider $L_{AB}$ to be a similarity score between some language $A$ and $B$ from 0 (equal) to >>0 (very different). If we have this score and assume that it correlates directly with how useful language B is for A and vice-verca, then the problem can be broken down into:
+
+% a) Finding the right decay function (could be exponential like in DCSL, could be linear, could be quadratic, etc), likely with a thresholding parameter $L^*$ that is learned 
+
+% b) Deciding the range for $L_{AB}$: it could be $[0,1]$, or $[0,\infty]$,
+
+% c) Deciding the range for $D_{B \rightarrow A}$: e.g. $[-\infty,D_A]$ (other language can harm A but never help beyond $D_A$), $[-\infty,\infty]$ (other language can harm and help even beyond $D_A$), $[0,D_A]$ (other languages can at most be neutral, help up to $D_A$)
+
+
+% All of these should likely be found empirically by just codifying it and comparing $R^2$. 
+
+% One example:
+
+% a) exponential
+
+% b) $[0,\infty]$
+
+% c) $[0, D_A]$
+
+% $D_{B \rightarrow A}=D_{B}*e^{-L^*L_{AB}}$
+
+% here if our similarity value is 0 ($L_{AB}=0$), it is exactly one i.e. we get the full value of $D_{B}$; if the value is very high and much larger than $L^*$, then we end up with $D_{B \rightarrow A} \approx 0$.
+
+% One thing to note is also that $L_{AB}$ may not be symmetric i.e. different from $L_{BA}$
+
+% The full loss formula is then just
+% \begin{equation}
+% \label{eq:ccbase}
+% L(N,D) = \frac{A}{N^\alpha} + \frac{B}{(D+D_{B \rightarrow A} + D_{C \rightarrow A} + D_{D \rightarrow A} ...) ^\beta} + E
+% \end{equation}
+
+% i.e. it is essentially the same as Chinchilla. To add multiple epochs we can then just use DCSL or any other Chinchilla extension on top of it, e.g.:
+
+% \begin{equation}\label{eq:fin}
+% \begin{aligned}
+% L(U_N,U_D,R_N,R_D)=\frac{A}{(U_N + U_N R_N^* (1 - e^{\frac{-R_N}{R_N^*}}))^\alpha} + \\ \frac{B}{((U_D + U_D R_D^* (1 - e^{\frac{-R_D}{R_D^*}})) + (U_{D_{A \rightarrow B}} + U_{D_{A \rightarrow B}} R_D^* (1 - e^{\frac{-R_D}{R_D^*}}))...)^\beta} + E
+% \end{aligned}
+% \end{equation}
+
+% reusing the same $R_D^*$ etc
+
+
+% --- in preamble (or before the equation on the slide) ---
+% \usepackage{xcolor}
+
+
+% % --- on the slide ---
+% \begin{align}
+% \mathcal{D}_{\mathrm{eff}}^{(\text{TH})}
+%   &= 
+%    \underbrace{
+%      \mathcal{S}_{\learned{\lambda_{\text{TH}}}}
+%        \!\left(\given{D_{\text{TH}}};\,\given{U_{\text{TH}}}\right)
+%    }_{\text{Thai}}
+%    \\
+%   &\quad+
+%    \underbrace{
+%      \learned{\tau_{\text{EN}}}\,
+%      \mathcal{S}_{\learned{\lambda_{\text{EN}}}}
+%        \!\left(\given{D_{\text{EN}}};\,\given{U_{\text{EN}}}\right)
+%    }_{\text{English}}
+%    +
+%    \underbrace{
+%      \learned{\tau_{\text{ID}}}\,
+%      \mathcal{S}_{\learned{\lambda_{\text{ID}}}}
+%        \!\left(\given{D_{\text{ID}}};\,\given{U_{\text{ID}}}\right)
+%    }_{\text{Indonesian}}
+%    \\
+%   &\quad+
+%    \underbrace{
+%      \learned{\tau_{\text{MS}}}\,
+%      \mathcal{S}_{\learned{\lambda_{\text{MS}}}}
+%        \!\left(\given{D_{\text{MS}}};\,\given{U_{\text{MS}}}\right)
+%    }_{\text{Malay}}
+%    +
+%    \underbrace{
+%      \learned{\tau_{\text{HR}}}\,
+%      \mathcal{S}_{\learned{\lambda_{\text{HR}}}}
+%        \!\left(\given{D_{\text{HR}}};\,\given{U_{\text{HR}}}\right)
+%    }_{\text{Croatian}}
+%    \\
+%   &\quad+
+%    \underbrace{
+%      \learned{\tau_{\text{ES}}}\,
+%      \mathcal{S}_{\learned{\lambda_{\text{ES}}}}
+%        \!\left(\given{D_{\text{ES}}};\,\given{U_{\text{ES}}}\right)
+%    }_{\text{Spanish}}
+%    \\
+%   &\quad+
+%    \underbrace{
+%      \learned{\tau_{\mathrm{other}}}\,
+%      \mathcal{S}_{\learned{\lambda_{\mathrm{other}}}}
+%        \!\left(\given{D_{\mathrm{other}}};\,\given{U_{\mathrm{other}}}\right)
+%    }_{\text{100s of other languages}} .
+% \end{align}
+
+% \medskip
+% \textcolor{blue}{\textbf{Given data:}}
+% $\given{D_{\ast}}$ (total tokens per language),
+% $\given{U_{\ast}}$ (unique tokens / epochs).
+% \quad
+% \textcolor{red}{\textbf{Learned parameters:}}
+% $\learned{\lambda_{\ast}}$ (repetition scales),
+% $\learned{\tau_{\ast}}$ (transfer weights).
+

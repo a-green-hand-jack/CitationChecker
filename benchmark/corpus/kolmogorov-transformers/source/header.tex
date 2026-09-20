@@ -1,0 +1,86 @@
+\usepackage{amsthm}
+
+\usepackage{pgfplots}
+
+\newcommand{\comment}[3]{\textcolor{#2}{[\textbf{#1:} #3]}}
+
+\newcommand{\jacob}[1]{\comment{JE}{green!80!blue!100}{#1}}
+\newcommand{\kristout}[1]{\comment{KT}{red!40}{#1}}
+\newcommand{\pete}[1]{\comment{PS}{blue!80}{#1}}
+\newcommand{\james}[1]{\comment{JC}{purple}{#1}}
+
+\newtheorem{thm}{Theorem}
+\newtheorem*{thm*}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{cor}{Corollary}
+\newtheorem*{cor*}{Corollary}
+\newtheorem{defn}{Definition}
+\newtheorem{prop}{Proposition}
+\newtheorem*{prop*}{Proposition}
+\newtheorem*{remark}{Remark}
+
+\newcommand{\N}{\mathbb{N}}
+
+\newcommand{\leqc}{\mathrel{\mathchoice%
+  {\overset{+}{\leq}}%
+  {\text{\scriptsize $\overset{+}{\leq}$}}%
+  {\text{\scriptsize $\overset{+}{\leq}$}}%
+  {\text{\scriptsize $\overset{+}{\leq}$}}%
+}}
+
+\newcommand{\geqc}{\stackrel{+}{\geq}}
+\newcommand{\eqc}{\stackrel{+}{=}}
+
+\newcommand{\B}{\{0,1\}^*}
+
+\newcommand{\bigast}{\raisebox{-0.3ex}{\scalebox{1.2}{\ensuremath{\ast}}}}
+
+\usepackage{stmaryrd} 
+
+\usepackage{booktabs} 
+
+\usepackage{siunitx}  
+
+\usepackage{titletoc}
+
+\newcommand{\eat}[1]{}
+
+\newcommand{\zmap}{\texttt{zmap}}
+
+\usepackage{wrapfig}    
+
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+
+
+\usepackage{minted}
+%\usemintedstyle{solarized}
+
+\usepackage{amsmath}
+\usepackage{blkarray} 
+
+\usepackage{enumitem}
+
+
+\DeclareMathOperator{\im}{im}
+\DeclareMathOperator{\dom}{dom}
+
+
+\definecolor{gdmblue900}{HTML}{174EA6}
+\definecolor{gdmblue800}{HTML}{185ABC}
+\definecolor{gdmblue700}{HTML}{1967D2}
+\definecolor{gdmblue600}{HTML}{1A73E8}
+\definecolor{gdmblue500}{HTML}{4285F4}
+\definecolor{gdmblue400}{HTML}{669DF6}
+\definecolor{gdmblue300}{HTML}{8AB4F8}
+\definecolor{gdmblue200}{HTML}{AECBFA}
+\definecolor{gdmblue100}{HTML}{D2E3FC}
+
+
+\usepackage{pifont}
+
+% Define custom commands for the green check and red cross symbols
+\newcommand{\greencheck}{\textcolor{green!70!black}{\ding{51}}}
+\newcommand{\redcross}{\textcolor{red!70!black}{\ding{55}}}
+
+\usepackage{makecell} % Added for manual line breaks in cells

@@ -5,21 +5,33 @@ import subprocess
 import sys
 from pathlib import Path
 
+from citation_checker.runtime.main import build_parser
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_benchmark_has_12_balanced_tasks():
+def test_benchmark_has_ten_real_papers_and_controlled_mutations():
+    manifest = json.loads((ROOT / "benchmark/corpus/manifest.json").read_text())
     rows = [json.loads(x) for x in (ROOT / "benchmark/cases.jsonl").read_text().splitlines() if x.strip()]
-    assert len(rows) == 12
-    assert sum(r["construction"] == "positive" for r in rows) == 6
-    assert sum(r["construction"] == "negative" for r in rows) == 6
+    assert len(manifest["papers"]) == 10
+    assert len(rows) == 40
+    assert {r["paper_id"] for r in rows} == {p["slug"] for p in manifest["papers"]}
+    assert sum(r["construction"] == "positive" for r in rows) == 10
+    assert sum(r["construction"] == "negative" for r in rows) == 30
     assert {r["mutation_type"] for r in rows if r["construction"] == "negative"} == {
         "metadata_corruption",
+        "hallucinated_reference",
         "reference_swap",
-        "claim_strength_corruption",
     }
     for row in rows:
-        assert (ROOT / "benchmark/tasks" / f"{row['task_id']}.md").exists()
+        task = ROOT / "benchmark/tasks" / row["task_id"]
+        assert (task / "main.tex").exists()
+        assert (task / "references.bib").exists()
+
+    for paper in manifest["papers"]:
+        assert (ROOT / paper["local_pdf"]).exists()
+        assert (ROOT / paper["local_source_archive"]).exists()
+        assert (ROOT / paper["local_source_dir"]).is_dir()
 
 
 def test_perfect_predictions_score_one():
@@ -32,3 +44,9 @@ def test_perfect_predictions_score_one():
     assert "reference-status accuracy: 1.000" in result.stdout
     assert "support-label accuracy:    1.000" in result.stdout
     assert "overall exact match:       1.000" in result.stdout
+
+
+def test_check_defaults_to_deepseek_v4_flash():
+    args = build_parser().parse_args(["check", "benchmark/tasks/atlas-transfer-scaling-valid/main.tex", "--dry-run"])
+    assert args.provider == "apex-deepseek"
+    assert args.model == "deepseek-v4-flash"

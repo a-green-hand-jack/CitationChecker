@@ -1,0 +1,186 @@
+\documentclass{article}
+\usepackage{style}
+\usepackage[square,numbers]{natbib}
+
+\input{math_commands.tex}
+
+\usepackage{hyperref}
+\usepackage{url}
+\pagestyle{plain}
+
+
+\usepackage[utf8]{inputenc} 
+\usepackage[T1]{fontenc}    
+\usepackage{hyperref}       
+\usepackage{url}           
+\usepackage{booktabs}       
+\usepackage{amsfonts}       
+\usepackage{nicefrac}       
+\usepackage{microtype}      
+\usepackage{xcolor}         
+\usepackage{enumitem}
+\usepackage{xspace}
+\usepackage{bm}
+\usepackage{bbm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{amsthm}
+\usepackage{multirow}
+\usepackage{enumitem}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand\snote[2]{{\color{blue!30!red} **{\bf #1:} \texttt{ #2}**}}
+\newcommand{\td}{\tilde{\mathcal{D}}}
+\newcommand{\Ex}{\mathbb{E}}
+\newcommand{\oS}{{\overline{S}}}
+\newcommand{\oN}{{\overline{N}}}
+\newcommand{\oQ}{\overline{Q}}
+\newcommand{\done}{{\mathcal{D}_1}}
+\newcommand{\dzero}{{\mathcal{D}_0}}
+\newcommand{\Langle}{\left\langle}
+\newcommand{\Rangle}{\right\rangle}
+\newcommand{\cH}{\mathcal{H}}
+\newcommand{\trc}{{\sf{trunc}}}
+\newcommand{\pos}{{\sf{pos}}}
+
+
+\newcommand{\mc}[1]{\ensuremath{\mathcal{#1}}\xspace}
+\newcommand{\mb}[1]{\ensuremath{\mathbf{#1}}\xspace}
+\newcommand{\tn}[1]{\ensuremath{\textnormal{#1}}\xspace}
+\newcommand{\ol}[1]{\ensuremath{\overline{#1}}\xspace}
+\newcommand{\wh}[1]{\ensuremath{\widehat{#1}}\xspace}
+
+\DeclareMathAlphabet\mathbfcal{OMS}{cmsy}{b}{n}
+
+\newcommand{\mbc}[1]{\ensuremath{\mathbfcal{#1}}\xspace}
+
+
+\newcommand{\bX}{{\mb{X}}}
+\newcommand{\bY}{{\mb{Y}}}
+\newcommand{\bc}{{\mb{c}}}
+\newcommand{\bZ}{{\mb{Z}}}
+
+\newcommand{\ba}{{\mb{a}}}
+
+\newcommand{\bb}{{\mb{b}}}
+\newcommand{\bW}{{\mb{W}}}
+\newcommand{\bU}{{\mb{U}}}
+\newcommand{\bV}{{\mb{V}}}
+\newcommand{\bR}{{\mb{R}}}
+\newcommand{\bN}{{\mb{N}}}
+
+\newcommand{\bg}{{\mb{g}}}
+\newcommand{\bd}{{\mb{d}}}
+
+\newcommand{\bu}{{\mathbf{u}}}
+\newcommand{\bn}{{\mathbf{n}}}
+\newcommand{\bv}{{\mathbf{v}}}
+\newcommand{\bw}{{\mathbf{w}}}
+\newcommand{\br}{{\mathbf{r}}}
+
+\newcommand{\bS}{{\mathbf{S}}}
+\newcommand{\bG}{{\mathbf{G}}}
+\newcommand{\bH}{{\mathbf{H}}}
+\newcommand{\bD}{{\mathbf{D}}}
+
+\newcommand{\ag}{\textcolor{red}}
+\newcommand{\rishi}{\textcolor{blue}}
+
+\usepackage[ruled,vlined]{algorithm2e}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+
+
+\title{Algorithmic Guarantees for Distilling \\ Supervised and Offline RL Datasets}
+
+
+
+\newcommand\blfootnote[1]{%
+  \begingroup
+  \renewcommand\thefootnote{}\footnote{#1}%
+  \addtocounter{footnote}{-1}%
+  \endgroup
+}
+
+\author{%
+Aaryan Gupta \\ Google DeepMind India \\  {\tt aaryangupta@google.com}
+\and
+Rishi Saket \\ Google DeepMind India \\ {\tt rishisaket@google.com}
+\and
+Aravindan Raghuveer \\ Google DeepMind India \\ {\tt araghuveer@google.com}
+}
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+
+
+\begin{document}
+
+
+\maketitle
+
+
+\begin{abstract}
+Given a training dataset, the goal of dataset distillation is to derive a synthetic dataset such that models trained on the latter perform as well as those trained on the training dataset. In this work, we develop and analyze an efficient dataset distillation algorithm for supervised learning, specifically regression in $\mathbb{R}^d$, based on matching the losses on the training and synthetic datasets with respect to a fixed set of randomly sampled regressors without any model training. Our first key contribution is a novel performance guarantee proving that our algorithm needs only $\tilde{O}(d^2)$ sampled regressors to derive a synthetic dataset on which the MSE loss of any bounded linear model is approximately the same as its MSE loss on the given training data. In particular, the model optimized on the synthetic data has close to minimum loss on the training data, thus performing nearly as well as the model optimized on the latter. Complementing this, we also prove a matching lower bound of $\Omega(d^2)$ for the number of sampled regressors showing the tightness of our analysis.
+
+Our second contribution is to extend our algorithm to offline RL dataset distillation by matching the Bellman loss, unlike previous works which used a behavioral cloning objective. This is the first such method which leverages both, the rewards and the next state information, available in offline RL datasets, without any policy model optimization. We show similar guarantees: our algorithm generates a synthetic dataset whose Bellman loss with respect to any linear action-value predictor is close to the latter’s Bellman loss on the offline RL training dataset. Therefore, a policy associated with an action-value predictor optimized on the synthetic dataset performs nearly as well as that derived from the one optimized on the training data. We conduct extensive experiments to validate our theoretical guarantees and observe performance gains on real-world RL environments with offline training datasets and supervised regression datasets.
+\end{abstract}
+
+\input{introduction}
+
+
+\input{previous}
+
+\input{problem_our_results}
+
+\input{proofoutlines}
+
+
+
+\input{experiments}
+
+
+\newpage
+
+\bibliography{iclr2026_conference}
+\bibliographystyle{iclr2026_conference}
+\newpage
+\appendix
+\input{prelimappendix}
+
+\input{thm1proof}
+
+\input{lowerbounds}
+
+\input{thm2proof}
+
+\input{concatenation}
+
+\section{Useful Technical Details}
+\subsection{Bellman Loss Risk Bounds}\label{app:misc1}
+The \emph{value gap} i.e., the difference between the true and estimated value functions for a policy corresponding to a $Q$-value predictor can be 
+estimated by the latter's empirical Bellman Loss on offline data. This holds under under a certain \emph{concentrability} assumption -- informally it states that the dataset should contain all state-action pairs which are reachable from the starting state with significant probability, should also be present with sufficient probability in the dataset. We refer the reader to Assumption 1 and Lemma 3.2 of~\citep{duan21a} for more details.
+
+\subsection{Convexity of $L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, D^{\sf sup}_{\tn{syn}}, f)$}\label{app:misc2}
+From \eqref{eqn:errMSEloss}, $L_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, f)$ is constant w.r.t. $D^{\sf sup}_{\tn{syn}}$ and the dependent part is  $L_{\tn{mse}}(D^{\sf sup}_{\tn{syn}}, f)$. The latter is the mean squared error loss which is the average of squares of linear functions of the points of  $D^{\sf sup}_{\tn{syn}}$ and is therefore convex in the points of $D^{\sf sup}_{\tn{syn}}$. Since $L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, D^{\sf sup}_{\tn{syn}}, f)$ is convex in $L_{\tn{mse}}(D^{\sf sup}_{\tn{syn}}, f)$, it is also convex in the points of $D^{\sf sup}_{\tn{syn}}$.
+
+
+Now, if $\phi$ is linear in $(s,a)$ (the concatenation of $s$ and $a$), then $\hat{L}_{\tn{Bell}}(D^{\sf orl}_{\tn{syn}}, f, \lambda)$ (from \eqref{eqn:hatLbell}) is a sum of squares of terms which are each the difference of (i) a linear function in the points of  $D^{\sf orl}_{\tn{syn}}$ and, (ii) the maximum over a $\mc{A}$ of linear functions of  the points of  $D^{\sf orl}_{\tn{syn}}$. Since max (over a fixed number of arguments) is a convex function over its vector of arguments, this implies that $\hat{L}_{\tn{Bell}}(D^{\sf orl}_{\tn{syn}}, f, \lambda)$ is convex and therefore $\hat{L}^{\tn{err}}_{\tn{Bell}}(D^{\sf orl}_{\tn{train}}, D^{\sf orl}_{\tn{syn}}, f, \lambda)$ is also convex.
+
+
+\input{additionalexperiments}
+
+
+\end{document}

@@ -52,13 +52,36 @@ pytest
 
 ## Benchmark development
 
-`benchmark/cases.jsonl` is the source of truth. Every case has a `pair_id`, arXiv provenance, mutation type, and gold labels for both bibliographic status and semantic support. Keep the benchmark small and auditable. Negative cases should ideally change one factor only.
+`benchmark/corpus/manifest.json` pins ten ICLR 2026 OpenReview records to exact
+arXiv versions and records the PDF/source hashes. Verify the materialized corpus
+with:
 
-Run evaluator tests with:
+```bash
+python benchmark/download_corpus.py --verify-only
+```
+
+`benchmark/cases.jsonl` is the gold source of truth. It contains 40 cases (four
+per paper): a valid self-reference, a wrong-year mutation, a fabricated
+reference, and a swap to another real corpus paper. The claim text is a short,
+manually selected sentence from the pinned arXiv abstract. Rebuild the LaTeX
+fixtures with:
+
+```bash
+python benchmark/create_cases.py
+python benchmark/generate_tasks.py --clean
+```
+
+Do not execute manuscript code. The benchmark task fixtures are citation cards;
+the full TeX source and compiled PDF remain available under `benchmark/corpus/`
+for provenance and future full-paper fixtures.
+
+Run evaluator checks with:
 
 ```bash
 pytest tests/test_benchmark.py
 python benchmark/evaluate.py benchmark/example_predictions.jsonl
 ```
 
-Do not paste long passages from source papers into the benchmark. Prefer short paraphrases plus arXiv identifiers and source URLs.
+Development benchmark runs default to `apex-deepseek/deepseek-v4-flash`; pass
+`--provider` and `--model` only when intentionally testing another route.
+Use `--workers` to control parallel provider-backed cases.

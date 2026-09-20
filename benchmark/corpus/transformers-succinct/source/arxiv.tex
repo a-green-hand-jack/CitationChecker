@@ -1,0 +1,1434 @@
+
+\documentclass{article} % For LaTeX2e
+\usepackage{iclr2026_conference,times}
+\usepackage{inconsolata}
+
+\pagestyle{plain} % removes ICLR header
+
+% Optional math commands from https://github.com/goodfeli/dlbook_notation.
+%\input{math_commands.tex}
+
+\usepackage{xcolor}
+\definecolor{darkpurple}{RGB}{75,0,130}
+\usepackage[colorlinks=true,citecolor=darkpurple,linkcolor=darkpurple,urlcolor=darkpurple]{hyperref}
+\usepackage{url}
+\usepackage{amsmath,amsfonts,bm,mathtools,amsthm,amssymb}
+\usepackage{thmtools,thm-restate} % for \begin{restatable}{}{...} and \cmd*
+\usepackage{enumitem} % for tweaking list spacing/indent (e.g., [itemsep=2pt,leftmargin=2.5em])
+\usepackage{complexity}
+% Render complexity-class names a bit smaller than surrounding text.
+% \renewcommand{\ComplexityFont}[1]{{\small\ensuremath{\mathsf{#1}}}} % Comment out since give many warnings. Does not work in math mode
+% Widen the margin so todonotes can render properly. ICLR's style sets
+% \marginparwidth = 0.07in, which causes todonotes to wrap one word per
+% line. Override it BEFORE loading todonotes (the package reads it on
+% load).
+% \setlength{\marginparwidth}{2cm}
+% \setlength{\marginparsep}{2pt}
+\usepackage[textsize=footnotesize,disable]{todonotes}
+\usepackage{zref-clever} % since cref has bugs with new latex version
+\zcsetup{cap,nameinlink}
+% Render references with the standard math-paper abbreviations
+% (Eq. 1, Thm. 5, Prop. 6, Lem. 8, Cor. 11, Def. ...). Without this
+% block zref-clever spells out the full word.
+\zcLanguageSetup{english}{type=equation,Name-sg=Eq.,name-sg=Eq.,Name-pl=Eqs.,name-pl=Eqs.}
+\zcLanguageSetup{english}{type=theorem,Name-sg=Thm.,name-sg=Thm.,Name-pl=Thms.,name-pl=Thms.}
+\zcLanguageSetup{english}{type=proposition,Name-sg=Prop.,name-sg=Prop.,Name-pl=Props.,name-pl=Props.}
+\zcLanguageSetup{english}{type=lemma,Name-sg=Lem.,name-sg=Lem.,Name-pl=Lems.,name-pl=Lems.}
+\zcLanguageSetup{english}{type=corollary,Name-sg=Cor.,name-sg=Cor.,Name-pl=Cors.,name-pl=Cors.}
+\zcLanguageSetup{english}{type=definition,Name-sg=Def.,name-sg=Def.,Name-pl=Defs.,name-pl=Defs.}
+\zcLanguageSetup{english}{type=remark,Name-sg=Rem.,name-sg=Rem.,Name-pl=Rems.,name-pl=Rems.}
+\zcLanguageSetup{english}{type=example,Name-sg=Ex.,name-sg=Ex.,Name-pl=Exs.,name-pl=Exs.}
+\zcLanguageSetup{english}{type=problem,Name-sg=Prob.,name-sg=Prob.,Name-pl=Probs.,name-pl=Probs.}
+\zcLanguageSetup{english}{type=section,Name-sg={§},name-sg={§},Name-pl={§§},name-pl={§§}}
+\zcLanguageSetup{english}{type=subsection,Name-sg={§},name-sg={§},Name-pl={§§},name-pl={§§}}
+\zcLanguageSetup{english}{type=appendix,Name-sg=App.,name-sg=App.,Name-pl=Apps.,name-pl=Apps.}
+
+\usepackage{soul} % For colorbox in \revised
+\soulregister\ref7
+\soulregister\zcref7
+\soulregister\cite7
+\soulregister\citet7
+\soulregister\citep7
+\soulregister\citeposs7
+
+%\newcommand{\revisedA}[1]{\sethlcolor{yellow}\hl{#1}}
+%\newcommand{\revisedB}[1]{\sethlcolor{green}\hl{#1}}
+%\newcommand{\revisedC}[1]{\sethlcolor{cyan}\hl{#1}}
+%\newcommand{\revisedD}[1]{\sethlcolor{orange}\hl{#1}}
+% Disable highlighting
+\newcommand{\revisedA}[1]{#1}
+\newcommand{\revisedB}[1]{#1}
+\newcommand{\revisedC}[1]{#1}
+\newcommand{\revisedD}[1]{#1}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}{Example}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{problem}[theorem]{Problem}
+
+% Needed for zcref if counter is reused (see zcref documentation)
+\AddToHook{env/proposition/begin}{\zcsetup{countertype={theorem=proposition}}}
+\AddToHook{env/lemma/begin}{\zcsetup{countertype={theorem=lemma}}}
+\AddToHook{env/corollary/begin}{\zcsetup{countertype={theorem=corollary}}}
+\AddToHook{env/remark/begin}{\zcsetup{countertype={theorem=remark}}}
+\AddToHook{env/definition/begin}{\zcsetup{countertype={theorem=definition}}}
+
+\newcommand{\Q}{\mathbb{Q}}
+\renewcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\N}{\mathbb{N}}
+
+\newcommand{\minatt}{\blacktriangleleft}
+\newcommand{\maxatt}{\blacktriangleright}
+\newcommand{\minmaxatt}{\minatt\!\maxatt}
+\newcommand{\tleft}{\mathsf{left}}
+\newcommand{\tright}{\mathsf{right}}
+\newcommand{\tup}{\mathsf{up}}
+\newcommand{\tdown}{\mathsf{down}}
+
+\newcommand{\emb}{\mathsf{emb}}
+\newcommand{\enc}{\mathsf{enc}}
+\newcommand{\bin}{\mathsf{bin}}
+\newcommand{\score}{\mathrm{S}}
+\newcommand{\OMIT}[1]{}
+
+% Upright bold operator: \textbf inherits the surrounding shape (e.g.,
+% italic inside an \begin{example} body), so we wrap it in \textnormal
+% to force the upright shape regardless of context. Used for the LTL
+% operators below so they render upright bold even inside theorem-like
+% environments.
+\newcommand{\opbf}[1]{\textnormal{\textbf{#1}}}
+
+\newcommand{\past}{\opbf{P}}
+\newcommand{\future}{\opbf{F}}
+\newcommand{\Global}{\opbf{G}}
+\newcommand{\history}{\opbf{H}}
+\newcommand{\yesterday}{\opbf{Y}}
+\renewcommand{\next}{\opbf{X}}
+\newcommand{\since}{\mathbin{\opbf{S}}}
+\newcommand{\until}{\mathbin{\opbf{U}}}
+
+\newcommand{\ACzero}{\text{AC}^0}
+\newcommand{\TCzero}{\text{TC}^0}
+
+
+% Common math shortcuts
+\newcommand{\defeq}{\mathrel{\stackrel{\textnormal{\tiny def}}{=}}}
+\newcommand{\eqdef}{\defeq}
+\newcommand{\indicator}[1]{\mathbf{1}\!\left[#1\right]}
+\newcommand{\bigO}{\mathcal{O}}
+\DeclareMathOperator*{\argmax}{argmax}
+\DeclareMathOperator*{\argmin}{argmin}
+\let\poly\undefined
+\DeclareMathOperator{\poly}{poly}
+
+% Per-author margin notes (uses todonotes, loaded in the preamble)
+% \newcommand{\ryan}[1]{\todo[color=red!40,size=\footnotesize]{\textbf{Ryan:} #1}}
+% \let\Ryan\ryan
+% \newcommand{\anthony}[1]{\todo[color=blue!40,size=\footnotesize]{\textbf{Anthony:} #1}}
+% \newcommand{\pascal}[1]{\todo[color=green!40,size=\footnotesize]{\textbf{Pascal:} #1}}
+
+
+% Mark an inline edit (human or otherwise) in blue
+% \newcommand{\edit}[1]{\textcolor{blue}{#1}}
+
+% % Inline margin todo for AI-/co-author responses, e.g. \response{claude}{summary}
+% \newcommand{\response}[2]{\todo[color=red!20,size=\footnotesize]{\textbf{Response (#1):} #2}}
+
+% % Mark text the authors suspect / want to revisit, in blue
+% \newcommand{\suspect}[1]{\textcolor{blue}{#1}}
+
+% Definitional emphasis (used at the introduction of a new term)
+\newcommand{\defn}[1]{\textbf{#1}}
+
+% Concatenation of strings, written with square brackets
+\newcommand{\concat}[2]{[#1\, #2]}
+
+% Matrix and vector macros for the UHA layer (Section 2.2)
+\newcommand{\matA}{\boldsymbol{A}}
+\newcommand{\matB}{\boldsymbol{B}}
+\newcommand{\matC}{\boldsymbol{C}}
+\newcommand{\matQ}{\boldsymbol{Q}}
+\newcommand{\vecx}{\boldsymbol{x}}
+\newcommand{\vecb}{\boldsymbol{b}}
+\newcommand{\veca}{\boldsymbol{a}}
+\newcommand{\bn}{\boldsymbol{n}}
+
+% Grammar definition: :\bnfdef as a single mathrel
+\newcommand{\bnfeq}{\Coloneqq}
+
+% Single-colon defining-equals (\bnfdef) as a single mathrel, parallel to \bnfeq
+\newcommand{\bnfdef}{\coloneqq}
+
+% Notation: strings/symbols/alphabets and vectors. Colors removed.
+\newcommand{\sym}[1]{\mathrm{#1}}
+\newcommand{\str}[1]{#1}
+\newcommand{\alphabet}{\Sigma}
+
+% Bold vector v and its slice v_{i:j}
+\newcommand{\bv}{\boldsymbol{v}}
+\newcommand{\bu}{\boldsymbol{u}}
+\newcommand{\vsub}[2]{\bv_{#1:#2}}
+
+% Bold word (input string variable).
+\newcommand{\bword}{\mathbf{a}}
+
+% RNN bits: hidden state, transition function, accept function.
+\newcommand{\bh}{\boldsymbol{h}}
+\newcommand{\bhinit}{\bh_0}
+\newcommand{\rnnstep}{g}
+\newcommand{\rnnout}{f}
+
+% Transformer (\trans) and acceptance vector (\boldsymbol{t}).
+\newcommand{\trans}{\mathcal{T}}
+\newcommand{\bt}{\boldsymbol{t}}
+
+% B-RASP program (denoted \boldsymbol{P}) -- the program as a whole, distinct
+% from the individual predicates P_1, ..., P_\Pi that constitute it.
+\newcommand{\brasp}{\boldsymbol{P}}
+
+% LTL atomic proposition Q_a
+\newcommand{\Qprop}[1]{Q_{#1}}
+
+% Language and recognizer-class shortcuts
+\newcommand{\Lang}{L}
+\newcommand{\classC}{\mathcal{C}}
+% Single representation (paired with \classC, the class of representations)
+\newcommand{\rep}{\mathcal{R}}
+
+% Possessive citation: \citeposs{key} renders as ``Author's (Year)''.
+% Uses natbib's \citeauthor and \citeyearpar.
+\newcommand{\citeposs}[1]{\citeauthor{#1}'s \citeyearpar{#1}}
+
+% Kleene star and plus
+\newcommand{\kstar}{^*}
+\newcommand{\kplus}{^+}
+
+% Turing machine symbol and tiling instance (used in thm:ltl-succinct)
+\newcommand{\TM}{\mathcal{M}}
+\newcommand{\TI}{\mathcal{I}}
+
+% Tile (t), tile set (T), and final tile. Colors removed.
+\newcommand{\tile}{\boldsymbol{t}}
+\newcommand{\tileset}{T}
+\newcommand{\tilefin}{\boldsymbol{t}_{\mathit{fin}}}
+
+% Small pictogram of a tile -- a tiny square with a labeled dot on
+% each edge -- used decoratively next to the defined term.
+\newcommand{\tileicon}{%
+  \mbox{\tikz[baseline={(b.base)}]{%
+    \node[inner sep=0pt,outer sep=0pt] (b) {\vphantom{X}};
+    \draw[thick,black] (-1.6ex,-0.3ex) rectangle (1.6ex,2.9ex);
+    \filldraw[black] (0,2.9ex) circle (0.35ex);
+    \filldraw[black] (-1.6ex,1.3ex) circle (0.35ex);
+    \filldraw[black] (1.6ex,1.3ex) circle (0.35ex);
+    \filldraw[black] (0,-0.3ex) circle (0.35ex);
+  }}%
+}
+
+% Tighter \cdots and \ldots (negative kerning) -- imported from the meowza paper.
+% \mycdots: small period glyphs (like \mydots/\ldots) raised to the math
+% axis, so \cdots reads as more compact and matches the visual weight of
+% \ldots rather than using the heavier \cdot glyphs.
+\newcommand{\mydots}{%
+  \ifmmode
+    \mathord{.}\mkern-1mu\mathord{.}\mkern-1mu\mathord{.}%
+  \else
+    .\kern-0.1em.\kern-0.1em.%
+  \fi
+}
+\newcommand{\mycdots}{%
+  \ifmmode
+    \mathord{\raisebox{0.45ex}{\ensuremath{\mydots}}}\mkern2mu%
+  \else
+    \raisebox{0.45ex}{.\kern-0.1em.\kern-0.1em.}\kern0.1em%
+  \fi
+}
+% Backwards-compatible alias.
+\newcommand{\centerldots}{\mycdots}
+% amsmath's \dots is robust and dispatches to \dotsc/\dotsm/etc, which
+% bypass a plain \renewcommand{\dots}. Wrap ALL the redefinitions in
+% \AtBeginDocument so they win against amsmath's late definitions.
+\AtBeginDocument{%
+  \renewcommand{\cdots}{\mycdots}%
+  \renewcommand{\ldots}{\mydots}%
+  \renewcommand{\dots}{\mydots}%
+  \renewcommand{\dotsc}{\mydots}%
+  \renewcommand{\dotsm}{\mycdots}%
+  \renewcommand{\dotsb}{\mycdots}%
+  \renewcommand{\dotsi}{\mycdots}%
+  \renewcommand{\dotso}{\mydots}%
+}
+
+% Filled (black) tombstone as the QED marker
+\renewcommand{\qedsymbol}{$\blacksquare$}
+
+\title{Transformers are Inherently Succinct}
+
+% Authors must not appear in the submitted version. They should be hidden
+% as long as the \iclrfinalcopy macro remains commented out below.
+% Non-anonymous submissions will be rejected without review.
+
+\author{Pascal Bergsträßer \\
+	RPTU Kaiserslautern-Landau\\
+	Kaiserslautern, Germany \\
+	\texttt{bergstraesser@cs.uni-kl.de}
+	\And
+	Ryan Cotterell \\
+	ETH Zürich \\
+	Zurich, Switzerland \\
+	\texttt{ryan.cotterell@inf.ethz.ch}
+	\And
+	Anthony W.\ Lin \\
+	RPTU Kaiserslautern-Landau and MPI-SWS\\
+	Kaiserslautern, Germany \\
+	\texttt{lin@cs.uni-kl.de} \\
+}
+
+%\author{Antiquus S.~Hippocampus, Natalia Cerebro \& Amelie P. Amygdale \thanks{ Use footnote for providing further information
+%about author (webpage, alternative address)---\emph{not} for acknowledging
+%funding agencies.  Funding acknowledgements go at the end of the paper.} \\
+%Department of Computer Science\\
+%Cranberry-Lemon University\\
+%Pittsburgh, PA 15213, USA \\
+%\texttt{\{hippo,brain,jen\}@cs.cranberry-lemon.edu} \\
+%\And
+%Ji Q. Ren \& Yevgeny LeNet \\
+%Department of Computational Neuroscience \\
+%University of the Witwatersrand \\
+%Joburg, South Africa \\
+%\texttt{\{robot,net\}@wits.ac.za} \\
+%\AND
+%Coauthor \\
+%Affiliation \\
+%Address \\
+%\texttt{email}
+%}
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to \LaTeX{} to determine where to break
+% the lines. Using \AND forces a linebreak at that point. So, if \LaTeX{}
+% puts 3 of 4 authors names on the first line, and the last on the second
+% line, try using \AND instead of \And before the third author name.
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+
+
+\iclrfinalcopy % Uncomment for camera-ready version, but NOT for submission.
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We study \emph{succinctness} as a measure of the expressive power of
+transformers.
+Succinctness---how compactly a formalism can describe a
+language relative to other formalisms---is a classical notion in logic and
+automata theory.
+We
+prove that fixed-precision transformers are remarkably succinct: they can
+be exponentially more succinct than both linear temporal logic (LTL) and recurrent neural networks, and, by extension, state-space
+models, and doubly exponentially more succinct than finite automata.
+In other words, there exist families of languages describable by polynomial-size
+transformers whose smallest equivalent LTL formula or recurrent neural network is exponentially
+large, and whose smallest equivalent automaton is doubly exponentially
+large. We also establish matching upper bounds, showing that any
+fixed-precision transformer can be converted to an LTL formula with at
+most an exponential blow-up---improving a prior doubly exponential
+translation. As a consequence of this succinctness, we show that basic
+verification problems for transformers, such as emptiness and equivalence,
+are provably intractable: specifically, $\EXPSPACE$-complete.
+%
+    %reasoning
+    %about the behavior of transformers
+
+    \OMIT{
+    Recent years saw a surprising result that transformers with fixed
+    precision recognize at most star-free regular languages.
+    %In particular,
+    %this
+    %is true for transformers with masking.
+    Star-free regular languages admit various standard representations
+    including Linear Temporal Logic (LTL) formulas, as well as counter-free
+    finite-state automata.
+    In this paper, we provides evidence of the
+    %---
+    %and are strictly less expressive than regular languages (e.g. PARITY is
+    %not star-free).
+    %Despite this limitation in expressivity,
+    we show in this paper that
+    transformers with fixed precision are inherently succinct compared to
+    standard representations.
+    %. Star-free regular languages are strictly less
+    %expressive than regular languages (e.g. PARITY is not star-free). Despite
+    %In this
+    %paper, we show that transformers are inherently succinct, i.e.,
+    More precisely, they
+    can represent star-free regular languages exponentially (resp. doubly
+    exponentially) more compactly than LTL formulas (resp. finite automata).
+    }
+\end{abstract}
+
+
+\section{Introduction}
+\label{sec:intro}
+Transformers \citep{Vaswani17} are the dominant architecture underlying
+most modern large language models. 
+A substantial body of recent
+theoretical work has investigated their expressive power
+\citep{transformers_survey,barcelo2024logical,YangCA24,hahn20,perez,CC22,tale},
+their trainability and ability to generalize to unseen strings of longer lengths
+\citep{raspl,framework,CC22}, and the extent to which their behavior can
+be formally verified \citep{SAL25}. A key finding of this line of work is
+that transformers with finite precision---the setting most
+faithful to real-world hardware---recognize various classes of subregular languages depending on the exact assumptions made \citep{YangCA24,barcelo2024logical,tale,LC25}.
+
+Subregular languages constitute strict subclasses of the regular languages.
+For instance, the subregular class of star-free languages are precisely those definable by regular expressions that replace the
+Kleene star with intersection and complementation. 
+The language $a^*b^*$
+is star-free because it can be written as
+$\overline{\overline{\emptyset} \cdot b \cdot a \cdot\overline{\emptyset}}$, whereas $(aa)^*$ is not star-free \citep{straubing-book}. 
+By contrast, recurrent
+neural networks (RNNs) can recognize all regular languages under a fixed precision assumption
+\citep{minsky1967computation,SS95,RNN-hierarchy,svete2023recurrent}, making them strictly more expressive than
+transformers as language recognizers. 
+However, the strong empirical performance of transformers invites the question as to whether expressive capacity is the most revealing lens through which to compare architectures.\looseness=-1
+
+In this paper, we propose \emph{succinctness} as an alternative lens for
+understanding the expressivity of transformers. 
+The succinctness of a
+language $\Lang$ with respect to a class $\classC$ of language
+recognizers (e.g., transformers, finite automata, and formulas in $\textsf{FO}[<]$) measures the size of the
+smallest $C \in \classC$ that recognizes $\Lang$.
+In other words, succinctness tells us how many symbols
+are needed to describe $\Lang$ with respect to the class $\classC$. 
+Succinctness is a classical notion in logic
+and computer science \citep{Stockmeyer-thesis,GS04}, where it
+sharpens expressive power into a complexity-theoretic refinement: rather than asking only which languages a formalism can recognize, succinctness asks how compactly each such language can be described within it. Greater succinctness comes at a price---more succinct formalisms typically have correspondingly harder decision problems, since their compact descriptions force any decision procedure to unfold a larger amount of underlying structure.
+A well-known
+example concerns linear temporal logic \citep[LTL;][]{pnueli-ltl}, which is
+expressively equivalent to the star-free languages
+\citep{libkin-book}, and, hence, also to the counter-free automata of
+\citet{counter-free-book}. 
+Despite this equivalence in expressive power,
+LTL can be exponentially more succinct than finite automata
+\citep{SistlaC85}, i.e., certain languages admit polynomial-size LTL formulas
+but require exponentially larger automata. A direct consequence is that
+decision problems for LTL, such as checking whether a formula recognizes a
+trivial language, are provably harder than the corresponding problems for
+automata \citep{SistlaC85}.\looseness=-1
+
+This paper offers a formal result, which can be summarized as follows: transformers can describe
+certain languages extremely succinctly. 
+Specifically, we show that transformers can be
+\emph{exponentially} more succinct than LTL and RNNs, and hence also state-space models
+\citep[SSMs;][]{mamba,ssm-will}.
+Moreover, they are \emph{doubly exponentially} more
+succinct than finite automata. In concrete terms, there exist families of
+languages describable by polynomial-size transformers that require
+exponentially larger LTL formulas or RNNs, and doubly exponentially larger
+automata.
+We also establish matching upper bounds: we give a translation from
+finite-precision transformers to LTL formulas of exponential size,
+significantly improving the doubly exponential translation of
+\citet{YangCA24}. 
+It follows that for any fixed-precision transformer,
+there is an equivalent LTL formula of exponential size and an equivalent
+finite automaton of doubly exponential size.\footnote{This holds without exception: the LTL bound is the constructive translation of \zcref{prop:UHAT-LTL}, and the automaton bound is its composition with the standard exponential LTL-to-automaton conversion \citep{SistlaC85,VardiW94}; both are unconditional upper bounds on every fixed-precision transformer.}
+The key technical ingredient
+behind these results is showing that transformers can count from $0$ to
+$2^{2^N}$---that is, implement doubly exponentially large counters---via a
+subtle encoding using attention. We then prove that the resulting
+languages require exponentially larger descriptions as LTL formulas or
+RNNs, and doubly exponentially larger descriptions as finite automata.
+A natural consequence of this succinctness is that analyzing transformers
+should be computationally challenging.
+And, indeed, we show that checking whether a given transformer
+recognizes a trivial language, is $\EXPSPACE$-complete. Under standard
+complexity-theoretic assumptions, this means that no algorithm can solve
+the problem in less than double exponential time.\looseness=-1
+
+The specific transformer model we study is the
+unique-hard attention transformer (UHAT), a simple and widely used
+abstraction of self-attention
+\citep{YangCA24,tale,transformers_survey,Hao22,LC25,hahn20,barcelo2024logical,uhat-data}.
+In particular, \citet{tale} show that expressivity bounds on
+UHATs entail corresponding bounds on softmax transformers with
+fixed precision.
+Different results in this paper hold under different precision assumptions: the UHAT upper bounds are stated for arbitrary rational weights, whereas the corresponding RNN results assume fixed (finite) precision.
+Importantly, this means our conclusions are valid in the setting that most faithfully mirrors real-world implementations---fixed precision arithmetic.\looseness=-1
+
+\section{Preliminaries}
+\label{sec:prelim}
+We adopt the following notational conventions in this paper.
+We write $\N \defeq \{1, 2, 3, \ldots\}$ for the natural numbers and $\N_0 \defeq \{0, 1, 2, 3, \ldots\}$ for the natural numbers including zero.
+Given $N \in \N$, we define $[N] \defeq \{1, \ldots, N\}$.
+Furthermore, we write $\Q$ for the rational numbers.
+We denote scalars by lowercase italicized Latin letters, vectors by boldface lowercase italicized Latin letters, and matrices by boldface uppercase italicized Latin letters.
+For a vector $\bv =
+(v_1,\ldots,v_D)$, we write $\vsub{i}{j} \defeq (v_i,\ldots,v_j)$ for all $1
+\le i \le j \le D$, and $v_i$ for its $i^{\text{th}}$ component.
+An \defn{alphabet} is a finite, non-empty set $\alphabet$ of \defn{symbols}.
+A \defn{word} (also called a \defn{string}) is a finite sequence of symbols $\str{\bword} = \sym{a}_1\cdots \sym{a}_N$.
+We denote symbols using lowercase Latin letters and words as boldfaced lowercase Latin letters.
+We write $|\str{\mathbf{a}}| = |\sym{a}_1\cdots \sym{a}_N| = N$ for the length of a word $\str{\mathbf{a}}$.
+We write $\alphabet^*$ for the set of all \defn{words}---including the empty word $\varepsilon$---and $\alphabet^+ \defeq \alphabet^* \setminus \{\varepsilon\}$.
+A \defn{language} is a subset $\Lang \subseteq \alphabet^*$.
+
+We assume familiarity with basic formal language theory and complexity
+theory; see \citet{Kozen} and \citet{Sipser97} for standard references.
+In particular, we work with finite automata and the following complexity
+classes \citep{Sipser97}:
+\[
+    \P \subseteq \NP \subseteq \PSPACE \subseteq \EXP \subseteq \NEXP
+    \subseteq \EXPSPACE.
+\]
+$\P$ and $\NP$ are problems solvable by a Turing machine in polynomial and
+nondeterministic polynomial time, respectively, and $\EXP$ and $\NEXP$
+are their exponential-time counterparts. $\PSPACE$ and $\EXPSPACE$ are
+problems solvable by a Turing machine in polynomial and exponential space, respectively.
+
+\subsection{Linear Temporal Logic}
+A formula in linear temporal logic (LTL) over an alphabet $\alphabet$
+is defined by the grammar
+\[
+    \varphi \bnfeq \top \mid \bot \mid \Qprop{\sym{a}} \; (\sym{a} \in \alphabet) \mid
+    \varphi \wedge \varphi \mid \varphi \vee \varphi \mid \neg\varphi
+    \mid \varphi \since \varphi \mid \varphi \until \varphi.
+\]
+Satisfaction of an LTL formula $\varphi$ on a word $\str{\bword} = \sym{a}_1 \cdots \sym{a}_N \in
+\alphabet^+$ at position $n \in [N]$, written $\str{\bword}, n \models \varphi$, is
+defined inductively (omitting the trivial cases for $\top$ and $\bot$):
+\begin{center}
+\begin{tabular}{l l l}
+$\str{\bword},n \models \Qprop{\sym{a}}$ & iff & $\sym{a_n} = \sym{a}$ \qquad ($\sym{a} \in \alphabet$)\\
+$\str{\bword},n \models \varphi_1 \wedge \varphi_2$ & iff &
+    $\str{\bword},n \models \varphi_1$ and $\str{\bword},n \models \varphi_2$\\
+$\str{\bword},n \models \varphi_1 \vee \varphi_2$ & iff &
+    $\str{\bword},n \models \varphi_1$ or $\str{\bword},n \models \varphi_2$\\
+$\str{\bword},n \models \neg\varphi_1$ & iff &
+    $\str{\bword},n \not\models \varphi_1$\\
+$\str{\bword},n \models \varphi_1 \since \varphi_2$ & iff &
+    for some $j$ with $1 \le j < n$: $\str{\bword},j \models \varphi_2$ and \\
+&& for all $k$ with $j < k < n$: $\str{\bword},k \models \varphi_1$\\
+$\str{\bword},n \models \varphi_1 \until \varphi_2$ & iff &
+    for some $j$ with $n < j \le N$: $\str{\bword},j \models \varphi_2$ and \\
+&& for all $k$ with $n < k < j$: $\str{\bword},k \models \varphi_1$
+\end{tabular}
+\end{center}
+We also use the standard abbreviations
+\[
+    \past\varphi \bnfdef \top \since \varphi \qquad
+    \future\varphi \bnfdef \top \until \varphi \qquad
+    \yesterday\varphi \bnfdef \bot \since \varphi \qquad
+    \history\varphi \bnfdef \varphi \wedge \neg\past\neg\varphi.
+\]
+An LTL formula $\varphi$ recognizes the language $\Lang(\varphi)$ consisting
+of all words $\str{\bword} \in \alphabet^+$ where $\str{\bword}, N \models \varphi$.\footnote{For fragments that only allow $\until$ or $\future$, we use $\str{\bword}, 1 \models \varphi$ instead.}
+\begin{example}
+    The star-free language $(\sym{a}\sym{b})^+$ can be defined in LTL as
+    \begin{equation}\label{eq:ltl-formula}
+        \Qprop{\sym{b}} \wedge \history\big( \Qprop{\sym{b}} \to \yesterday \Qprop{\sym{a}} \big) \wedge
+        \history\big( (\Qprop{\sym{a}} \wedge \yesterday \top) \to \yesterday \Qprop{\sym{b}} \big).
+    \end{equation}
+    \zcref{eq:ltl-formula} asserts that the last letter is $\sym{b}$, every $\sym{b}$ is preceded by
+    $\sym{a}$, and every $\sym{a}$ that has a predecessor is preceded by $\sym{b}$.
+\end{example}
+
+\subsection{Unique-hard attention transformers}\label{subsec:uhat}
+
+\paragraph{Symbol Embedding.}
+Let $\alphabet$ be an alphabet.
+A \defn{symbol embedding} is a function $\emb \colon \alphabet \to \Q^D$ for some $D > 0$.\footnote{We define transformers over arbitrary rational numbers, as this is the
+most general setting in which our upper bounds hold. All results,
+however, carry over to fixed-precision arithmetic, i.e., a constant
+number of bits per value, independent of input length. The lower bounds
+hold under the even stronger restriction to fixed-precision integers.
+The precise statement of this carry-over depends on the formalization of fixed-precision arithmetic adopted: standard floating-point representations \citep{goldberg1991what} are not associative, so the value of, for example, a dot product in an attention head can depend on the order in which its summands are evaluated. Our claim should therefore be understood with respect to a fixed, deterministic evaluation order; algebraic identities used in the proofs that rely on associativity (such as the order of summation) need to be re-checked under any other choice.}
+A symbol embedding naturally extends to a homomorphism $\alphabet^* \to (\Q^D)^*$,
+where $\emb(\sym{a}_1\cdots \sym{a}_N) = \emb(\sym{a}_1), \ldots, \emb(\sym{a}_N)$ for $\sym{a}_1,\dots, \sym{a}_N \in \alphabet$.
+
+\paragraph{Attention layer.}
+A unique hard-attention (UHA) layer of width $R > 0$ is
+specified by:
+\begin{itemize}[itemsep=1pt, topsep=2pt, parsep=0pt, leftmargin=2em]
+    \item Three affine transformations: $\matA, \matB \colon \Q^R \to \Q^R$ and
+    $\matC \colon (\Q^{R} \times \Q^{R}) \to \Q^S$;
+    \item A \defn{mask predicate} $M \colon \N \times \N \to
+    \{0,1\}$, defined as one of $M(n,m) \defeq 1$ (no masking),
+    $M(n,m) \defeq \indicator{m < n}$ (strict future masking), or $M(n,m) \defeq \indicator{m > n}$
+    (strict past masking);
+    \item A \defn{tie-breaking function} $\tau$ that selects an element
+    of a finite, non-empty subset of $\N$, defined as either $\min$
+    (leftmost) or $\max$ (rightmost).
+\end{itemize}
+Given a sequence of $N$ vectors $\bv_1,\ldots,\bv_N \in \Q^R$ with $N \ge 1$,
+the layer operates as follows.
+The \defn{score function} is defined as the dot
+product
+\begin{equation}\label{eq:uha-score}
+    \score(\bv_n,\bv_m) \defeq \langle \matA(\bv_n), \matB(\bv_m) \rangle
+\end{equation}
+for all $n,m \in [N]$. For each position $n \in [N]$, let
+\begin{subequations}\label{eq:uha-attended}
+\begin{align}
+\label{eq:uha-attended-U}
+U_n &\defeq \{m \in [N] \mid M(n, m) = 1\} \\
+\label{eq:uha-attended-B}
+B_n &\defeq \{m \in U_n \mid \forall m' \in U_n \colon \score(\bv_n,\bv_m) \ge \score(\bv_n,\bv_{m'})\}
+\end{align}
+\end{subequations}
+be the set of unmasked positions and the subset of those that maximize the
+score, respectively. The \defn{attention vector} at position $n$ is defined as $\veca_n \defeq \bv_{\tau(B_n)}$ if $U_n \ne \emptyset$ and $\veca_n \defeq \mathbf{0}$
+otherwise. The layer outputs the sequence $\matC(\bv_1, \veca_1), \dots,
+\matC(\bv_N, \veca_N)$.
+
+\paragraph{ReLU layer.}
+A \defn{ReLU layer} of width $R > 0$ applies, for a designated coordinate
+$r \in [R]$, the ReLU function to the $r^{\text{th}}$ component of each input
+vector. 
+Formally, define $\rho_r \colon \Q^R \to \Q^R$ by
+\begin{equation}\label{eq:relu-layer-vec}
+\rho_r(\bv) \defeq (\bv_{1:r-1}, \max(0, v_r), \bv_{r+1:R}).
+\end{equation}
+Given a sequence of $N$ input vectors $\bv_1,\ldots,\bv_N \in \Q^R$ with $N \ge 1$, the layer outputs the sequence $\rho_r(\bv_1),\ldots,\rho_r(\bv_N)$ obtained by applying $\rho_r$ position-wise.
+Equivalently, one could place a
+feed-forward network at the end of each encoder layer \citep{Hao22,barcelo2024logical}.
+
+\paragraph{Transformer.}
+A \defn{unique hard-attention transformer (UHAT)} is a
+length-preserving function $\trans \colon \alphabet^+ \to (\Q^S)^+$
+obtained by composing a symbol embedding with a finite sequence of UHA and
+ReLU layers of conformable width.
+To use a UHAT $\trans \colon \alphabet^+ \to (\Q^S)^+$ as a language recognizer, we equip it with an \defn{acceptance vector} $\bt \in \Q^S$. The language recognized by $\trans$, denoted $\Lang(\trans)$, consists of all words $\str{\bword} \in \alphabet^+$ such that  $\langle \bt, \bv_N \rangle > 0$ with $\trans(\str{\bword}) =\bv_1, \dots, \bv_N \in \Q^S$.\footnote{For fragments that only allow strict past masking, we use $\langle \bt, \bv_1 \rangle$ instead.}
+
+\subsection{Boolean RASP}
+As an intermediate step in proving $\EXPSPACE$-hardness for UHATs, we use
+Boolean RASP \citep[\mbox{B-RASP};][]{YangCA24}, a programming language
+shown to be expressively equivalent to UHATs.
+A B-RASP program $\brasp$ is a finite sequence of predicates $P_1, \ldots, P_\Pi \in \{0,1\}^{[N]}$.
+The program operates
+on an input word $\str{\bword} = \sym{a}_1 \cdots \sym{a}_N \in \alphabet\kplus$.
+The first $|\alphabet|$ predicates are defined as follows.
+For each $\sym{a} \in \alphabet$, there is a lookup function $\Qprop{\sym{a}}
+\in \{0,1\}^{[N]}$ defined by $\Qprop{\sym{a}}(n) = 1$ iff $\sym{a}_n = \sym{a}$.
+We label these predicates
+$P_1, \ldots, P_{|\alphabet|}$. Each remaining predicate $P_{t+1}$, for $t \ge |\alphabet|$, is built from $P_1, \ldots, P_t$ by one of two operations.
+\begin{itemize}[itemsep=1pt, topsep=2pt, parsep=0pt, leftmargin=2em]
+\item A \defn{position-wise operation} sets $P_{t+1}(i) \bnfdef R(i)$, where $R(i)$ is
+a Boolean combination of $P_1(i), \dots, P_t(i)$.
+\item An \defn{attention operation} sets
+\begin{equation}
+    P_{t+1}(i) \bnfdef\ \minmaxatt_j\, [M(i,j),\, \score(i,j)]\ V(i,j) : D(i)
+\end{equation}
+where $\minmaxatt\ \in \{\minatt,\maxatt\}$ and we define the following operations
+\begin{itemize}[itemsep=1pt, topsep=2pt, parsep=0pt, leftmargin=2em]
+    \item $\minatt$ and $\maxatt$ indicate leftmost and
+    rightmost tie-breaking, respectively; 
+    \item $M(i,j)$ is a mask predicate as in the definition of a
+    UHAT; 
+    \item $\score(i,j)$ and $V(i,j)$ are Boolean combinations of $P_1(i),
+    \ldots, P_t(i)$ and $P_1(j), \ldots, P_t(j)$, called the
+    \defn{score predicate} and \defn{value predicate}, respectively;
+    \item $D(i)$ is a Boolean combination of $P_1(i), \dots, P_t(i)$.
+\end{itemize}
+    The semantics of the attention operation are as follows. For each $i \in [N]$, let
+\begin{equation}
+    o(i) \defeq \begin{cases}
+        \min\{j \in [N] \mid M(i,j) = 1 \text{ and } \score(i,j) = 1\},
+            & \text{for } \minatt \\
+        \max\{j \in [N] \mid M(i,j) = 1 \text{ and } \score(i,j) = 1\},
+            & \text{for } \maxatt.
+    \end{cases}
+\end{equation}
+Then $P_{t+1}(i) \defeq V(i, o(i))$ if $o(i)$ exists, and $P_{t+1}(i) \defeq
+D(i)$ otherwise.
+\end{itemize}
+We can view a B-RASP program as a language recognizer by asking whether $P_\Pi(N) = 1$.\footnote{As for UHATs, we use $P_\Pi(1) = 1$ if only strict past masking is allowed.}
+
+\subsection{Recurrent Neural Networks}
+As with transformers, we treat recurrent neural networks as language acceptors, following \citet{RNN-hierarchy} and \citet{WGY18,WGY24}. 
+We define a \defn{recurrent neural network} (\defn{RNN}) as a quadruple $(\alphabet, \rnnstep, \bhinit, \rnnout)$ where $\alphabet$ is an alphabet, $\rnnstep \colon (\Q^D \times \alphabet) \to \Q^D$ is a transition function, $\bhinit \in \Q^D$ is an initial hidden state, and $\rnnout \colon \Q^D \rightarrow \{\bot, \top\}$ is an acceptance function.
+Consider string $\str{\bword} = \sym{a}_1 \cdots \sym{a}_N$.
+For $n \geq 1$, we define the $n^{\text{th}}$ hidden state $\bh_n \defeq \rnnstep(\bh_{n-1}, \sym{a}_n)$ inductively.
+We say $\str{\bword}$ is accepted iff $\rnnout(\bh_N) = \top$.
+As a computational model, it is natural to assume RNNs operate over a fixed precision,
+i.e., computation is always performed over rational numbers that can be represented with
+a constant $k$ number of bits. 
+The details of the actual representation are
+not important for our analysis. Therefore, the state space of the above
+RNN can be mapped to $D$-vectors over $\{0,1\}^k$ (instead of $\Q$). The
+following proposition is now immediate.
+\begin{proposition}
+    An RNN $(\alphabet, \rnnstep, \bhinit, \rnnout)$ with $\rnnstep \colon (\Q^D \times \alphabet) \to \Q^D$ with fixed precision $k$
+    can be represented by a finite automaton with $2^{kD}$ many states.
+    \label{prop:rnn-dfa}
+\end{proposition}
+
+\subsection{Size measures and succinctness}\label{subsec:size}
+Let $\rep$ be a finite representation of a language, i.e.,
+in our case a UHAT, LTL formula, finite automaton, RNN, or B-RASP program.
+We define the size of $\rep$, denoted by $|\rep|$, as the length of its minimal binary encoding.
+In measuring succinctness of RNN, we put the precision $k$ in unary also as part of the
+size measure; since we do not want to compare a transformer that uses a
+fixed precision $k$ and allow an RNN that uses a fixed precision $2^k$.
+\begin{definition}[$f$-more succinct]\label{def:succinctness}
+Let $\classC^{(1)}$ and $\classC^{(2)}$ be classes of finite representations of languages, and let $f \colon \N \to \N$ be a function. 
+We say $\classC^{(1)}$ is $f$-\defn{more succinct} than $\classC^{(2)}$ if there is a family of languages $\{\Lang_n\}_{n=1}^\infty$ together with representations $\rep_n^{(1)} \in \classC^{(1)}$ of $\Lang_n$ such that every $\rep_n^{(2)} \in \classC^{(2)}$ representing $\Lang_n$ satisfies $|\rep_n^{(2)}| \ge f(|\rep_n^{(1)}|)$.
+\end{definition}
+ We say $\classC^{(1)}$ is \emph{exponentially} more succinct than $\classC^{(2)}$ if it is $f$-more succinct for some $f(n) \in \Omega(2^{cn^{d}})$ with $c,d > 0$, and \emph{doubly exponentially} more succinct if for some $f(n) \in \Omega(2^{2^{c n^{d}}})$ with $c,d > 0$.
+
+\begin{definition}[$g$-bounded expansion]\label{def:expansive}
+Let $\classC^{(1)}$ and $\classC^{(2)}$ be classes of finite representations of languages, and let $g \colon \N \to \N$ be a function. 
+We say $\classC^{(1)}$ has $g$-\defn{bounded expansion} over $\classC^{(2)}$ if for every language $\Lang$ and every choice of representation $\rep{(2)} \in \classC^{(2)}$ of $\Lang$, there is a representation $\rep^{(1)} \in \classC^{(1)}$ of $\Lang$ with $|\rep^{(1)}| \le g(|\rep^{(2)}|)$. 
+\end{definition}
+We say $\classC^{(1)}$ has \emph{polynomially} bounded expansion over $\classC^{(2)}$ if it has $g$-bounded expansion for some polynomial $g$, and \emph{exponentially} bounded expansion if for some $g(n) \in O(2^{c n^d})$ with $c,d > 0$.
+
+\zcref{def:succinctness} and \zcref{def:expansive} are duals. 
+On one hand, \zcref{def:succinctness} is an \emph{existential} lower-bound: it asks for a witness family on which $\classC^{(2)}$ is forced to be at least $f$ times bigger than $\classC^{(1)}$. 
+On the other, \zcref{def:expansive} is a \emph{universal} upper-bound: it asks that on every language, every $\classC^{(2)}$ representation has a $\classC^{(1)}$ translation of size at most $g$. 
+Neither definition alone is antisymmetric, but together they pin the gap: $\classC^{(1)}$ is $f$-more succinct \emph{and} has $g$-bounded expansion over $\classC^{(2)}$ exactly when the size gap is at least $f$ on a witness family and at most $g$ uniformly. 
+
+\section{The size of smallest witness via non-emptiness problem}
+\label{sec:emptiness}
+We now consider the problem of checking whether the language
+recognized by a UHAT or B-RASP program is non-empty. In particular, the
+technique is essentially a simulation of a Turing machine with an
+$2^{O(N)}$-sized tape for a given $N$. 
+As we will see later,
+there are Turing machines such that
+the shortest accepted word
+by the constructed UHAT
+is of length at least $2^{2^{\Omega(N)}}$.
+
+\begin{example}\label{ex:tiling}
+We consider an example with $N=4$.
+Let $\alphabet = \{\sym{0}, \sym{1}, \sym{\#}, \sym{a},\sym{b},\sym{c}\}$, and let $H \defeq \{(\sym{a},\sym{b}),(\sym{b},\sym{c}),(\sym{b},\sym{a}),(\sym{c},\sym{b})\}$ be a set of constraints specifying which symbols can appear in adjacent positions.
+We now describe a B-RASP program that accepts words of the form
+\[\sym{0000a_1 \# 0001a_2 \# 0010a_3 \#} \cdots \sym{\# 1111a_{2^4} \#}\]
+such that $(\sym{a}_n,\sym{a}_{n+1}) \in H$ for all $1 \le n < 2^4$.
+We show how to construct a B-RASP programs that (i) check that the bit counter is incremented, and
+(ii) check that the successive symbols are in $H$.\footnote{Filling in the remainder of the B-RASP program to enforce the remaining constraints is straightforward.}
+To check (i), we use the following attention operation:
+\begin{equation}\label{eq:increment-predic}
+\begin{split}
+C_{+1}(i) \bnfdef\,\, \maxatt_j[j<i,Q_\#(j)]\ \bigvee_{k=1}^4 \Biggl(&\bigwedge_{r=1}^{k-1} \big(\neg C_r(i) \wedge C_r(j)\big) \wedge C_k(i) \wedge \neg C_k(j) \\
+&\wedge \bigwedge_{r=k+1}^{4} \big(C_r(i) \leftrightarrow C_r(j)\big) \Biggr) \colon 1
+\end{split}
+\end{equation}
+Assume $i$ is a $\#$-position.
+Attention selects the rightmost $\#$-position $j$ left of position $i$.
+Let $b_1^i \cdots b_4^i$ and $b_1^j \cdots b_4^j$ be the bit words directly left of position $i$ and $j$, respectively.
+We assume that we already defined $C_k(i) = b_k^i$ and $C_k(j) = b_k^j$ for all $k \in [4]$.
+Then, the above value predicate checks that the bit word $b_1^i \cdots b_4^i$ is the bit word $b_1^j \cdots b_4^j$ incremented by 1.
+To check (ii), we can use the attention operation
+\begin{equation}
+M_{\leftarrow}(i) \bnfdef \,\, \maxatt_j[j<i,Q_{\sym{a}}(j) \vee Q_{\sym{b}}(j) \vee Q_{\sym{c}}(j)]\ \bigvee_{(\sym{h},\sym{h}') \in H} Q_{\sym{h}}(j) \wedge Q_{\sym{h}'}(i) : 1.
+\end{equation}
+If $i$ is a position of a symbol $\sym{a}_i$, attention picks the rightmost position $j$ of a symbol $\sym{a}_j$ to the left of $i$ and
+checks with the value predicate that $(\sym{a}_j,\sym{a}_i) \in H$.
+Two boundary conditions remain: the input must begin with the counter $\sym{0000}$ and end with the counter $\sym{1111}$.
+The first is a position-wise check at the leftmost $\sym{\#}$, requiring $C_1(i) = \cdots = C_4(i) = 0$ at that position; the second is the analogous check at the rightmost $\sym{\#}$, requiring all four bits to be $1$.
+We omit the construction of these gadgets here, since they follow the same pattern as $C_{+1}$ and $M_\leftarrow$.
+\end{example}
+
+The construction given in \zcref{ex:tiling} allows us to succinctly recognize a language whose shortest word has length exponential
+in the number of bits of the binary counter.
+In the following, we describe how to extend this idea such that we can reduce an $\EXPSPACE$-complete problem to non-emptiness of a certain B-RASP program.
+Intuitively, we place multiple such words as above on top of each other, creating multiple rows and columns (separated by $\sym{\#}$).
+Moreover, we introduce vertical constraints, i.e., between rows, in addition to the horizontal constraints $H$.
+Using this technique, we will see in \zcref{thm:ltl-succinct} how B-RASP programs
+can even succinctly recognize languages whose shortest word has doubly exponential length.
+
+Throughout the rest of this section, we build up to the proof of the following complexity bound.
+\begin{restatable}[]{theorem}{thmUHATemptiness}\label{thm:UHAT-emptiness}
+The non-emptiness problem for UHATs and B-RASP programs is $\EXPSPACE$-complete.\looseness=-1
+\end{restatable}
+
+To prove \zcref{thm:UHAT-emptiness}, we start with the lower bound for B-RASP programs.
+\begin{proposition}\label{prop:hardness}
+The non-emptiness problem for B-RASP programs is $\EXPSPACE$-hard.
+\end{proposition}
+For the proof, we use the construction sketched in \zcref{ex:tiling} and reduce from the tiling problem.
+
+\begin{problem}\label{prob:tiling}
+We now describe the $2^N$-\defn{tiling problem}.
+A \defn{tile} is a quadruple $\tile = \langle a, b, c, d \rangle \in \N_0^4$. We write $\tleft(\tile) = a$, $\tup(\tile) = b$, $\tright(\tile) = c$, and $\tdown(\tile) = d$.
+\begin{description}
+\item[Given:] An instance $\TI = (N, \tileset, \tilefin)$, where $N > 0$ is an integer in unary, $\tileset$ is a finite set of tiles, and $\tilefin \in \tileset$ is a designated final tile.
+\item[Question:] Do there exist a natural $M \in \mathbb{N}$ and a function $\tau \colon [2^N] \times [M] \to \tileset$ such that
+\begin{enumerate}
+\item $\tau(2^N,M) = \tilefin$, \label{itm:t-fin}
+\item $\tdown(\tau(i,1)) = \tup(\tau(i,M)) = 0$ for all $1 \le i \le 2^N$, \label{itm:bot-top}
+\item $\tleft(\tau(1,j)) = \tright(\tau(2^N,j)) = 0$ for all $1 \le j \le M$, \label{itm:first-last}
+\item $\tright(\tau(i,j)) = \tleft(\tau(i+1,j))$ for all $1 \le i < 2^N$ and $1 \le j \le M$, and \label{itm:right-left}
+\item $\tup(\tau(i,j)) = \tdown(\tau(i,j+1))$ for all $1 \le i \le 2^N$ and $1 \le j < M$? \label{itm:up-down}
+\end{enumerate}
+\end{description}
+\end{problem}
+A configuration of tiles, i.e., a candidate for the function $\tau$, places tiles in $2^N$ columns and an arbitrary number ($M$) of rows.
+
+\begin{proposition}\label{prop:tiling}
+The $2^N$-tiling problem is $\EXPSPACE$-complete.
+\end{proposition}
+\begin{proof}
+The result follows from Theorem 5 in \citet{Schwarzentruber19} by choosing $k=1$.
+\end{proof}
+To prove \zcref{prop:hardness}, we construct a B-RASP program of size polynomial in $N$ that
+accepts an encoding of a configuration of tiles as a sequence of words, similar to those displayed in \zcref{ex:tiling},
+if and only if the configuration is a solution of the given $2^N$-tiling problem instance.
+The key observation is that strict future masking with rightmost tie-breaking
+enables us to check conditions between successive tiles in a row (\zcref{itm:right-left})
+but also between the current tile and the tile at the most recent past occurrence of the same counter value, i.e., in the same column of the previous row (\zcref{itm:up-down}).
+The proof of the next lemma can be found in \zcref{app:tiling-brasp}.
+
+\begin{restatable}[]{lemma}{lemTilingBrasp}\label{lem:tiling-brasp}
+\revisedA{Given a $2^N$-tiling problem instance, one can construct in time polynomial in $N$ a B-RASP program,
+whose language is non-empty iff the $2^N$-tiling problem instance has a solution.}
+\end{restatable}
+
+\zcref{lem:tiling-brasp} reduces the $2^N$-tiling problem to the non-emptiness problem for B-RASP programs.
+Thus, together with \zcref{prop:tiling}, it implies \zcref{prop:hardness}.
+
+We observe that the B-RASP program constructed in \zcref{lem:tiling-brasp} is of a special form,
+which allows for a polynomial-time translation to UHAT.
+
+\begin{restatable}[]{lemma}{lemBraspUHAT}\label{lem:brasp-uhat}
+Given a B-RASP program $P_1,\ldots,P_\Pi$ where every attention operation is of the form
+\begin{equation}
+P_{t+1}(i) \bnfdef\ \minmaxatt_j [M(i,j),  \score(j) \wedge \bigwedge_{k \in K} P_k(i) \leftrightarrow P_k(j)]\ V(i,j) : D(i),
+\end{equation}
+where
+$|\alphabet| \le t < \Pi$, $\minmaxatt\ \in \{\minatt,\maxatt\}$, $\score(j)$ is a Boolean combinations of $P_1(j),\ldots,P_t(j)$, and $K \subseteq \{1,\dots,t\}$,
+one can construct in polynomial time a UHAT that recognizes the same language.
+\end{restatable}
+\begin{proof}[Proof sketch]
+Any Boolean combination of position-wise predicates can be simulated by a sequence of attention layers (each layer simply applies its affine map $\matC$ to the current vector and disregards the attention vector) and ReLU layers.
+For each B-RASP attention operation, we use a single UHA layer (\zcref{subsec:uhat}) whose mask predicate is $M$, whose tie-breaker matches $\minmaxatt$, whose affine maps $\matA, \matB$ compute the relevant components of the score, and whose affine map $\matC$ combines the position's input $\bv_n$ with the attention-selected $\veca_n$.
+The value predicate $V(i,j)$ is simulated as follows: the layer's affine map $\matC$ copies the relevant components of $\veca_i$---the layer-$\ell$ vector that attention selected from position $o(i)$ (the unique position whose layer-$\ell$ vector wins the argmax in the UHA layer; equivalently, $o(i) = \tau(B_i)$ in the UHAT notation of \zcref{subsec:uhat}, with $B_i$ the argmax set among the unmasked positions and $\tau$ the tie-breaker)---into the layer's output at position $i$, and a small ReLU sub-network applies the Boolean combination $V$ to those copied components.
+The part $\score(j)$ of the score predicate that only depends on $j$
+can be simulated using an additional preliminary layer that already computes the result of $\score(j)$ at every position $j$.
+For the part $\bigwedge_{k \in K} P_k(i) \leftrightarrow P_k(j)$ that checks equality of two binary numbers,
+we provide a score function that maximizes the attention score if the two binary numbers are equal.
+The full proof can be found in \zcref{app:brasp-uhat}.
+\end{proof}
+
+
+\begin{proposition}\label{prop:UHAT-hardness}
+The non-emptiness problem for UHAT is $\EXPSPACE$-hard.
+\end{proposition}
+\begin{proof}
+Together, \zcref{prop:tiling}, \zcref{lem:tiling-brasp} and \zcref{lem:brasp-uhat} imply the $\EXPSPACE$ lower bound for UHAT.
+\end{proof}
+
+\begin{corollary}
+The non-emptiness problem for UHATs in which every layer uses strict future masking and rightmost tie-breaking (or, dually, strict past masking and leftmost tie-breaking) is $\EXPSPACE$-hard.
+\end{corollary}
+\begin{proof}
+The B-RASP program constructed in \zcref{lem:tiling-brasp} uses only strict future masking and rightmost tie-breaking, and it can be adapted to use only strict past masking and leftmost tie-breaking.\footnote{In case of strict past masking, we use the first coordinate in the acceptance condition.} The UHAT translation in \zcref{lem:brasp-uhat} preserves the mask predicate and tie-breaking. Therefore the $\EXPSPACE$ lower bound established by \zcref{prop:tiling}, \zcref{lem:tiling-brasp}, and \zcref{lem:brasp-uhat} transfers to UHATs in either of the two restricted classes.
+\end{proof}
+
+We now prove the upper bounds in \zcref{thm:UHAT-emptiness}.
+To this end, we first note that any B-RASP program can be converted in exponential time into an LTL formula
+using the construction given by \citet{YangCA24}.
+In \zcref{prop:UHAT-LTL} we prove that the same holds true for UHATs,
+which improves the doubly exponential construction given by \citet{YangCA24} that translates UHATs into B-RASP programs first.
+These constructions suffice for the exponential-space upper bounds in \zcref{thm:UHAT-emptiness} since
+non-emptiness of languages given by LTL formulas is in polynomial space \citep{SistlaC85}.
+
+To perform the translation from UHAT to LTL, we first have to make the crucial observation that the values occurring during the computation of a UHAT are not too large.
+The proof of the following proposition can be found in \zcref{app:UHAT-values}.
+\begin{restatable}[]{proposition}{propUHATvalues}\label{lem:UHAT-values}
+For every UHAT $\trans$, the precision required to evaluate $\trans$ on any input is polynomial in $|\trans|$, i.e., every rational value arising in the computation of $\trans$ can be represented with at most $\poly(|\trans|)$ bits.
+\end{restatable}
+
+By \zcref{lem:UHAT-values}, the set of rationals that can arise in the computation of $\trans$ is finite, and each member has bit-length polynomial in $|\trans|$.
+The set therefore has cardinality at most $2^{\poly(|\trans|)}$, i.e., exponential in $|\trans|$, and can be enumerated in exponential time. 
+This is precisely what makes the layer-by-layer LTL construction in the proof of \zcref{prop:UHAT-LTL} feasible: at each layer we have a finite, enumerable, polynomial-bit-length set of vectors to range over, which implies that the LTL formula only has to simulate the position-wise behavior of attention layers, i.e.,
+masking and selecting the position of the attention vector,
+but not the actual computation of values.
+
+The proof of the following proposition can be found in \zcref{app:UHAT-LTL}.
+\begin{restatable}[]{proposition}{propUHATLTL}\label{prop:UHAT-LTL}
+Given a UHAT $\trans$ recognizing a language $\Lang \subseteq \alphabet\kplus$, one can construct in exponential time an LTL formula $\varphi$ that recognizes $\Lang$.
+\end{restatable}
+
+
+Note, if we start with a UHAT, where every attention layer uses strict future masking and leftmost tie-breaking (resp. strict past masking and rightmost tie-breaking),
+then the LTL formula constructed in the proof of \zcref{prop:UHAT-LTL} only uses the $\past$ (resp. $\future$) operator.
+It was shown by \citet{SistlaC85} that the non-emptiness problem for the fragments of LTL
+that only allow $\past$ or $\future$ is $\NP$-complete.
+Thus, we obtain an improved complexity upper bound for such restricted UHATs.
+\begin{corollary}
+The non-emptiness problem for UHATs, where each attention layer uses strict future masking/leftmost tie-breaking
+(resp. strict past masking/rightmost tie-breaking), is in $\NEXP$.
+\end{corollary}
+
+Note that it has been shown by \citet{tale} that such restricted UHATs
+are equally expressive as the LTL fragment with only $\past$ (respectively, $\future$).\footnote{Note that LTL with a subset of the operators is often defined over $\textsc{eos}$-padded strings; this choice affects its expressive capacity when using LTL with a subset of the operators. 
+For instance, \citeposs{LC26} demonstration that LTL[$\past$] can \emph{not} accept $\{a,b\}^*a$ with $\textsc{eos}$-padding, but can without the padding.}
+However, the construction by 
+\citet{tale} from UHAT to the LTL fragments incurs a doubly exponential blow-up,
+as opposed to our singly exponential translation. The full proof of \zcref{thm:UHAT-emptiness}, combining the preceding lemmas, propositions, and corollaries into the two directions of $\EXPSPACE$-completeness, can be found in \zcref{app:UHAT-emptiness}.
+
+\section{Succinctness across representations}
+\label{sec:succinctness}
+We now study how succinctly transformers can represent languages compared to standard models from formal language theory.
+We first compare transformers to LTL.
+One suggestion that transformers may be more succinct than LTL comes from \zcref{thm:UHAT-emptiness},
+which shows that the non-emptiness problem for UHATs is $\EXPSPACE$-complete,
+whereas for LTL the corresponding problem is known to be $\PSPACE$-complete.
+The following result shows that this exponential gap is also manifested in terms of the formalisms' respective succinctness.
+
+\begin{restatable}[]{theorem}{thmLTLsuccinct}\label{thm:ltl-succinct}
+UHATs are exponentially more succinct than LTL.
+\end{restatable}
+\begin{proof}
+It suffices to exhibit a witness family $\{\Lang_n\}_{n=1}^\infty$ together with UHATs $\trans_n$ of size $\poly(n)$ recognizing $\Lang_n$ such that every LTL formula recognizing $\Lang_n$ has size at least $c_1 2^{c_2 n}$ for constants $c_1, c_2>0$. Such a family is a witness in the sense of \zcref{def:succinctness}: from $|\trans_n| = \poly(n)$, say $|\trans_n| \le c_0 n^d$, we get $n \ge (|\trans_n|/c_0)^{1/d}$, and substituting into $|\varphi_n| \ge c_1 2^{c_2n}$ gives $|\varphi_n| \ge c_12^{c'\,|\trans_n|^{1/d}}$ for $c'_2 = c_2/c_0^{1/d}$. This witnesses $f$-more succinctness for $f(m) = c_1 2^{c'_2\,m^{1/d}}$ as required.
+
+\paragraph{Polynomial-size UHAT.}
+This direction proceeds in 3 steps.
+\begin{enumerate}[itemsep=2pt, topsep=2pt, parsep=0pt, leftmargin=1.5em]
+    \item Let $\TM_n$ be a (deterministic) Turing machine that implements a binary counter with $2^n$ bits,
+    i.e., it writes $0^{2^n}$ on its tape and increments the binary number until it has written $1^{2^n}$ on its tape and accepts.
+    In particular, $\TM_n$ first checks that it was started with the empty tape and then writes $2^n$ many $0$'s on its tape
+    using an additional $n$-bit counter.
+    To increment the $2^n$-bit counter, $\TM_n$ traverses the counter from left to right while
+    flipping every $1$ to $0$ until it encounters the first $0$, which is then flipped to $1$.
+    To initialize the counter with $0$'s, $\TM_n$ uses a linear number of states in $n$.
+    Incrementing can be done with a constant-sized Turing machine.
+    Moreover, $\TM_n$ uses an exponential number of tape cells in $n$ and
+    the unique accepting run has length at least $2^{2^n}$.
+    \item \Citet{Boas97} gives a reduction from Turing machines to tiling problem instances
+    that encodes configurations of Turing machines in its rows and
+    a correct tiling corresponds to a valid execution of the Turing machine.
+    We observe that the $2^{p(n)}$-tiling problem instance $\TI_n$,
+    for some polynomial $p$,
+    constructed from $\TM_n$ has size polynomial in $n$
+    and it has the property that the smallest correct tiling has at least $2^{2^n}$ many rows.
+    \item \zcref{lem:tiling-brasp} and \zcref{lem:brasp-uhat} show
+    that there is a UHAT $\trans_n$ of size polynomial in the size of $\TI_n$
+    that recognizes encodings of correct tilings of $\TI_n$.
+    Thus, $\trans_n$ is of size polynomial in $n$ and the smallest accepted word has length at least $2^{2^n}$.
+    We let $L_n$ be the language recognized by $\trans_n$.
+\end{enumerate}
+
+\paragraph{Exponential LTL lower bound.}
+Let $\varphi_n$ be an LTL formula that recognizes $L_n$.
+Because the smallest accepted word by any LTL formula has length at most exponential in the formula size, using an exponential conversion from LTL to finite automata similar to \citet{VardiW94},
+it follows that the size of $\varphi_n$ is at least exponential in $n$.
+\end{proof}
+
+Conversely, the next result shows that UHATs have polynomially bounded expansion over LTL: every LTL formula has an at most polynomially larger UHAT for the same language. Combined with \zcref{thm:ltl-succinct}, this pins the gap between UHATs and LTL: at most polynomial universally, and at least exponential on a witness family.
+The proof can be found in \zcref{app:LTL-UHAT}.
+
+\begin{restatable}[]{proposition}{propLTLUHAT}\label{lem:ltl-uhat}
+UHATs have polynomially bounded expansion over LTL.
+In particular, given an LTL formula $\varphi$, one can construct in polynomial time a UHAT $\trans$ such that $\Lang(\trans) = \Lang(\varphi)$.
+\end{restatable}
+
+
+
+We show next that UHATs are doubly exponentially more succinct than finite automata.
+
+\begin{theorem}\label{thm:automata-succinct}
+UHATs are doubly exponentially more succinct than finite automata.
+\end{theorem}
+\begin{proof}
+We reuse the witness family from \zcref{thm:ltl-succinct}: $\Lang_n$ is the language recognized by the UHAT $\trans_n$ constructed there.
+$\trans_n$ is of size polynomial in $n$ and the smallest accepted word has length at least $2^{2^n}$.
+Because any automaton recognizing a non-empty language accepts a word of length at most linear in the automaton size,
+the smallest automaton that recognizes $\Lang_n$ has size at least doubly exponential in $n$.
+Combined with $|\trans_n| = \poly(n)$, this exhibits the witness family required by \zcref{def:succinctness} with $f$ doubly exponential.
+\end{proof}
+
+Conversely, the best known translation from counter-free automata---the class of finite automata equivalent to LTL---to LTL incurs an exponential blow-up \citep{MalerP90}. Composing this with \zcref{lem:ltl-uhat} yields an at-most exponential-time translation from counter-free automata to UHATs, which shows that UHATs have exponentially bounded expansion over finite automata when restricted to the star-free languages. 
+The translation in \citet{YangCA24} also incurs an exponential blow-up via \citet{MalerP90}.
+
+Combining \zcref{thm:automata-succinct} with \zcref{prop:rnn-dfa} yields the following succinctness gap between UHATs and RNNs.
+\begin{corollary}\label{cor:rnn-succinct}
+UHATs are exponentially more succinct than RNNs.
+\end{corollary}
+
+\section{Applications}
+\label{sec:apps}
+%Optimizability: given a transformer, does there exist a (descriptionally) smaller one
+%
+%\fix{Maybe we need to define it as a function problem and then show that equivalence is hard.}
+
+As a consequence of our results, we can show that reasoning about the language accepted by a UHAT, e.g., checking
+equivalence and emptiness, is intractable.
+Contrast this fact with deterministic finite automata, where these problems can be done in
+polynomial time \citep{Kozen}. 
+As an example, we give a precise statement about the complexity of \emph{equivalence problem},
+i.e., the problem of checking whether two UHATs recognize the same
+language.
+The proof can be found in \zcref{app:UHAT-equiv}.
+\begin{restatable}[]{theorem}{thmUHATequiv}\label{thm:UHAT-equiv}
+Deciding the equivalence between two UHATs is $\EXPSPACE$-complete.
+\end{restatable}
+%\vspace{-15pt}
+
+\section{Concluding remarks}
+\label{sec:related}
+\paragraph{Related work.} 
+Our work directly draws upon a number of recent results
+\citep{YangCA24,barcelo2024logical,tale,LC25}, which demonstrate the close connection
+between unique-hard attention transformers and LTL and, thus, the star-free regular languages.
+However, none of these results concerns succinctness and computational complexity of verification.
+Closer to our complexity-theoretic angle, \citet{SAL25} studied the verification problem for transformers of various precisions and showed that fixed-precision transformers are at least $\NEXP$-hard (i.e., hard for the class of problems solvable by nondeterministic algorithms that run in exponential time). Their technique implies that transformers can be (singly) exponentially more succinct than finite automata, but yields no conclusion about their succinctness relative to representations like LTL or RNNs.
+Our results substantially improve on this by showing that transformers can be doubly exponentially more succinct than automata, and exponentially more succinct than LTL and RNNs. Our model is also simpler: we use unique-hard attention, whereas \citet{SAL25} employs a combination of soft and hard attention.
+Our setting also restricts positional information to positional masking---a simple class of positional embeddings also considered by \citet{YangCA24}, \citet{tale} and \citet{LC25}---in contrast to the arbitrary fixed-precision positional encodings admitted by \citet{SAL25}. 
+Without position encodings, \citet{counting-power} recently showed that verification is undecidable for average-hard-attention and softmax-attention transformers with finite but unbounded precision.
+
+\paragraph{Formal Verification of Transformers.}
+We close by situating our findings within the broader program of formal verification---the automated analysis, verification, and explanation of transformers---which is a central concern of explainable AI \citep{survey-explainable}. Substantial practical progress has been made on verifying feed-forward neural networks, with tools developed over the last decade and benchmarked at the annual VNN competition \citep{vnn-result24}; transformers, by contrast, remain largely out of reach.
+Despite the high worst-case complexity ($\EXPSPACE$-complete), we pose as a challenge bringing techniques from automated verification \citep{model-checking-book}---symbolic methods, simulation, \textit{inter alia}---to bear on transformer verification in practice. 
+Because our $\EXPSPACE$-hardness proof requires transformers that encode large counters, a complementary direction is to identify subclasses that cannot encode such counters and thus admit lower-complexity verification.
+A related open question is the learnability of succinct transformers, on which the empirical evidence remains mixed \citep{Garg22,NBA25,framework}.
+Finally, our results are a first step toward understanding how succinct transformers can be relative to other language-acceptor models, e.g., fixed-precision softmax transformers \citep{LC25}, which UHATs overapproximate. 
+We leave the succinctness of fixed-precision softmax and average-hard attention transformers as future work; see \citet{yang26} for an initial attempt. 
+
+
+\subsubsection*{Acknowledgments}
+%Use unnumbered third level headings for the acknowledgments. All
+%acknowledgments, including those to funding agencies, go at the end of the paper.
+We thank David Chiang, Marco Sälzer, Andy Yang and anonymous reviewers for
+their helpful feedback.
+Pascal Bergsträßer and Anthony W.\ Lin are supported by
+Deutsche Forschungsgemeinschaft (grant number \href{https://gepris.dfg.de/gepris/projekt/522843867?language=en}{522843867}) and
+European Union\footnote{
+	Views and opinions expressed are however those
+	of the author(s) only and do not necessarily reflect those of the European
+	Union or the European Research Council Executive Agency. Neither the
+	European Union nor the granting authority can be held responsible for them.}
+\includegraphics[width=0.75cm]{eu-erc_cropped.pdf}
+(ERC, LASD, \href{https://doi.org/10.3030/101089343}{101089343}).
+
+
+\bibliography{iclr2026_conference}
+\bibliographystyle{acl_natbib}
+
+\appendix
+%\section{Appendix}
+%You may include other additional sections here.
+\newpage
+\section{Proofs}
+\label{app:emptiness}
+\subsection{Proof of Theorem \ref{thm:UHAT-emptiness}}\label{app:UHAT-emptiness}
+\thmUHATemptiness*
+\begin{proof}
+The theorem asserts $\EXPSPACE$-completeness of the non-emptiness problem for two formalisms simultaneously: B-RASP programs and UHATs. We prove the two directions of completeness separately.
+
+\paragraph{Hardness (lower bound).}
+We establish $\EXPSPACE$-hardness first for B-RASP programs, then transfer it to UHATs.
+\begin{itemize}[itemsep=1pt, topsep=2pt, parsep=0pt, leftmargin=2em]
+    \item \textbf{B-RASP}. For B-RASP programs, \zcref{prop:tiling} states that the $2^N$-tiling problem is $\EXPSPACE$-complete, so it is $\EXPSPACE$-hard.
+By \zcref{lem:tiling-brasp}, any instance of the $2^N$-tiling problem can be transformed, in time polynomial in $N$, into a B-RASP program whose recognized language is non-empty if and only if the original tiling instance has a solution. Composing these two results yields a polynomial-time reduction from an $\EXPSPACE$-hard problem to B-RASP non-emptiness.
+Thus, B-RASP non-emptiness is itself $\EXPSPACE$-hard.
+
+\item \textbf{UHAT}.
+For UHATs, we further compose the previous reduction with the polynomial-time, language-preserving translation from B-RASP to UHATs of \zcref{lem:brasp-uhat}. The composed reduction is again polynomial-time, so the $\EXPSPACE$-hardness of $2^N$-tiling transfers to UHAT non-emptiness; this is the content of \zcref{prop:UHAT-hardness}.
+\end{itemize}
+
+\paragraph{Membership (upper bound).}
+We show that the non-emptiness problem for both formalisms lies in $\EXPSPACE$ by translating to LTL and invoking the Sistla--Clarke decision procedure.
+
+For B-RASP programs, the construction of \citet{YangCA24} converts any B-RASP program $\brasp$ into an equivalent LTL formula $\varphi_{\brasp}$ in time exponential in $|\brasp|$; consequently $|\varphi_{\brasp}|$ is itself at most exponential in $|\brasp|$.
+
+For UHATs, the analogous translation is supplied by \zcref{prop:UHAT-LTL}, which turns any UHAT $\trans$ into an equivalent LTL formula $\varphi_\trans$ in exponential time (and hence of at most exponential size). The proof of \zcref{prop:UHAT-LTL} relies crucially on \zcref{lem:UHAT-values}: the latter guarantees that all rational values arising in the computation of $\trans$ admit representations of polynomially many bits, which is what makes the set of layer-wise representations enumerable in exponential time.
+
+In both cases we have, in exponential time, reduced the original non-emptiness problem to LTL satisfiability for a formula of size at most exponential in the size of the original UHAT or B-RASP program.
+\citet{SistlaC85} prove that LTL satisfiability is decidable in space polynomial in the formula size; applied to $\varphi_{\brasp}$ or $\varphi_\trans$, this uses space polynomial in an exponential quantity, that is, space exponential in $|\brasp|$ or $|\trans|$. The overall decision procedure therefore runs in $\EXPSPACE$.
+
+Combining the two halves yields $\EXPSPACE$-completeness of non-emptiness for both B-RASP programs and UHATs, as claimed.
+\end{proof}
+
+\subsection{Proof of Lemma \ref{lem:tiling-brasp}}\label{app:tiling-brasp}
+\lemTilingBrasp*
+\begin{proof}
+Fix a $2^N$-tiling problem instance $\TI = (N, \tileset, \tilefin)$ as in \zcref{prob:tiling}.
+We construct a B-RASP program $\brasp_\TI$ of size polynomial in $N$ and $|\tileset|$ such that $\Lang(\brasp_\TI) \ne \emptyset$ if and only if $\TI$ admits a solution $\tau \colon [2^N] \times [M] \to \tileset$ in the sense of \zcref{prob:tiling}.
+
+\paragraph{Encoding.}
+We encode a candidate $\tau$ as a word over the alphabet $\alphabet \bnfdef \tileset \cup \{\sym{0}, \sym{1}, \sym{\#}\}$.
+Define the per-cell encoding $\enc \colon [2^N] \times [M] \to \alphabet\kplus$ by
+\begin{equation}\label{eq:enc}
+\enc(i,j) \bnfdef \bin_N(i-1)\, \tau(i,j)\, \sym{\#},
+\end{equation}
+where $\bin_N(i-1) \in \{\sym{0},\sym{1}\}^N$ is the $N$-bit binary representation of $i-1$, most significant bit first.
+The encoding of the full configuration scans columns within each row in order:
+\begin{equation}\label{eq:enc-full}
+\enc(\tau) \bnfdef \enc(1,1) \cdots \enc(2^N,1)\, \enc(1,2) \cdots \enc(2^N,M).
+\end{equation}
+Let $\Lang_\TI \bnfdef \{\enc(\tau) \mid \tau \text{ is a solution of } \TI\}$. It suffices to construct a B-RASP program that recognizes $\Lang_\TI$.\looseness=-1
+
+\paragraph{Plan.}
+Throughout, let $\str{\bword} = \sym{a}_1 \cdots \sym{a}_L \in \alphabet\kplus$ denote the input, with $L \bnfdef |\str{\bword}|$.
+We build $\brasp_\TI$ as a conjunction of five \emph{gadgets}, each evaluated at the last position $L$:
+\begin{itemize}[itemsep=2pt, topsep=2pt, parsep=0pt, leftmargin=2em]
+    \item \emph{Gadget A---shape}: $\str{\bword} \in (\{\sym{0},\sym{1}\}^N\, \tileset\, \sym{\#})\kstar$.
+    \item \emph{Gadget B---column counter}: consecutive $N$-bit blocks count $0, 1, \dots, 2^N-1, 0, \dots$.
+    \item \emph{Gadget C---final tile}: $\str{\bword}$ ends with $\sym{1}^N\, \tilefin\, \sym{\#}$ (\zcref{itm:t-fin}).
+    \item \emph{Gadget D---boundary conditions}: \zcref{itm:bot-top} and \zcref{itm:first-last}.
+    \item \emph{Gadget E---adjacency}: \zcref{itm:right-left} and \zcref{itm:up-down}.
+\end{itemize}
+The output predicate is $Y(i) \bnfdef A(i) \wedge B(i) \wedge C(i) \wedge D(i) \wedge E(i)$, and $\brasp_\TI$ accepts $\str{\bword}$ iff $Y(L) = 1$. We define each gadget below and verify its soundness at $L$.
+
+\paragraph{Gadget A: well-formed shape.}
+To check whether $\str{\bword} \in (\{\sym{0},\sym{1}\}^N\, \tileset\, \sym{\#})\kstar$, we construct the following B-RASP predicates:
+\begin{subequations}\label{eq:gadget-A}
+\begin{align}
+A_{\tileset}(i) &\bnfdef\ \maxatt_j[j<i,1]\ \bigvee_{\tile \in \tileset} \Qprop{\tile}(j) : 0 \label{eq:A-T}\\
+A_{\mathrm{bit},1}(i) &\bnfdef\ \maxatt_j[j<i,1]\ \Qprop{\sym{0}}(j) \vee \Qprop{\sym{1}}(j) : 0 \label{eq:A-bit-1}\\
+A_{\mathrm{bit},k}(i) &\bnfdef\ \maxatt_j[j<i,1]\ A_{\mathrm{bit},k-1}(j) : 0 \qquad \text{for } k = 2,\dots,N \label{eq:A-bit-k}\\
+A_{\#,1}(i) &\bnfdef\ \maxatt_j[j<i,1]\ \Qprop{\sym{\#}}(j) : 1 \label{eq:A-h-1}\\
+A_{\#,k}(i) &\bnfdef\ \maxatt_j[j<i,1]\ A_{\#,k-1}(j) : 1 \qquad \text{for } k = 2,\dots,N+1 \label{eq:A-h-k}\\
+A_{\enc}(i) &\bnfdef \left(\Qprop{\sym{\#}}(i) \to A_{\tileset}(i)\right) \wedge \left(\left(\bigvee_{\tile \in \tileset} \Qprop{\tile}(i)\right) \to \left(\bigwedge_{k=1}^N A_{\mathrm{bit},k}(i)\right) \wedge A_{\#,N+1}(i)\right) \label{eq:A-enc}
+\end{align}
+\end{subequations}
+We aggregate $A_\enc$ across all positions:
+\begin{equation}
+A(i) \bnfdef\ \maxatt_j[j<i,\neg A_\enc(j)]\ 0 : A_\enc(i).
+\end{equation}
+Then $A(L) = 1$ iff $A_\enc(i) = 1$ at every position, which holds iff $\str{\bword}$ matches $(\{\sym{0},\sym{1}\}^N\, \tileset\, \sym{\#})\kstar$ up to the requirement that the last symbol is $\sym{\#}$, which is enforced by Gadget C below.
+
+\paragraph{Gadget B: column counter.}
+We check that the $N$-bit binary blocks separated by $\sym{\#}$ encode the integers $0, 1, \dots, 2^N-1, 0, \dots$ in order, generalizing the increment predicate of \zcref{ex:tiling} from $4$ bits to $N$ bits.
+\begin{subequations}\label{eq:gadget-B}
+\begin{align}
+B_1(i) \bnfdef&\ \maxatt_j[j<i,\Qprop{\sym{0}}(j) \vee \Qprop{\sym{1}}(j)]\ \Qprop{\sym{1}}(j) : 0 \label{eq:B-1}\\
+B_k(i) \bnfdef&\ \maxatt_j[j<i,\Qprop{\sym{0}}(j) \vee \Qprop{\sym{1}}(j)]\ B_{k-1}(j) : 0 \qquad \text{for } k = 2,\dots,N \label{eq:B-k}\\
+B_{+1}(i) \bnfdef&\ \maxatt_j[j<i,\Qprop{\sym{\#}}(j)]\ \bigvee_{k=1}^N \Big(\bigwedge_{r=1}^{k-1} \neg B_r(i) \wedge B_r(j)\notag\\
+&\quad \wedge B_k(i) \wedge \neg B_k(j) \wedge \bigwedge_{r=k+1}^{N} B_r(i) \leftrightarrow B_r(j)\Big) : 0 \label{eq:B-+1}\\
+B_{1 \to 0}(i) \bnfdef&\ \maxatt_j[j<i,\Qprop{\sym{\#}}(j)]\ \bigwedge_{k=1}^N \neg B_k(i) \wedge B_k(j) : \bigwedge_{k=1}^N \neg B_k(i) \label{eq:B-rollover}\\
+B(i) \bnfdef&\ \maxatt_j[j<i,\Qprop{\sym{\#}}(j) \wedge \neg B_{1 \to 0}(j) \wedge \neg B_{+1}(j)]\ 0 : B_{1 \to 0}(i) \wedge B_{+1}(i) \label{eq:B-final}
+\end{align}
+\end{subequations}
+Then $B(L) = 1$ iff the binary blocks count up correctly.
+
+\paragraph{Gadget C: final tile.}
+For each tile $\tile \in \tileset$, we record whether the most recent prior tile equals $\tile$ via the predicate $T_{\tile}$ at every position, and use this to check that $\str{\bword}$ ends with $\sym{1}^N\, \tilefin\, \sym{\#}$ (\zcref{itm:t-fin}):
+\begin{subequations}\label{eq:gadget-C}
+\begin{align}
+T_{\tile}(i) \bnfdef&\ \maxatt_j[j<i,\bigvee_{\tile' \in \tileset} \Qprop{\tile'}(j)]\ \Qprop{\tile}(j) : 0 \qquad \text{for all } \tile \in \tileset \label{eq:C-T}\\
+C(i) \bnfdef&\ \Qprop{\sym{\#}}(i) \wedge T_{\tilefin}(i) \wedge \bigwedge_{k=1}^N B_k(i) \label{eq:C-final}
+\end{align}
+\end{subequations}
+Then $C(L) = 1$ iff $\str{\bword}$ ends with $\sym{1}^N\, \tilefin\, \sym{\#}$.
+
+\paragraph{Gadget D: boundary conditions.}
+We enforce \zcref{itm:bot-top} and \zcref{itm:first-last} of \zcref{prob:tiling}: the bottom row uses tiles with $\tdown = 0$, the top row uses tiles with $\tup = 0$, and the leftmost (resp.\ rightmost) column uses tiles with $\tleft = 0$ (resp.\ $\tright = 0$).
+\begin{subequations}\label{eq:gadget-D}
+\begin{align}
+D_\bot(i) &\bnfdef\, \maxatt_j[j<i,\Qprop{\sym{\#}}(j) \wedge \bigwedge_{k=1}^N B_k(i) \leftrightarrow B_k(j)]\ 1 : \smashoperator[r]{\bigvee_{\substack{\tile \in \tileset, \\ \tdown(\tile) = 0}}} T_{\tile}(i) \label{eq:D-bot}\\
+D_\top(i) &\bnfdef\, \maxatt_j\Big[j<i,\, \Qprop{\sym{\#}}(j) \wedge \left(\smashoperator[r]{\bigvee_{\substack{\tile \in \tileset, \\ \tup(\tile) \ne 0}}} T_{\tile}(j) \vee \left(\bigwedge_{k=1}^N \neg B_k(j)\right)\right)\Big]\notag\\
+&\qquad\qquad\qquad\qquad \qquad\qquad\qquad\qquad \left(\smashoperator[r]{\bigvee_{\substack{\tile \in \tileset, \\ \tup(\tile) = 0}}} T_{\tile}(j)\right) \wedge \left(\smashoperator[r]{\bigvee_{\substack{\tile \in \tileset, \\ \tup(\tile) = 0}}} T_{\tile}(i)\right) : 0 \label{eq:D-top}\\
+D_\vdash(i) &\bnfdef \left(\bigwedge_{k=1}^N \neg B_k(i)\right) \to \smashoperator[r]{\bigvee_{\substack{\tile \in \tileset, \\ \tleft(\tile) = 0}}} T_{\tile}(i) \label{eq:D-left}\\
+D_\dashv(i) &\bnfdef \left(\bigwedge_{k=1}^N B_k(i)\right) \to \smashoperator[r]{\bigvee_{\substack{\tile \in \tileset, \\ \tright(\tile) = 0}}} T_{\tile}(i) \label{eq:D-right}\\
+D(i) &\bnfdef\, \maxatt_j[j<i,\, \Qprop{\sym{\#}}(j) \wedge \neg\left(D_\bot(j) \wedge D_\vdash(j) \wedge D_\dashv(j)\right)]\ 0 :  D_\bot(i) \wedge D_\top(i) \wedge D_\vdash(i) \wedge D_\dashv(i) \label{eq:D-final}
+\end{align}
+\end{subequations}
+Then $D(L) = 1$ iff \zcref{itm:bot-top} and \zcref{itm:first-last} hold.
+
+\paragraph{Gadget E: adjacency.}
+We enforce \zcref{itm:right-left} and \zcref{itm:up-down}: horizontally adjacent tiles agree on $(\tright,\tleft)$, and vertically adjacent tiles (same column, consecutive rows) agree on $(\tdown,\tup)$ as follows:
+\begin{subequations}\label{eq:gadget-E}
+\begin{align}
+E_\leftarrow(i) &\bnfdef\ \maxatt_j[j<i,\,\Qprop{\sym{\#}}(j)] \left(\bigvee_{k=1}^N B_k(i)\right) \to \smashoperator[r]{\bigvee_{\substack{\tile,\tile' \in \tileset, \\ \tleft(\tile) = \tright(\tile')}}}  \left(T_{\tile}(i) \wedge T_{\tile'}(j)\right) : 1 \label{eq:E-left}\\
+E_\downarrow(i) &\bnfdef\ \maxatt_j[j<i,\Qprop{\sym{\#}}(j) \wedge \bigwedge_{k=1}^N B_k(i) \leftrightarrow B_k(j)] \smashoperator[r]{\bigvee_{\substack{\tile,\tile' \in \tileset, \\ \tdown(\tile) = \tup(\tile')}}} T_{\tile}(i) \wedge T_{\tile'}(j) : 1 \label{eq:E-down}\\
+E(i) &\bnfdef\ \maxatt_j[j<i,\, \Qprop{\sym{\#}}(j) \wedge \neg\left(E_\downarrow(j) \wedge E_\leftarrow(j)\right)]\ 0 : E_\downarrow(i) \wedge E_\leftarrow(i) \label{eq:E-final}
+\end{align}
+\end{subequations}
+Then $E(L) = 1$ iff \zcref{itm:right-left} and \zcref{itm:up-down} hold.
+
+\paragraph{Wrap-up.}
+Define the output predicate
+\begin{equation}
+Y(i) \bnfdef A(i) \wedge B(i) \wedge C(i) \wedge D(i) \wedge E(i),
+\end{equation}
+and let $\brasp_\TI$ accept iff $Y(L) = 1$. By the soundness of each gadget, $\Lang(\brasp_\TI) = \Lang_\TI$, so $\Lang(\brasp_\TI) \ne \emptyset$ iff $\TI$ admits a solution. Each gadget uses $O(N)$ predicates of size polynomial in $N$ and $|\tileset|$, so $|\brasp_\TI|$ is polynomial in $N$ and $|\tileset|$, hence in the size of $\TI$.
+\end{proof}
+
+\subsection{Proof of Lemma \ref{lem:brasp-uhat}}\label{app:brasp-uhat}
+\lemBraspUHAT*
+\begin{proof}
+Let $\brasp = (P_1,\ldots,P_\Pi)$ be a B-RASP program over the alphabet $\alphabet = \{\sym{a}_1,\dots,\sym{a}_{|\alphabet|}\}$,
+where $P_t$ is the initial vector $\Qprop{\sym{a}_t}$ for all $1 \le t \le |\alphabet|$.
+We construct a UHAT over $\alphabet$ that recognizes the same language as $\brasp$.
+We use a one-hot symbol embedding $\emb \colon \alphabet \to \{0,1\}^{|\alphabet|}$, i.e.,
+$\emb(\sym{a}_t) \bnfdef \boldsymbol{e}_t$ for all $1 \le t \le |\alphabet|$, where $\boldsymbol{e}_t$ denotes the $t^{\text{th}}$ unit vector.
+Then $P_t(i)$ coincides with the $t^{\text{th}}$ component of the $i^{\text{th}}$ input vector of the UHAT after the symbol embedding is applied.
+The UHAT will preserve these components in each layer and will gradually add new components
+to store the value of $P_t(i)$ for all $|\alphabet| < t \le \Pi$.
+So assume we already defined the layers of the UHAT that compute the vector $(P_1(i),\dots,P_t(i))$
+at position $i$ for $|\alphabet| \le t < \Pi$.
+We now define additional layers whose output will be $(P_1(i),\dots,P_{t+1}(i))$.
+
+We first consider the case where $P_{t+1}$ is a position-wise operation, i.e.,
+$P_{t+1}(i)$ is defined by a Boolean combination of $P_1(i),\dots,P_t(i)$.
+We define UHAT layers to compute the result of that Boolean combination bottom-up.
+Assume we already defined layers that output $(R_1(i),\dots,R_s(i))$,
+where $s \ge t$ and $R_1(i),\dots,R_s(i)$ contain $P_1(i),\dots,P_t(i)$ and the results of previously computed subformulas.
+To compute the result of $\neg R_k(i)$ for some $k \in [s]$,
+we add an attention layer that just forwards $1-R_k(i)$ at position $i$ in an additional component
+while leaving the first $s$ components unchanged.
+To compute $R_k(i) \wedge R_\ell(i)$ for some $k,\ell \in [s]$,
+we first use an attention layer to forward $R_k(i) + R_\ell(i)-1$ in an additional component
+followed by a ReLU layer that forwards the result of $\max\{0,R_k(i) + R_\ell(i)-1\}$ in this additional component,
+again leaving the first $s$ components unchanged.
+We do not have to deal with $R_k(i) \vee R_\ell(i)$, since it can be rewritten as $\neg(\neg R_k(i) \wedge \neg(R_\ell(i))$.
+After computing the results of all subformulas, we add an additional attention layer to only forward
+$(P_1(i),\dots,P_{t+1}(i))$, i.e., removing the intermediate results.
+Observe that a Boolean combination has only linearly many subformulas.
+
+Let us now consider the case where $P_{t+1}$ is an attention operation of the form
+\begin{equation}
+P_{t+1}(i) \bnfdef\ \minmaxatt_j [M(i,j),  \score(j) \wedge \bigwedge_{k \in K} P_k(i) \leftrightarrow P_k(j)]\ V(i,j) : D(i)
+\end{equation}
+as in the statement of \zcref{lem:brasp-uhat}.
+Throughout the construction below, $K$, $M$, $\minmaxatt$, $\score$, $V$, and $D$ are the parameters of this input attention operation, as bound in the lemma statement; in particular, $K \subseteq \{1, \dots, t\}$ is the index set of predicates whose values at $i$ and $j$ are compared for equality in the operation's score predicate.
+We first use additional layers as in the case of position-wise operations to compute the result of $\neg \score(i)$
+at every position $i$ in an additional component to output $(P_1(i),\dots,P_{t}(i),1 - \score(i))$.
+Next we use an attention layer to add the result of $1-P_k(i)$ for all $k \in K$ at every position $i$ in additional components.
+We then add an attention layer that uses mask predicate $M$, tie-breaking according to $\minmaxatt$, and attention score
+\begin{equation}
+\Big(\sum_{k \in K} \big(P_k(i) P_k(j) + (1-P_k(i))(1-P_k(j))\big)\Big) - \big(1-\score(j)\big)
+\end{equation}
+which is equal to $|\{k \in K \mid P_k(i) = P_k(j)\}| - (1-\score(j))$ since
+\begin{equation}
+P_k(i) P_k(j) + (1-P_k(i))(1-P_k(j)) = \begin{cases}
+1, &\text{if } P_k(i) = P_k(j)\\
+0, &\text{otherwise.}
+\end{cases}
+\end{equation}
+Thus, the score is maximized (equal to $|K|$) if $P_k(i) = P_k(j)$ for all $k \in K$ and $\score(j) = 1$.
+For every position $i$ let $o(i)$ be the position of the vector that maximizes the attention score with respect to $i$.
+The attention layer forwards the vector $(P_1(i),\dots,P_t(i),P_1(o(i)),\dots,P_t(o(i)),\score(o(i)))$ at position $i$.
+We now compute the result of
+\begin{equation}
+R(i) \bnfdef \score(o(i)) \wedge \bigwedge_{k \in K} P_k(i) \leftrightarrow P_k(o(i))
+\end{equation}
+at every position $i$ as in the case of position-wise operations and
+forward the vector $(P_1(i),\dots,P_t(i),P_1(o(i)),\dots,P_t(o(i)),R(i))$.
+Finally, we compute
+\begin{equation}
+\big(R(i) \wedge V(i,o(i))\big) \vee \big(\neg R(i) \wedge D(i)\big)
+\end{equation}
+by again using additional layers as in the case of position-wise operations,
+whose result is exactly $P_{t+1}(i)$.
+We then forward $(P_1(i),\dots,P_{t+1}(i))$.
+
+It remains to describe when the UHAT accepts.
+If $P_t$ is the output vector of $\brasp$,
+then we stop the construction of the UHAT after the layers to compute $P_t$ are constructed.
+The acceptance vector of the UHAT is then defined as $\boldsymbol{e}_t$, i.e., the $t^{\text{th}}$ unit vector.
+% and the output position $k$ is the same as the output position of $\brasp$
+% (i.e., the first or last position of the sequence).\pascal{Output position used}
+This means that the UHAT accepts if and only if $\langle \boldsymbol{e}_t,(P_1(N),\dots,P_t(N)) \rangle > 0$,
+which holds if and only if $P_t(N) = 1$, where $N$ is the length of the input.
+
+We observe that the resulting UHAT only has polynomially many layers
+since the result of each operation $P_t$ can be computed using an additional number of layers
+that is linear in the description size of $P_t$.
+\end{proof}
+
+%\begin{lemma}\label{lem:equality}
+%Given a mask predicate $M$ and tie-breaking function $\tau$,
+%there is an attention layer using $M$ and $\tau$ that on every sequence $\mathbf{v}_1,\dots,\mathbf{v}_n \in \{0,1\}^{2d}$
+%with $\mathbf{v}_k = (b_{k,1},1-b_{k,1},\dots,b_{k,d},1-b_{k,d})$ for all $k \in [1,n]$
+%and for every $i \in [1,n]$ picks attention vector $\mathbf{a}_i = \mathbf{v}_j$ such that
+%$b_{i,r} = b_{j,r}$ for all $r \in [1,d]$
+%if such an unmasked position $j$ exists.
+%\end{lemma}
+%\begin{proof}
+%As affine transformations $A$ and $B$ we use the identity, i.e.,
+%\[\score(\mathbf{v}_i,\mathbf{v}_j) \bnfdef \langle \mathbf{v}_i, \mathbf{v}_j \rangle = \sum_{r=1}^d \big(b_{i,r} b_{j,r} + (1-b_{i,r})(1-b_{j,r})\big)\]
+%which is equal to $|\{r \in [1,d] \mid b_{i,r} = b_{j,r}\}|$ since
+%\[b_{i,r} b_{j,r} + (1-b_{i,r})(1-b_{j,r}) = \begin{cases}
+%1, &\text{if } b_{i,r} = b_{j,r}\\
+%0, &\text{otherwise.}
+%\end{cases}\]
+%Thus, the score is maximized (equal to $d$) if $b_{i,r} = b_{j,r}$ for all $r \in [1,d]$.
+%\end{proof}
+
+
+\subsection{Proof of Proposition \ref{lem:UHAT-values}}\label{app:UHAT-values}
+\propUHATvalues*
+\begin{proof}
+\medskip\noindent\textbf{Part 1: bounding the denominator.}\quad
+Let $K$ be the number of rationals in the description of $\trans$, i.e., the entries of the embedding $\emb(\sym{a})$ for $\sym{a} \in \alphabet$, the entries of every affine transformation $\matA_\ell, \matB_\ell, \matC_\ell$ at each layer $\ell$, and the entries of the acceptance vector $\bt$. Each of these rationals is part of $\trans$'s binary encoding, so $K \le |\trans|$ and the bit-length $b$ of any individual rational satisfies $b \le |\trans|$ as well.
+Let $D$ be the least common multiple (LCM) of the denominators of those $K$ rationals.
+The LCM of $K$ integers each of bit-length at most $b$ has bit-length at most $K \cdot b$ (an upper bound is the product of the integers), so $D$ has bit-length at most $|\trans|^2$. By construction, every embedding entry and every coefficient of an affine transformation can be written with denominator dividing~$D$.
+
+We now show by induction on the layer number $\ell$ that there is a denominator $d_\ell$, of polynomial bit-length, common to every value at layer $\ell$. The base case $\ell = 0$ is the embedding: $d_0 \defeq D$ works.
+For the inductive step, suppose every layer-$\ell$ value has denominator dividing $d_\ell$. An attention layer takes an affine combination of layer-$\ell$ values, weighted by coefficients drawn from the description of $\trans$. Each weight has denominator dividing $D$, and each input has denominator dividing $d_\ell$. The product of two fractions with denominators dividing $D$ and $d_\ell$ has denominator dividing $D \cdot d_\ell$; a sum of such products and the bias term (denominator dividing $D$, which divides $D \cdot d_\ell$) shares the same denominator. So we may take $d_{\ell+1} \defeq D \cdot d_\ell$. A ReLU layer applies $\max\{0, \cdot\}$ pointwise, which leaves denominators unchanged, so $d_{\ell+1} \defeq d_\ell$ suffices for that case. Iterating over at most $|\trans|$ many layers, the final denominator is at most $D^{|\trans|+1}$, with bit-length $(|\trans|+1) \log D$, polynomial in $|\trans|$.\looseness=-1
+
+\medskip\noindent \textbf{Part 2: bounding the numerator.}\quad
+At an attention layer of width $R$, each output numerator is an affine combination of $2R$ layer-$\ell$ numerators with integer weights and a bias each of bit-length at most $\log D$ (the entries of $\matC$ scaled by $D$). The magnitude is therefore at most $2R \cdot 2^{\log D}$ times the largest layer-$\ell$ numerator's magnitude---an \emph{additive} per-layer bit-length increase of $\log R + \log D + O(1)$; ReLU leaves bit-lengths unchanged. Since layer-$0$ numerators have bit-length at most $|\trans| + \log D$, iterating across the at-most-$|\trans|$ many layers gives a final bit-length of $O(|\trans| \cdot (\log R + \log D))$, polynomial in $|\trans|$.
+
+Note that the additive (rather than multiplicative) per-layer growth above follows because the forwarded vector at an attention layer is $\matC(\bv_n, \veca_n)$, an affine combination of two layer-$\ell$ vectors: the position's own input $\bv_n$ and the attention-selected $\veca_n = \bv_{\tau(B_n)}$, which is just a verbatim copy of whichever existing layer-$\ell$ vector $\tau$ picks. The score function $\score(\bv_n, \cdot)$---including the dot product---does enter the picture and a single score value would have bit-length \emph{quadratic} in its inputs. But the score is used only to rank positions; the argmax reduces it to a position index, and that index alone is used to fetch $\veca_n$. The score's value never becomes a coordinate of any forwarded vector, so its quadratic bit-length never enters the next layer's input.
+
+\medskip\noindent
+Combining the two parts: every value produced by $\trans$ on any input has the form $p / q$ with $p$ and $q$ each of bit-length polynomial in $|\trans|$.
+\end{proof}
+
+\subsection{Proof of Proposition \ref{prop:UHAT-LTL}}\label{app:UHAT-LTL}
+\propUHATLTL*
+\begin{proof}
+\noindent\textbf{Setup.}\quad
+Let $\trans$ be a UHAT recognizing a language $\Lang \subseteq \alphabet\kplus$ and let
+$F$ be the set of binary representations of rational numbers that may occur during the computation of $\trans$, as in \zcref{lem:UHAT-values}.
+For the $\ell^{\text{th}}$ layer of $\trans$ and every $\bv \in F^S$,
+where $S$ is the output dimension of layer $\ell$,
+we construct an LTL formula $\varphi_{\bv}^\ell$ such that, on input $\str{\bword} = \sym{a}_1 \cdots \sym{a}_N \in \alphabet\kplus$,
+the $\ell^{\text{th}}$ layer outputs $\bv$ at position $n \in [N]$ if and only if
+$\str{\bword}, n \models \varphi_{\bv}^\ell$.
+We define $\varphi_{\bv}^\ell$ inductively on $\ell$.
+
+\medskip\noindent\textbf{Base case ($\ell = 0$).}\quad
+Let $\emb \colon \alphabet \to \Q^D$ be the symbol embedding of $\trans$, and for all $\bv \in F^D$ let
+\begin{equation}
+\varphi_{\bv}^0 \bnfdef \begin{cases}
+\displaystyle \bigvee_{\sym{a} \in \emb^{-1}(\bv)} \Qprop{\sym{a}}, &\text{if } \emb^{-1}(\bv) \ne \emptyset\\
+\bot, &\text{otherwise.}
+\end{cases}
+\end{equation}
+We now define the formula for layer $\ell+1$, splitting on the type of layer.
+
+\medskip\noindent\textbf{Inductive step---ReLU layer.}\quad
+If layer $\ell+1$ is a ReLU layer of width $R$ applying ReLU to the $k^{\text{th}}$ coordinate, we set
+\begin{equation}
+\varphi_{\bv}^{\ell+1} \bnfdef \smashoperator[r]{\bigvee_{\substack{u \in F, \\ \max\{0,u\} = v_k}}} \varphi_{(\bv_{1:k-1},\, u,\, \bv_{k+1:R})}^\ell
+\end{equation}
+for all $\bv \in F^R$.
+
+\medskip\noindent\textbf{Inductive step---attention with strict masking.}\quad
+If layer $\ell+1$ is an attention layer with strict future masking and rightmost tie-breaking defined by an affine transformation
+$\matC \colon \Q^{2R} \to \Q^S$ and a score function $\score \colon \Q^{2R} \to \Q^R$, we let
+\begin{equation}
+\varphi_{\bv}^{\ell+1} \bnfdef \smashoperator[r]{\bigvee_{\substack{\bu, \veca \in F^R, \\ \matC(\bu, \veca) = \bv}}} \varphi_{\bu}^\ell \wedge
+\Big(\Big(\smashoperator[r]{\bigvee_{\substack{\vecb \in F^R, \\ \score(\bu, \vecb) < \score(\bu, \veca)}}} \varphi_{\vecb}^\ell\Big) \since
+\Big(\varphi_{\veca}^\ell \wedge \neg\past \smashoperator[r]{\bigvee_{\substack{\vecb \in F^R, \\ \score(\bu, \vecb) > \score(\bu, \veca)}}}
+\varphi_{\vecb}^\ell\Big)\Big)
+\end{equation}
+for all $\bv \in F^S$.
+To account for the special case where the set of unmasked positions is empty, we take the disjunction of the previous formula with
+\begin{equation}
+(\neg\past\top) \wedge \smashoperator[r]{\bigvee_{\substack{\bu \in F^R, \\ \matC(\bu, \mathbf{0}) = \bv}}} \varphi_{\bu}^\ell.
+\end{equation}
+We omit this special case in what follows.
+If the layer uses leftmost tie-breaking instead, we adapt the formula as follows:
+\begin{equation}
+\varphi_{\bv}^{\ell+1} \bnfdef \smashoperator[r]{\bigvee_{\substack{\bu, \veca \in F^R, \\ \matC(\bu, \veca) = \bv}}} \varphi_{\bu}^\ell \wedge
+\Big(\past \Big(\varphi_{\veca}^\ell \wedge \neg\past \smashoperator[r]{\bigvee_{\substack{\vecb \in F^R, \\ \score(\bu, \vecb) \ge \score(\bu, \veca)}}}
+\varphi_{\vecb}^\ell\Big)\Big) \wedge
+\Big(\neg\past \smashoperator[r]{\bigvee_{\substack{\vecb \in F^R, \\ \score(\bu, \vecb) > \score(\bu, \veca)}}}
+\varphi_{\vecb}^\ell\Big)
+\end{equation}
+The case of strict past masking is similar, with $\until$ in place of $\since$ and $\future$ in place of $\past$.
+
+\medskip\noindent\textbf{Inductive step---attention without masking.}\quad
+If the layer uses no masking and rightmost tie-breaking, we distinguish three cases according to where the attention vector lies relative to the current position: at the current position, strictly to the left, or strictly to the right.
+When the attention vector is at the current position, we define $\varphi_{\bv,\text{at}}^{\ell+1}$ as
+\begin{equation}\label{eq:no-masking1}
+\varphi_{\bv,\text{at}}^{\ell+1} \bnfdef \smashoperator[r]{\bigvee_{\substack{\bu \in F^R, \\ \matC(\bu, \bu) = \bv}}} \varphi_{\bu}^\ell \wedge
+\Big(\neg\past\smashoperator[r]{\bigvee_{\substack{\vecb \in F^R, \\ \score(\bu, \vecb) > \score(\bu, \bu)}}}
+\varphi_{\vecb}^\ell\Big) \wedge
+\Big(\neg\future\smashoperator[r]{\bigvee_{\substack{\vecb \in F^R, \\ \score(\bu, \vecb) \ge \score(\bu, \bu)}}}
+\varphi_{\vecb}^\ell\Big).
+\end{equation}
+When the attention vector is strictly to the left of the current position, we define $\varphi_{\bv,\text{L}}^{\ell+1}$ as
+\begin{equation}\label{eq:no-masking2}
+\varphi_{\bv,\text{L}}^{\ell+1} \bnfdef \smashoperator[r]{\bigvee_{\substack{\bu, \veca \in F^R, \\ \matC(\bu, \veca) = \bv, \\ \score(\bu, \veca) > \score(\bu, \bu)}}} \varphi_{\bu}^\ell \wedge
+\Big(\neg\future\smashoperator[r]{\bigvee_{\substack{\vecb \in F^R, \\ \score(\bu, \vecb) \ge \score(\bu, \veca)}}}
+\varphi_{\vecb}^\ell\Big) \\ \wedge
+\Big(\Big(\smashoperator[r]{\bigvee_{\substack{\vecb \in F^R, \\ \score(\bu, \vecb) < \score(\bu, \veca)}}} \varphi_{\vecb}^\ell\Big) \since
+\Big(\varphi_{\veca}^\ell \wedge \neg\past \smashoperator[r]{\bigvee_{\substack{\vecb \in F^R, \\ \score(\bu, \vecb) > \score(\bu, \veca)}}}
+\varphi_{\vecb}^\ell\Big)\Big).
+\end{equation}
+Similarly, when the attention vector is strictly to the right, we define $\varphi_{\bv,\text{R}}^{\ell+1}$ as
+\begin{equation}\label{eq:no-masking3}
+\varphi_{\bv,\text{R}}^{\ell+1} \bnfdef \smashoperator[r]{\bigvee_{\substack{\bu, \veca \in F^R, \\ \matC(\bu, \veca) = \bv, \\ \score(\bu, \veca) \ge \score(\bu, \bu)}}} \varphi_{\bu}^\ell \wedge
+\Big(\neg\past\smashoperator[r]{\bigvee_{\substack{\vecb \in F^R, \\ \score(\bu, \vecb) > \score(\bu, \veca)}}}
+\varphi_{\vecb}^\ell\Big) \wedge
+\Big(\future \Big(\varphi_{\veca}^\ell \wedge \neg\future \smashoperator[r]{\bigvee_{\substack{\vecb \in F^R, \\ \score(\bu, \vecb) \ge \score(\bu, \veca)}}}
+\varphi_{\vecb}^\ell\Big)\Big) \wedge
+\Big(\neg\future \smashoperator[r]{\bigvee_{\substack{\vecb \in F^R, \\ \score(\bu, \vecb) > \score(\bu, \veca)}}}
+\varphi_{\vecb}^\ell\Big).
+\end{equation}
+In the case of no masking and rightmost tie-breaking, we set
+\begin{equation}
+\varphi_{\bv}^{\ell+1} \bnfdef \varphi_{\bv,\text{at}}^{\ell+1} \vee \varphi_{\bv,\text{L}}^{\ell+1} \vee \varphi_{\bv,\text{R}}^{\ell+1}.
+\end{equation}
+The case of no masking and leftmost tie-breaking is analogous.
+
+\medskip\noindent\textbf{Acceptance formula.}\quad
+If $\trans$ has $m$ layers whose last layer outputs vectors of dimension $S$,
+and $\bt \in \Q^S$ is its acceptance vector, we define
+\begin{equation}
+\varphi \bnfdef \smashoperator[r]{\bigvee_{\substack{\bv \in F^S, \\ \langle \bt, \bv \rangle > 0}}} \varphi_{\bv}^m.
+\end{equation}
+Then $\str{\bword}, N \models \varphi$ if and only if $\str{\bword} \in \Lang$. 
+%where $k$ is the output position of $\trans$.\pascal{Here output position is used}
+
+\medskip\noindent\textbf{Complexity.}\quad
+It remains to argue that $\varphi$ can be computed in exponential time.
+By \zcref{lem:UHAT-values}, $|F|$ is exponential in $|\trans|$
+and every representation in $F$ has polynomial bit-length;
+moreover, $F$ can be computed in exponential time.
+At every layer $\ell+1$ of width $R$, the formula $\varphi_{\bv}^{\ell+1}$ depends on $|F|^{O(R)}$ formulas from layer $\ell$,
+and can be computed in time polynomial in $|F|^R \cdot |\trans|$,
+since we only have to evaluate affine transformations on vectors from $F^R$,
+each of polynomial bit-length.
+At the last layer $m$, the formulas $\varphi_{\bv}^{m}$ depend on $|F|^{O(R' m)}$ formulas from layer $0$,
+where $R'$ is the maximum layer width.
+Hence $\varphi_{\bv}^{m}$, and therefore $\varphi$, has size exponential in $|\trans|$ and is computable in exponential time.\looseness=-1
+\end{proof}
+
+
+\subsection{Proof of Proposition \ref{lem:ltl-uhat}}\label{app:LTL-UHAT}
+\propLTLUHAT*
+\begin{proof}[Proof sketch]
+We construct $\trans$ by induction on the subformula structure of $\varphi$, maintaining the following invariant: after processing a subformula $\psi$, the UHAT built so far has, at every position $n$ of any input $\str{\bword}$, a designated output coordinate carrying the truth value of $\str{\bword}, n \models \psi$. Once the invariant is established for $\psi = \varphi$, the acceptance vector reads off that coordinate at the last position.
+
+\textbf{Atomic formulas.} For $\varphi = \Qprop{\sym{a}}$, the token embedding already provides the indicator $\indicator{\sym{a}_n = \sym{a}}$ at each position, which is precisely the required truth value.
+
+\textbf{Boolean combinations.} The truth value of $\neg\psi$, $\psi_1 \wedge \psi_2$, or $\psi_1 \vee \psi_2$ at position $n$ depends only on the children's truth values at the same position $n$, so a single affine-and-ReLU layer computes the required coordinate point-wise from coordinates produced by the inductive hypothesis.
+
+
+\textbf{Since} ($\varphi = \varphi_1 \since \varphi_2$). By inductive hypothesis we have coordinates for $\varphi_1$ and $\varphi_2$ at every position; an affine-and-ReLU layer computes $\neg\varphi_1 \vee \varphi_2$ at every position.
+We then use an attention layer with strict future masking and rightmost tie-breaking
+to get for every position $i$ the maximal position $j < i$ where $\neg\varphi_1 \vee \varphi_2$ holds and
+output at position $i$ the truth value of $\varphi_2$ from position $j$.
+For positions $\ell$ and subformulas $\psi$, we write $\psi(\ell) \in \{0,1\}$ for the indicator of $\str{\bword}, \ell \models \psi$. By the maximality of $j$, every $k$ with $j < k < i$ satisfies $\varphi_1(k) \wedge \neg\varphi_2(k)$ (otherwise $k$ would be a more recent witness); in particular $\varphi_1(k)$ holds for all  $k \in (j,i)$. Thus if $\varphi_2(j) = 1$, then $j$ witnesses $\varphi_1 \since \varphi_2$ at $i$ under the semantics of \zcref{sec:prelim}, and if $\varphi_2(j) = 0$ then $\neg\varphi_1(j) = 1$ blocks any earlier $j' \le j$ from witnessing $\since$ at $i$. When no such $j$ exists, the attention layer's default value outputs $0$, which is again consistent with the semantics.
+
+The case where $\varphi = \varphi_1 \until \varphi_2$ is similar using strict past masking and leftmost tie-breaking.
+\end{proof}
+
+
+\subsection{Proof of Theorem \ref{thm:UHAT-equiv}}\label{app:UHAT-equiv}
+\thmUHATequiv*
+\begin{proof}
+To prove the lower bound, we reduce from the non-emptiness problem for UHATs,
+which by \zcref{thm:UHAT-emptiness} is $\EXPSPACE$-complete.
+To this end, let $\trans$ be a given UHAT and fix a UHAT $\trans_0$ that recognizes the empty language.
+Then we have that $\trans$ and $\trans_0$ are equivalent if and only if $\trans$ recognizes the empty language.
+
+To prove the upper bound, let the UHATs $\trans_1$ and $\trans_2$ be given.
+We apply \zcref{prop:UHAT-LTL} to turn $\trans_1$ and $\trans_2$ in exponential time
+into LTL formulas $\varphi_1$ and $\varphi_2$, respectively.
+Now, $\trans_1$ and $\trans_2$ are equivalent if and only if $\varphi_1$ and $\varphi_2$ are equivalent.
+The latter can be decided in polynomial space \citep{SistlaC85}, which results in an exponential-space algorithm in total.
+\end{proof}
+
+
+\end{document}

@@ -1,0 +1,225 @@
+
+\section{Applications}\label{sec: stochastic}
+
+
+By \pref{thm: general thm}, the worst-case regret of \pref{alg:general} is $\sum_t \min_p \max_\nu \air^{\Phi, D}_\eta(p,\nu;\rho_t) + \est/\eta \leq T\mfdec^{\Phi, \tilD}_\eta + \est/\eta$. %With the choice of $D$ in \pref{eq: our divergence}, the decision-making complexity $\max_\rho \min_p \max_\nu \air^{\Phi, D}_\eta(p,\nu;\rho)$ underlying our algorithm is exactly the $\mfdec_\eta^{\Phi, \tilD}$ defined in \pref{eq: digdec}. 
+%\begin{align*}
+%    &\mfdec_\eta^{\Phi, \tilD}
+%    =\max_{\rho\in\Delta(\Phi)} \min_{p\in\Delta(\Pi)} \max_{\nu\in \Delta(\calM)}  \numberthis  \label{eq: digdec}\\
+%    &\qquad \E_{\pi\sim p}\E_{M\sim \nu}\left[ V_M(\pi_M) - V_M(\pi) - \frac{1}{\eta}\E_{o\sim M(\cdot|\pi)}\left[\KL(\nu_{\bo{\phi}}(\cdot|\pi, o), \rho)\right] - \frac{1}{\eta} \E_{\phi\sim \rho}\left[\tilD^\pi(\phi\|M)\right]  \right]   
+%\end{align*}
+%where ``$\mathsf{dig}$-'' stands for ``dual information gain,'' reflecting the two terms in its definition (i.e., the $\KL$ term and the $\tilD$ term) that quantify the information gain. 
+%Thus, by \pref{thm: general thm}, the regret of \pref{alg:general} is bounded by $T\cdot\mfdec_\eta^{\Phi,\tilD} + \est/\eta$. 
+In \pref{sec: postupdate sec}, we provided bounds on $\est$ for two types of $\tilD$, i.e., $\tilD_\bi$ and $\tilD_\sbe$. Below, we provide upper bounds for $\mfdec_\eta^{\Phi, \tilD}$ in concrete settings associated with each $\tilD$. 
+
+
+%\pref{sec: compare DEC}, we compare \decname (\pref{eq: digdec}) with other model-free DECs established in previous works.  
+%\HL{we need to add a normalization $\frac{1}{2\eta L} \E_{\phi\sim \rho}\left[\tilD^\pi(\phi\|M)\right]$ where $L$ is an upper bound of the divergence.}
+
+\subsection{Stochastic Settings}
+For the stochastic setting, we consider MDP class $\calM$ and its associated $\Phi$ with bounded bilinear rank \citep{du2021bilinear}, Bellman-eluder dimension \citep{jin2021bellman}, and coverability \citep{xie2022role}. The results are summarized in \pref{tab: summary stochastic}.The on-policy/off-policy in \pref{tab: summary stochastic} should not be confused with the standard on-policy/off-policy training in standard RL. Instead, they are two subclasses of the bilinear class \citep{du2021bilinear} and correspond to the $Q$-type/$V$-type Bellman eluder dimension in \citep{jin2021bellman}. The on-policy case has smaller regret because the executed policies provides sufficient exploration to notice a model missmatch, while in the off-policy case, the learner needs to execute an additional exploration policy for this purpose.
+
+% \cw{Omit this second paragraph}\textcolor{blue}{The high-level reason for the worse regret bound in the off-policy case is as follows. In the on-policy bilinear subclass, it is assumed that the learner can directly execute the policy induced by the model belief, which already provides sufficient exploration to detect model mismatch. In contrast, in the off-policy case, the learner is required to execute a mixture policy that combines the belief-induced policy with an additional exploration policy in order to guarantee sufficient exploration. This mixture is necessary but less efficient, leading to a worse regret bound. More technical details are provided in \pref{lem: bilinear complexity sto} and \pref{app: sto Be}.
+% }
+
+% Our use of the terms “on-policy’’ and “off-policy’’ are two subclasses of the bilinear class [Du et al., 2021] and MDPs with Bellman-eluder dimension  [Jin et al., 2021] ([Jin et al., 2021] refer to them as $Q$-type and $V$-type, respectively), rather than the standard distinction in classical RL. One can find a concise description of them in Section~4.1 of [Du et al., 2021].
+
+% The high level reason for the worse regret bound is that in the on-policy bilinear subclass, the policy induced by model belief ($\pi_{\phi}$ with $\phi \sim \rho_t$) already provides sufficient exploration to notice a model mismatch, while for the off-policy cases, it is assumed that the learner needs to execute an additional exploration policy for this purpose. 
+
+\begin{table}[h]
+  \centering
+  \caption{Summary of the applications in the stochastic settings. BE stands for MDPs with bounded Bellman-eluder dimensions. Dig-DEC bounds are provided in \pref{app: relate sto to bilinear} for bilinear classes, \pref{app: sto Be} for BE, and \pref{app: related sto coverability} for coverable MDPs. Bilinear classes marked with $\star$ are restricted to estimation function specified in \pref{lem: connecting two digdec},  under which it holds that $\mfdec_\eta^{\Phi, \tilD_{\sbe}}\leq \mfdec_\eta^{\Phi, \tilD_{\bi}}$. $B$ and $N$ are parameters specified in \pref{assum: avg err} or \pref{assum: squared est err}. The regret bound is given by $T\cdot \mfdec^{\Phi, \tilD}_\eta + \est/\eta$ with  $\est$ given in \pref{thm: avg est} or \pref{thm: sq est}, with the optimal $\eta$. } \label{tab: summary stochastic}
+  \vspace*{-5pt}
+  \renewcommand{\arraystretch}{1.3}
+  \begin{tabular}{ |c|c|c|c|c|c|c|c| }
+    \hline
+    \multicolumn{3}{|c|}{Setting} & \multirow{2}{*}{$\mfdec^{\Phi, \tilD}_\eta$} & \multirow{2}{*}{$\tilD$} & \multirow{2}{*}{$B$} & \multirow{2}{*}{$N$} & \multirow{2}{*}{$\E[\Reg(\pi_{M^\star})]$} \\
+    \cline{1-3}
+    class & sub-class & completeness & & & & & \\ 
+    \hline
+    bilinear & on-policy &  & $H^2d\eta$ & $\tilD_{\bi}$ & $1$ & $1$ & $H\sqrt{d\log|\Phi|}T^{\frac{2}{3}}$ \\ \hline
+    bilinear & off-policy &  & $\sqrt{H^3d |\calA|^2 \eta}$ & $\tilD_{\bi}$ & $|\calA|$ & $1$ & $H(d|\calA|^2 \log|\Phi|)^{\frac{1}{3}} T^{\frac{7}{9}}$ \\ \hline
+    BE & $Q$-type &  & $H^2d\eta$ & $\tilD_{\bi}$ & $1$ & $1$ & $H\sqrt{d\log|\Phi|}T^{\frac{2}{3}}$ \\ \hline
+    BE & $V$-type &  & $\sqrt{H^3d|\calA|\eta}$ & $\tilD_{\bi}$ & $1$ & $1$ & $H(d|\calA| \log|\Phi|)^{\frac{1}{3}} T^{\frac{7}{9}}$ \\ \hline
+    bilinear$^\star$ & on-policy & \cmark & $H^2d\eta$ & $\tilD_{\sbe}$ & $1$ & -- & $H\sqrt{dT}\log|\Phi|$ \\ \hline
+    bilinear$^\star$ & off-policy & \cmark & $\sqrt{H^3d |\calA|^2 \eta}$ & $\tilD_{\sbe}$ & $|\calA|$ & -- & $H(d|\calA|^2 \log^2|\Phi|)^{\frac{1}{3}}T^{\frac{2}{3}}$ \\ \hline
+    BE & $Q$-type & \cmark & $H^2d\eta$ & $\tilD_{\sbe}$ & $1$ & -- &  $H\sqrt{dT}\log|\Phi|$\\ \hline
+    BE & $V$-type & \cmark & $\sqrt{H^3d|\calA|\eta}$ & $\tilD_{\sbe}$ & $1$ & -- & $H(d|\calA| \log^2|\Phi|)^{\frac{1}{3}}T^{\frac{2}{3}}$ \\ \hline
+    coverable & -- & \cmark & $H^2 d \eta$ & $\tilD_{\sbe}$ & $1$ & -- & $H\sqrt{dT}\log|\Phi|$ \\ \hline
+  \end{tabular}
+\end{table}
+
+\iffalse
+\begin{example}[on-policy bilinear class]
+    On-policy bilinear classes (\pref{app: relate sto to bilinear}) with bilinear rank $d$ satisfy \pref{assum: avg err} with $N=1$, $B= 1$, and have $\mfdec_\eta^{\Phi, \tilD_\bi}\lesssim H^2 d\eta$. Our algorithm ensures $\E[\Reg(\pi_{M^\star})]\lesssim H^2 d\eta T + \log(|\Phi|)T^{\frac{1}{3}}/\eta = O(H\sqrt{d\log|\Phi|}T^{\frac{2}{3}})$ with the optimal $\eta$.  
+    %An MDP class $\calM$ and its associated $\Phi$ satisfy \pref{assum: avg err} with $N=1$, $B= 1$, and have $\mfdec_\eta^{\Phi, \tilD_\bi}\lesssim \eta dH$ if one of the following hold: 1) it is an on-policy bilinear class with bilinear rank bounded by $d$ (\pref{app: relate sto to bilinear}), or 2) its $Q$-type Bellman-eluder dimension is bounded by $d$ (\pref{app: sto Be}).  For these settings, we have $\E[\Reg(\pi_{M^\star})]\lesssim \eta dHT +  H\log(|\Phi|)T^{\frac{1}{3}}/\eta = O(H\sqrt{d\log|\Phi|}T^{\frac{2}{3}})$ with the optimal choice of $\eta$. 
+\end{example}
+\begin{example}[$Q$-type BE dimension]
+    MDPs with $Q$-type BE dimension bounded by $d$ satisfy \pref{assum: avg err} with $N=1$, $B= 1$, and have $\mfdec_\eta^{\Phi, \tilD_\bi}\lesssim H^2 d\eta$. Our algorithm ensures $\E[\Reg(\pi_{M^\star})]\lesssim H^2 d\eta T + \log(|\Phi|)T^{\frac{1}{3}}/\eta = O(H\sqrt{d\log|\Phi|}T^{\frac{2}{3}})$ with the optimal $\eta$.  
+\end{example}
+
+\begin{example}
+An MDP class $\calM$ and its associated $\Phi$ satisfy \pref{assum: avg err} with $N=1$, $B=1$, and have $\mfdec_\eta^{\Phi, \tilD_\bi}\lesssim \sqrt{\eta d|\calA|}H$ if one of the following hold: 1) it is an off-policy bilinear class with bilinear rank bounded by $d$ (\pref{app: relate sto to bilinear}), or 2) its $V$-type Bellman-eluder dimension is bounded by $d$ (\pref{app: sto Be}). For these settings, we have $\E[\Reg(\pi_{M^\star})]\lesssim H\sqrt{\eta d|\calA|}T + H\log(|\Phi|)T^{\frac{1}{3}}/\eta=O(H(d|\calA|\log|\Phi|)^{\frac{1}{3}}T^{\frac{7}{9}})$ with the optimal choice of $\eta$. 
+\end{example}
+
+
+\begin{example}
+    An MDP class $\calM$ and its associated $\Phi$ satisfy  \pref{assum: squared est err} with $B=1$ and have $\mfdec_\eta^{\Phi,\tilD_\sbe} \lesssim \eta dH$ if it is Bellman complete and one of the following holds: 1) it is an on-policy bilinear class with $\ellest_h(\phi; o_h) = f_\phi(s_h,a_h) - r_h - f_{\phi}(s_{h+1})$ and its bilinear rank is bounded by $d$ (\pref{app: relate sto to bilinear}+\pref{lem: connecting two digdec}), 2) its $Q$-type Bellman-eluder dimension is bounded by $d$ (\pref{app: sto Be}+\pref{lem: connecting two digdec}), or 3) its coverability is bounded by $d$ (\pref{app: related sto coverability}).  For these settings, we have $\E[\Reg(\pi_{M^\star})] \lesssim \eta dH T + H\log^2(|\Phi|)/\eta = O(H\sqrt{dT}\log|\Phi|)$ with the optimal choice of $\eta$. 
+\end{example}
+\begin{example}
+    An MDP class $\calM$ and its associated $\Phi$ satisfy  \pref{assum: squared est err} and have $\mfdec_\eta^{\Phi,\tilD_\sbe} \lesssim \sqrt{\eta d|\calA|}H$ if it is Bellman complete and one of the following holds: 1) it is an off-policy bilinear class with $\ellest_h(\phi; o_h) = f_\phi(s_h,a_h) - r_h - f_{\phi}(s_{h+1})$ and its bilinear rank is bounded by $d$ (\pref{app: relate sto to bilinear}+\pref{lem: connecting two digdec}), 2) its $V$-type Bellman-eluder dimension is bounded by $d$ (\pref{app: related sto coverability}).  For these settings, we have $\E[\Reg(\pi_{M^\star})]\lesssim H\sqrt{\eta d|\calA|}T + H\log^2(|\Phi|)/\eta=O(H(d|\calA|\log^2|\Phi|)^{\frac{1}{3}}T^{\frac{2}{3}})$. 
+\end{example}
+\fi
+We remark without giving details that in the stochastic setting, we can achieve same results in \pref{tab: summary stochastic} \emph{with high-probability} if we replace the $\E_{M\sim \nu} \E_{o\sim M(\cdot|\pi)}[\KL(\nu_{\bo{\phi}}(\cdot|\pi, o), \rho_t)]$ term by $\KL(\nu_{\bo{\phi}}, \rho_t)$ in the definition of $D$ in \pref{eq: our divergence}. This variant, however, cannot handle the hybrid setting.  
+%While all examples above for the stochastic setting only bound the expected regret, the adaptation to high-probability is standard.
+%\jz{I don't think we have the time to polish this part witht he new framework}\cw{But it's actually not standard... Actually, it suffices to use a }
+
+%with a slight variant of the algorithm is able to achieve high-probability bounds. We describe this variant in \pref{app: high prob}. 
+
+%In this section, we deal with model-free learning in stochastic MDPs where $M_t=M^\star$ for all $t$, and show improved results over previous DEC-based learning approaches. In model-free learning, instead of estimating the true MDP model, the learner only estimates a sufficient statistic for decision making. For example, in the common value-based learning approach, the learner is given a function set containing potential $Q^\star$ functions of the true world, and only tries to estimate the true $Q^\star$ over this function set. This idea can be generalized to other sufficient statistic such as jointly estimating $Q^\star/V^\star$ functions \citep{du2021bilinear}, or estimating the density ratio between policies \citep{amortila2024harnessing}. 
+
+
+%The notion of infoset (\pref{def: infoset}) is able to cover such a learning paradigm. %Suppose the learner is given a $\Phi$ satisfying \pref{def: infoset}. %By the second requirement in \pref{def: infoset}, we can define $\pi_\phi$ as the unique policy in the infoset $\phi$. 
+%For learning in stochastic MDPs, we further require $\Phi$ to satisfy the following. 
+
+
+%We denote $\pi_\phi$ as the unique policy in the infoset $\phi$ (which is well-defined by condition 2) in \pref{def: infoset}). 
+
+%We use the same model class partitioning scheme as in \cite{liu2025decision} to deal with model-free learning in stochastic MDPs: $\Phi=\{\phi_f: f\in\calF\}$ where $\phi_f=\{(M,\pi_M): M\text{~induces~}f\}$. That is, each information set corresponds to a value function in $\calF$, and all models that induces the same value function belong to the same information set. Since a value function is sufficient to specify the optimal policy, every information set is also associated with a single policy. Thus, for any $\phi\in\Phi$, we can use $f_\phi\in\calF$ and $\pi_\phi\in\Pi$ to denote the value function and the policy it corresponds to. 
+
+
+%\cite{foster2024model} extends the DEC framework to model-free reinforcement learning in stochastic settings. In this section, we demonstrate that, with an appropriate choice of divergence measure 
+%$D^\pi(\nu\|\rho)$ tailored to the model-free setting, our general framework \pref{alg:general} not only recovers their results but also yields strict improvements in certain cases. We begin by formalizing the notion of a bilinear class in the model-free setting in \pref{def:sto bilinear}. \cw{Define what $f$ is} \cw{Assume we are in stocahstic setting where $M_t=M^\star$}
+
+
+\iffalse
+The guarantee of our algorithm is stated in \pref{thm:BC}. 
+%Correspondingly, the posterior update rule in \pref{eq:opt-rho} is changed to an online learning method from \cite{agarwal2022non}, which is tailored to handle squared Bellman error with the Bellman completeness assumption. In \pref{app:model-free stoc}, we show that by leveraging $D_{sbe}^\pi(f|| M)$ and an adaptation of \cite{agarwal2022non}, a modified \pref{alg:MF-S} can recover the same results in \cite{foster2024model} with BC, and also recover the learnability of other popular complexity measures such as  Bellman Eluder dimension \citep{jin2021bellman} and coverability \citep{xie2022role}.
+
+\begin{theorem}\label{thm: sothcastic BC thm}
+For stochastic Bellman-complete MDPs (\pref{assum: sto bc}) with Bellman eluder dimension or coverability bounded by $d$,  \pref{alg:MF-BC-final} (an instance of \pref{alg:general}) ensures $\E\left[\Reg(\pi_{M^\star})\right] \le \tilde{O}(\sqrt{dT}\log|\Phi|)$.
+\label{thm:BC}
+\end{theorem}
+\fi
+
+
+\subsection{Hybrid Settings}
+\label{sec:hybrid}
+For the hybrid setting, with known linear reward feature, we consider transition structure including hybrid bilinear classes \citep{liu2025decision} and coverability \citep{xie2022role}. While it is possible to also extend Bellman-eluder dimension to the hybrid setting, we omit it for simplicity. 
+
+\begin{table}[h]
+  \centering
+  \caption{Summary of the applications in the hybrid settings. Dig-DEC bounds are provided in \pref{app: hybrid bilinear } for hybrid bilinear classes and \pref{app: coverability hybrid} for coverable MDPs. Bilinear classes marked with $\star$ are restricted to estimation function specified in \pref{lem: connecting two digdec hybrid}, under which it holds that $\mfdec_\eta^{\Phi, \tilD_{\sbe}}\leq \mfdec_\eta^{\Phi, \tilD_{\bi}}$. } 
+  \vspace*{-5pt}
+  \renewcommand{\arraystretch}{1.3}
+  \begin{tabular}{ |c|c|c|c|c|c|c|c| }
+    \hline
+    \multicolumn{3}{|c|}{Setting} & \multirow{2}{*}{$\mfdec^{\Phi, \tilD}_\eta$} & \multirow{2}{*}{$\tilD$} & \multirow{2}{*}{$B$} & \multirow{2}{*}{$N$} & \multirow{2}{*}{$\E[\Reg(\pi_{\phi^\star})]$} \\
+    \cline{1-3}
+    class & sub-class & completeness & & & & & \\ 
+    \hline
+    bilinear & on-policy &  & $(H^5d^3\eta)^{\frac{1}{3}}$ & $\tilD_{\bi}$ & $1$ & $d$ & $d(H^5\log|\Phi|)^{\frac{1}{4}}T^{\frac{5}{6}}$ \\ \hline
+    bilinear & off-policy &  & $(H^6 d^3 |\calA|^2 \eta)^{\frac{1}{4}}$ & $\tilD_{\bi}$ & $|\calA|$ & $d$ & $( H^6  d^4 |\calA|^2 \log|\Phi|)^{\frac{1}{5}}T^{\frac{13}{15}}$ \\ \hline
+    bilinear$^\star$ & on-policy & \cmark & $(H^5 d^4 \eta)^{\frac{1}{3}}$ & $\tilD_{\sbe}$ & $\sqrt{d}$ & -- & $d(H^5 \log^2|\Phi|)^{\frac{1}{4}}T^{\frac{3}{4}}$ \\ \hline
+    bilinear$^\star$ & off-policy & \cmark & $(H^6 d^4 |\calA|^2 \eta)^{\frac{1}{4}}$ & $\tilD_{\sbe}$ & $\sqrt{d}|\calA|$ & -- & $(H^6 d^4 |\calA|^2  \log^2|\Phi|)^{\frac{1}{5}}T^{\frac{4}{5}}$ \\ \hline
+    coverable & -- & \cmark & $(H^5 d^4 \eta)^{\frac{1}{3}}$ & $\tilD_{\sbe}$ & $\sqrt{d}$ & -- & $d(H^5 \log^2|\Phi|)^{\frac{1}{4}}T^{\frac{3}{4}}$ \\ \hline
+  \end{tabular}
+\end{table}
+
+\iffalse
+\begin{example}
+   An on-policy hybrid bilinear class satisfy \pref{assum: avg err} with $N=d$ and $B=1$, and have $\mfdec_\eta^{\Phi, \tilD_{\bi}}\lesssim \eta^{\frac{1}{3}}d^{\frac{1}{3}}H^{\frac{2}{3}}$. For this setting, we have $\E[\Reg(\pi_{\phi^\star})]\lesssim \eta^{\frac{1}{3}}d^{\frac{1}{3}}H^{\frac{2}{3}}T + H(\log|\Phi|)d^{\frac{2}{3}}T^{\frac{1}{3}}/\eta = O(d^{\frac{5}{12}}H^{\frac{3}{4}}\log^{\frac{1}{4}}(\Phi)T^{\frac{5}{6}})$ with the optimal choice of $\eta$.  
+\end{example}
+
+\begin{example}
+    An off-policy hybrid bilinear class satisfy \pref{assum: avg err} with $N=d$ and $B=1$, and have $\mfdec_\eta^{\Phi, \tilD_{\bi}}\lesssim \eta^{\frac{1}{6}}d^{\frac{1}{6}}|\calA|^{\frac{1}{6}}H^{\frac{1}{3}}$. For this setting, we have $\E[\Reg(\pi_{\phi^\star})]\lesssim \eta^{\frac{1}{6}}d^{\frac{1}{6}}|\calA|^{\frac{1}{6}}H^{\frac{1}{3}}T + + H(\log|\Phi|)d^{\frac{2}{3}}T^{\frac{1}{3}}/\eta = O(d^{\frac{5}{21}}|\calA|^{\frac{1}{7}}H^{\frac{3}{7}}\log^\frac{1}{7}(|\Phi|)T^{\frac{19}{21}})$ with the best choice of $\eta$. 
+\end{example}
+
+\begin{example}
+   An MDP class and its associated $\Phi$ satisfy \pref{assum: squared est err} with  $B^2=d$, and have $\mfdec_\eta^{\Phi, \tilD_{\sbe}}\lesssim \eta^{\frac{1}{3}}d^{\frac{1}{3}}H^{\frac{2}{3}}$ if it is Bellman complete and one of the following holds: 1) it is a on-policy hybrid bilinear class with bilinear rank bounded by $d$, or 2) its coverability is bounded by $d$. For this setting, we have $\E[\Reg(\pi_{\phi^\star})]\lesssim \eta^{\frac{1}{3}}d^{\frac{1}{3}}H^{\frac{2}{3}}T + H(\log|\Phi|)d/\eta = O(d^{\frac{1}{2}}H^{\frac{3}{4}}\log^{\frac{1}{4}}(\Phi)T^{\frac{3}{4}})$ with the optimal choice of $\eta$. 
+\end{example}
+\fi
+
+%\begin{example}
+%    An MDP class satisfies \pref{assum: squared est err} with $B=d$ and have $\mfdec_\eta^{\Phi, \tilD_{\sbe}}\lesssim$ \cw{to fill}. For this setting we have $\E[\Reg(\pi_{\phi^\star})]\lesssim $ \cw{fo till} 
+%\end{example}
+
+%In this section, we deal with model-free learning in hybrid MDPs where $M_t=(P^\star, R_t)$ for some fixed $P^\star\in\calP$ and arbitrarily changing $R_t\in\calR$. 
+%For hybrid MDPs, most previous work studies special cases such as linear (mixture) and low-rank MDPs. \cite{liu2025decision} first considers general settings, but their algorithms are either model-based (which suffer large estimation error $\log|\calP|$ for the transition), or require full-information reward feedback. We show that an instantiation of \pref{alg:general} allows to handle \emph{model-free} learning with \emph{bandit feedback} in the \emph{general} case. 
+
+
+%For reinforcement learning in hybrid MDPs, the transition is fixed while the rewards are changing over time. \cite{liu2025decision} characterizes the complexity of this setting for model-based approaches, showing that the learning problem can be as easy as the stochastic case when the reward space is convex. However, the understanding of model-free learning in the hybrid setting is limited. Although \cite{liu2025decision} proposes an model-free algorithm to handle full-information feedback, it fails to tackle more challenging bandit feedback setting. While a number of algorithms have been developed to address this challenge, their applicability is limited to simple cases like linear MDPs \citep{luo2021policy, sherman2023improved, dai2023refined, kong2023improved, liu2023towards} or low-rank MDPs \citep{liu2024beating}. Currently, there is no approach that can tackle model-free learning in hybrid setting with bandit feedback under general function approximation. In this section, we will solve this open problem through an instantiation of \pref{alg:general}. 
+
+%To model the hybrid setting under value function approximation, we adopt the setup introduced in \pref{def: func approx}.
+
+
+\iffalse
+\subsection{Regret Bounds for Bilinear Classes with Known-Feature Linear Reward}\label{sec: hybrid bilinear}
+
+
+
+
+
+Under \pref{assum: unique mapping}, the hybrid bilinear class is defined as the following. 
+\begin{assumption}[Hybrid bilinear class \cite{liu2025decision}]
+\label{assum:hybrid bilinear}
+A model class $\calM$ and its associated $\Phi$ satisfying \pref{assum: unique mapping} is a hybrid bilinear class with rank $d$ if there exists functions $X_h: \Phi \times \mathcal{P} \rightarrow \mathbb{R}^d$ and  $W_h: \Phi \times \mathcal{R} \times \mathcal{P} \rightarrow \mathbb{R}^d$ for all $h\in[H]$ such that for any $\phi \in \Phi$, any $R \in \mathcal{R}$, and any $ P \in \mathcal{P}$, 
+    \begin{align*}
+        \left|V_{\phi, R}(\pi_\phi) - V_{P, R}(\pi_\phi)\right| \leq \sum_{h=1}^H \left|\langle X_h(\phi; P), W_h(\phi, R; P)\rangle\right|.
+    \end{align*}
+    Moreover, there exists an estimation policy mapping function $\esttt: \Pi \rightarrow \Pi$, and for every $h \in [H]$, there exists a discrepancy function $\ellest_h: \Phi \times \mathcal{O} \times \calR  \rightarrow \mathbb{R}$ such that for any $\phi, \phi'\in\Phi$ and any $P,R$, 
+    \begin{align*}
+        \left|\langle X_h(\phi; P), W_h(\phi', R; P) \rangle\right| = \left|\E^{\pi \,\circ_h\, \esttt(\pi),\, P} \left[\ellest_h(\phi'; o_h, R)\right]\right|
+    \end{align*}
+    where $o_h = (s_h,a_h,s_{h+1})$. $\E^{\pi, P}[\cdot]$ denotes the expectation over the occupancy measure generated by policy $\pi$ and transition $P$. %Let $\pi \circ_h \esttt(\pi)$ denote playing $\pi$ for the first $h-1$ steps and play policy $\esttt(\pi)$\, at the $h$-th step.
+\end{assumption}
+Examples of hybrid bilinear classes are given in \cite{liu2025decision}, including, e.g., low-rank MDPs and low-occupancy MDPs. \cite{liu2025decision} handles model-free learning in bilinear classes with full-information feedback.  
+%\cite{liu2025decision} made an initial attempt on model-free learning in hybrid bilinear classes, but has only succeeded under full-information reward feedback (i.e., the whole reward function $R_t$ is revealed to the learner after episode $t$). Their algorithm is based on optimistic E2D \cite{foster2024model}, which requires an explicit estimator for $V_{\phi, R_t}(\pi_\phi)$ (defined in \pref{assum: function approximation hybrid}) for all $\phi$. 
+In special cases such as linear MDPs \cite{liu2023towards} and low-rank MDPs \cite{liu2024beating}, bandit feedback is handled by optimistic reward estimators that are designed case-by-case. However, it is unclear how to design a general optimistic estimator that applies to all settings in bilinear classes. Thanks to the AIR framework \cite{xu2023bayesian} and the removal of the optimism term in our general framework, we are able to bypass an explicit construction of reward estimator and build a conceptually simple algorithm for this challenging case.  
+
+%Although \cite{liu2025decision} introduces function approximation in the hybrid setting, their algorithm is only applicable under full-information feedback. This limitation arises because their algorithm is based on a generalization of the optimistic DEC approach \citep{foster2024model}, which necessitates optimistic posterior sampling \citep{zhang2022feel} (see their algorithm in \pref{eq:opt-dec-p} and \pref{eq:opt-rho}). For a given aggregation scheme $\Phi$, optimistic posterior sampling maintains a distribution over $\Phi$, which requires an optimistic term that quantify the value of every aggregation $\phi \in \Phi$. In stochastic setting,  aggregation is based on function $f: \calS \times \calA \rightarrow \mathbb{R}$, so the optimistic term is $\max_{\pi \in \Pi}f(s_1, \pi(s_1))$ as shown in \pref{eq:opt-rho}. For the hybrid setting, any aggregation $\phi$ contains a policy $\pi$ and function $f \in \calF^\pi$ mapping $ \calS \times \calA \times \calR \rightarrow \mathbb{R}$. With full-information reward $R$, the optimistic term can be constructed as $f(s_1, \pi(s_1), R)$ \citep{liu2025decision}. However, without the information of reward functions, it is generally hard to design such an explicit optimistic term, making the optimistic DEC pipeline \citep{foster2024model, liu2025decision} challenging to handle hybrid MDPs with bandit feedback. In contrast, our framework \pref{alg:general} does not rely on optimistic terms, enabling its instantiation to effectively address the hybrid setting under bandit feedback.
+
+
+For hybrid bilinear classes, we choose the $\tilD$ in \pref{eq: our divergence} as 
+\begin{align}
+    % \tilD^\pi(\phi\| P)=D^\pi_{\hbi}(\phi\|P) \triangleq \max_{R\in \calR}\sum_{h=1}^H\left(\E^{\pi, P}\left[\ellest_h(\phi; o_h, R)\right]\right)^2. 
+    \tilD^\pi(\phi\| M)=D^\pi_{\hbi}(\phi\|P) \triangleq \sum_{h=1}^H\max_{\tilde{R}\in\calR}\left(\E^{\pi, P}\left[\ellest_h(\phi; o_h, \tilde{R})\right]\right)^2 \quad \text{where} \quad M = (P,R). 
+    \label{eq:h-bi-div}
+\end{align}
+%which is a hybrid counterpart of \pref{eq:bi-div}. where $\ellest_h(\phi; z_h, R)$ is defined in \pref{def: func approx}. This divergence serves as the hybrid counterpart to the stochastic bilinear divergence in \pref{eq:bi-div}. Our approach \pref{alg:MFHB} instantiates \pref{alg:general} with $\Phi=\{\phi_{\pi,f}: \pi \in \Pi,  f\in\calF\}$ and $D^\pi(\nu||\rho_k) = \frac{1}{\eta}\E_{(M,\pi^\star) \sim \nu}\E_{o \sim M(\pi)}\left[\KL\left(\nu_{\phi|\pi, o}, \rho_k\right) + \frac{1}{4}\E_{\phi\sim \rho_k}\left[D_{hbi}^\pi(\phi||M)\right]\right]$,  leading to the objective \pref{eq:minmax hybrid}. This parallels the structure of the stochastic case in \pref{eq:minmax sto}, with adjustments to the definition of $\Phi$ and the divergence term to accommodate the hybrid setting. Compared to the stochastic setting, a key challenge in divergence estimation for the hybrid case is that the bilinear divergence in \pref{eq:h-bi-div} depends on the reward function $R$, which is unobserved under bandit feedback. To address this, we first average over samples collected within each epoch to approximate $\mathbb{E}^{\pi, P}$ in \pref{eq:h-bi-div}, and additionally take a maximum over all candidate rewards $R \in \mathcal{R}$. This leads to the estimated divergence $L_k$ and the posterior update rule for $\rho_{k+1}$ as defined in \pref{eq:rho-hybrid}.
+Compared with the bilinear divergence in the stochastic setting (\pref{eq:bi-div}) that captures the discrepancy between $\phi$ and the model $M$, the hybrid bilinear divergence (\pref{eq:h-bi-div}) only captures that between $\phi$ and the transition $P$. This is natural as in the hybrid setting (\pref{assum: function approximation hybrid}), each $\phi$ captures transition information but not reward information.  %ternary discrepancy functions $\ellest_h$ defined in \pref{assum:adv bilinear} to capture the function approximation in the hybrid setting (\pref{assum: function approximation hybrid}). 
+%For a given model $(P,R)$, the observation $o_h$ here is only related to transition $P$ while the reward function $R$ is treated as an input variable of $\ellest_h$.
+The algorithm for hybrid bilinear classes is similar to \pref{alg:MF-S}, and we display it in \pref{alg:MFHB}. Its regret guarantee is given by the following theorem, with proof deferred to \pref{app: hybrid bilinear}.  
+
+%Our \pref{alg:MFHB} bypasses the requirement of an explicit optimistic term and thus enables it to tackle model-free hybrid MDPs with bandit feedback. The guarantee of \pref{alg:MFHB} is given in \pref{thm: bilinear-adv}.
+\begin{theorem}\label{thm: bilinear-adv}
+For hybrid bilinear classes (\pref{assum:adv bilinear}) with know-feature linear reward (\pref{assum: known feature}),  \pref{alg:MFHB} ensures: 
+ If for all $\phi\in\Phi$, $\esttt(\pi_\phi) = \pi_\phi$, then $\E\left[\Reg(\pi_{\phi^\star})\right] \le \tilde{O}\big(\sqrt{dL^2\log\left(|\Phi||\calR|\right)}T^{\frac{3}{4}}\big)$, where $L$ is an upper bound of $|\ellest_h|$; if there exists $\phi\in\Pi$ such that $\esttt(\pi_\phi) \neq \pi_\phi$, then $\E\left[\Reg(\pi_{\phi^\star})\right]\le \tilde{O}\big(\left(dL^2\log\left(|\Phi||\calR|\right)\right)^{\frac{1}{3}}T^{\frac{5}{6}}\big)$.
+\label{thm:mf-f}
+\end{theorem}
+%The logarithmic term in \pref{thm: bilinear-adv} is slightly different from that in the stochastic setting (\pref{thm: bilinear result}). First, the definitions of $\Phi$ are already different in the two settings (\pref{assum: function approximation stochastic} and \pref{assum: function approximation hybrid}): In the stochastic setting, infosets are constructed by partitioning over $\calM=\calP\times\calR$, while in the hybrid setting, infosets are by partitioning over $\calP\times\Pi$, where each partition contains a unique policy. The logarithmic term in \pref{thm: bilinear-adv} further contains a $\log|\calR|$ factor. Overall, the overhead in the hybrid case roughly a factor of $\log|\Pi|$ compared to the stochastic case.  
+
+\subsection{Regret Bounds for Bellman-Complete Decouplable MDPs with Know-Feature Linear Reward}\label{sec: adv BC}
+Next, we tackle Bellman-complete hybrid MDPs, which is defined as 
+\begin{definition}[Bellman-completeness under $P^\star$]\label{def: adv bc} A $\Phi$ satisfying \pref{assum: unique mapping} is Bellman-complete under transition $P^\star$ if for any $\phi\in\Phi$, there exists an $\phi'\in\Phi$ such that for any $s,a,R$,  
+\begin{align*}
+    f_{\phi'}(s,a; R) = R(s,a) + \E_{s'\sim P^\star(\cdot|s,a)}[f_\phi(s'; R)].  
+\end{align*}
+\end{definition}
+In this case we choose the $\tilD$ in \pref{eq: our divergence} as 
+\begin{align*}
+    \tilD^\pi(\phi\|M) = D^\pi_{\hsbe}(\phi\|P) \triangleq \sum_{h=1}^H \max_{\tilde{R}\in\calR}\E^{ \pi, P}\left[\left(f_\phi(s_h, a_h; \tilde{R}) - \tilde{R}(s_h, a_h) - \E_{s' \sim P(\cdot|s_h, a_h)}\left[f_\phi(s';\tilde{R})\right]\right)^2\right], 
+\end{align*} 
+% Due to the $\max_{R}$ in the definition of $D_{\hsbe}$, 
+where $M = (P,R)$. Since the reward function $R$ is not observed but regarded as a variable of $f_{\phi}$ in the definition of $D_{\hsbe}$, it is no longer clear how to use the two-timescale procedure to improve the regret as in \pref{thm: sothcastic BC thm}. Thus, we use batching again and achieve a bound similar to \pref{thm: bilinear-adv}. As in the stochastic case, the decision making complexity can be characterized by Bellman eluder dimension or coverability, though the definition of the former has to adapted in the hybrid case. More details are provided in \pref{app: hybrid bc}. Our algorithm guarantees 
+\begin{theorem}\label{thm: adv bc}
+For hybrid Bellman-complete MDPs (\pref{def: adv bc}) with Bellman eluder dimension or coverability bounded by $d$, \pref{alg:MF-BC-adv} (an instance of \pref{alg:general}) ensures $\E\left[\Reg(\pi_{\phi^\star})\right] \le \tilde{O}(\sqrt{d\log(|\Phi||\calR|)}T^{\frac{3}{4}})$.
+\label{thm:BC hybrid}
+\end{theorem}
+\jz{I think this should still be in the main body}
+In the special case of linear rewards and transitions, the bound can be further improved.
+\begin{theorem}\label{thm: adv linear}
+For hybrid linear MDPs with dimension $d$, \pref{alg:linear-adv} (an instance of \pref{alg:general}) ensures $\E\left[\Reg(\pi_{\phi^\star})\right] \le \tilde{O}(\sqrt{d\log(|\Phi||\calR|)T})$.
+\label{thm:BC hybrid}
+\end{theorem}
+\fi

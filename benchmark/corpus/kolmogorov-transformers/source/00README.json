@@ -1,0 +1,49 @@
+{
+   "sources" : [
+      {
+         "usage" : "toplevel",
+         "filename" : "main.tex"
+      },
+      {
+         "usage" : "ignore",
+         "filename" : "_minted/5328A7A87924EB03236158C8D8C6A240.highlight.minted"
+      },
+      {
+         "usage" : "ignore",
+         "filename" : "_minted/5826B84F89283A13EF519D06DF71E9E8.highlight.minted"
+      },
+      {
+         "usage" : "ignore",
+         "filename" : "_minted/C56C544C332796483B49326869DCAEF7.highlight.minted"
+      },
+      {
+         "usage" : "ignore",
+         "filename" : "_minted/DF66F34AE74A2C1AD011ADD0A2B7A73B.highlight.minted"
+      },
+      {
+         "usage" : "ignore",
+         "filename" : "_minted/_78E6221F6393D1356681DB398F14CE6D.index.minted"
+      },
+      {
+         "usage" : "ignore",
+         "filename" : "_minted/default.style.minted"
+      },
+      {
+         "usage" : "ignore",
+         "filename" : "iclr2026_conference.bst"
+      },
+      {
+         "usage" : "ignore",
+         "filename" : "main.bbl"
+      },
+      {
+         "usage" : "ignore",
+         "filename" : "main.bib"
+      }
+   ],
+   "spec_version" : 1,
+   "texlive_version" : "2025",
+   "process" : {
+      "compiler" : "pdflatex"
+   }
+}

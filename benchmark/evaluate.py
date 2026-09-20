@@ -41,7 +41,7 @@ def accuracy(correct: int, total: int) -> float:
 
 
 def main() -> int:
-    p = argparse.ArgumentParser(description="Evaluate CitationChecker on the micro benchmark")
+    p = argparse.ArgumentParser(description="Evaluate CitationChecker on the controlled ICLR 2026 benchmark")
     p.add_argument("predictions", type=Path, help="JSONL/JSON predictions or directory containing citation-report.json files")
     p.add_argument("--gold", type=Path, default=Path(__file__).with_name("cases.jsonl"))
     args = p.parse_args()

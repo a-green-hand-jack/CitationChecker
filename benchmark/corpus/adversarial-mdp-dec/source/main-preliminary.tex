@@ -1,0 +1,121 @@
+\section{Preliminary}
+\label{sec:pre}
+We consider Decision Making with Structured Observations (DMSO) \citep{foster2021statistical}. Let 
+$\calM$ be a model space, $\Pi$ a policy space, $\calO$ an observation space, and $V$ a value function. For simplicity, we $|\Pi|$ is finite. Each model $M \in \calM$ is a mapping from policy space $\Pi$ to a distribution over observations $\Delta\left(\calO\right)$. Every model $M\in\calM$ is associated with a value function $V_M: \Pi\to [0,1]$ that specifies the expected payoff of policy $\pi\in\Pi$ in model $M$. We denote $\pi_M=\argmax_{\pi\in\Pi}V_M(\pi)$.  %Given a model $M \in \calM$, let $\E^{M, \pi}[\cdot]$ denote the expectation under $o \sim M(\cdot|\pi)$. we define value function $V_M(\pi) = \E^{M, \pi}[r]$. We also define $\pi_M = \argmax_{\pi \in \Pi} V_M(\pi)$.
+%\HL{The $z_t$ notation comes from \cite{foster2022complexity}, which seems more clear to seperate reward and transition}
+
+The learner interacts with the environment for $T$ rounds. In each round $t =1,\ldots, T$, the environment first chooses a model $M_t \in \calM$ without revealing it to the learner. Then the learner selects a policy $\pi_t \in \Pi$, and observes an observation $o_t \sim M_t(\cdot|\pi_t)$. The regret with respect to policy $\pi^\star\in\Pi$ is 
+\begin{align*}
+    \Reg(\pi^\star) = \sum_{t=1}^T \left(V_{M_t}(\pi^\star) - V_{M_t}(\pi_t)\right). 
+\end{align*}
+
+
+
+\paragraph{Markov Decision Process} 
+%One of the most important instance in such decision-making framework is reinforcement learning (RL), which is based on Markov Decision Process. 
+\mbox{A Markov decision process is defined by a tuple $(\calS, \calA, P, R, H, s_1)$,} where $\calS$ is the state space, $\calA$ is the action space, $P:\calS\times\calA\rightarrow\Delta(\calS)$ is the transition kernel, $R:\calS\times\calA\rightarrow\Delta([0,1])$ is the reward distribution (with abuse of notation, we also use $R(s,a)$ to denote the expected reward $R(s,a)\in [0,1]$), $H$ the horizon, and $s_1$ the initial state. Assume $\calS=\bigcup_{h=1}^H \calS_h$ with $\calS_i \cap \calS_j =\emptyset$ for $i\neq j$, and $\calS_1=\{s_1\}$. 
+In every step $h=1,2,\ldots, H$ within an episode, the learner observes the state $s_h\in\calS_h$ and selects an action $a_h\in\calA$. The learner then transitions to the next state via $s_{h+1}\sim P(\cdot|s_h,a_h)$, which is only supported on $\calS_{h+1}$, and receives the reward $r_h\sim R(s_h,a_h)$. 
+We assume that the reward is constrained such that $\sum_{h=1}^H r_h\in [0,1]$ for any policy almost surely. Given a policy $\pi:\calS\to\calA$, the $Q$-function and $V$-function for $s\in\calS_h$ are defined by $Q^\pi(s, a)=\E^\pi[\sum_{h'=h}^{H}r_h\,|\,s_h=s,a_h=a]$ and  $V^\pi(s)=Q^\pi(s,\pi(s))$. The $Q$-function and $V$-function of an optimal policy $\pi^\star$ are abbreviated with 
+$Q^\star$ and $V^\star$. We use $Q^\pi(s,a;M)$ and $Q^\star(s,a;M)$ to denote the $Q$-functions under model $M=(P,R)$. %For a given transition  $P$ and policy $\pi$, we use $d^{\pi, P}(s)$ to denote the probability of visiting state $s$
+%at step $h$ following $\pi$ under transition kernel $P$. %The observation space $\calO$ in MDPs is the trajectory space without reward. 
+%Let $\calP$ be the transition space, for every transition $P$ and every policy $\pi \in \Pi$, we use $M_P(\pi)$ to denote the trajectory distribution given $P$ and $\pi$. 
+
+Learning in MDPs is a DMSO problem where $\calM=\calP\times \calR$ with $\calP$ being the set of transition kernels and $\calR$ the set of reward functions. A \emph{round} in DMSO corresponds to an MDP episode, and observation $o = (s_1, a_1, r_1, s_2, a_2, r_2, \ldots, r_H)$ is the trajectory.  For any function $g$, we write $\E^{\pi, M}[g(o)] = \E_{o\sim M(\cdot|\pi)}[g(o)]$. If $g(o)$ only depends on $(s_1,a_1,s_2,a_2, \ldots, a_H)$, we also write it as  $\E^{\pi, P}[g(o)]$.  We use $V_M(\pi) = \E^{\pi, M}[\sum_{h=1}^H r_h]$ to denote the expected total reward obtained by policy $\pi$ in MDP $M$, and $d_h^{\pi, M}(s,a)$ (or $d_h^{\pi, P}(s,a)$) the occupancy measure on step $h$ under policy $\pi$ and model $M$ (or transition $P$). 
+
+%\paragraph{Model learning in stochastic DMSO} For DMSO, 
+%\cite{foster2021statistical, xu2023bayesian} studied the case where $M_t=M^\star$ for all $t$. Given $\rho\in\Delta(\calM)$ and $\eta>0$, define $\mair: \Delta(\Pi)\times \Delta(\calM)\to \mathbb{R}$ as
+%\begin{align} 
+%    \mair_{\eta}(p,\nu; \rho) = \E_{\pi\sim p}  \E_{M \sim \nu}\E_{o\sim M(\cdot|\pi)}\left[ 
+% V_M(\pi_M) - V_M(\pi) - \frac{1}{\eta}\KL\left(  \nu_{\bo{M}}(\cdot | \pi, o), \rho \right) \right], 
+%\end{align}
+%where $\nu_{\bo{M}}(\cdot|\pi,o)$\footnote{We use the notational convention in \cite{liu2025decision}: the bold subscript in $\nu_{\bo{M}}(\cdot|\pi,o)$ specifies the \emph{identity} of the variable represented by `~$\cdot$~', instead of a \emph{realized value} of that variable. The subscript may be omitted when it is clear. Similar for $\nu_{\bo{\pi^\star}}(\cdot|\pi,o)$ and $\nu_{\bo{\phi}}(\cdot|\pi,o)$ defined later.} is a posterior distribution over $M$ given $(\pi,o)$, calculated as $\nu(M|\pi, o)\propto \nu(M)M(o|\pi)$. \cite{foster2021statistical, xu2023bayesian} showed that in stochastic environments, there is an algorithm ensuring $\E[\Reg(\pi_{M^\star})]\leq \sum_t \E[\min_p \max_\nu\mair_\eta(p,\nu;\rho_t)] + \frac{\log|\calM|}{\eta}$. 
+%Furthermore, the decision estimation coefficient (DEC) is defined as 
+% $\dec_\eta(\calM) = \max_{\rho}\min_{p}\max_{\nu}\mair_\eta(p,\nu;\rho)$,\footnote{There are different DEC definitions. Here we refer to the offset DEC \citep{foster2021statistical} defined with KL divergence.  }  
+%Let $\textsc{co}(\calM)$ be the convex hull of $\calM$. 
+%\begin{align*}
+%\dec_{\eta}(\calM) = \max_{\overline{M} \in \co(\calM)} \min_{p \in \Delta(\Pi)}\max_{M \in \calM} \E_{\pi \sim p}\left[V_M(\pi_M) - V_M(\pi) - \frac{1}{\eta}\KL\left(M(\cdot|\pi), \overline{M}(\cdot|\pi)\right)\right].   
+%\label{eq:DEC}
+%\end{align*}
+%which characterizes optimal balance between exploitation and exploration under the worst environment. %\cite{foster2021statistical} and \cite{xu2023bayesian}  show 
+%\begin{theorem}[\cite{foster2021statistical,xu2023bayesian}]\label{thm: mair}
+%    Assume $M_t=M^\star$ for all $t$. There is an algorithm ensuring $\E[\Reg(\pi_{M^\star})]\leq \sum_t \E[\min_p \max_\nu\mair_\eta(p,\nu;\rho_t)] + \frac{\log|\calM|}{\eta} \leq  T\dec_\eta(\calM) + \frac{\log|\calM|}{\eta}$. 
+%\end{theorem}
+
+%\paragraph{Policy learning in adversarial DMSO} \cite{foster2022complexity,xu2023bayesian} studied the case where $M_t$ arbitrarily changes over time. Given $\rho\in\Delta(\Pi)$ and $\eta>0$, \mbox{define $\air:\Delta(\Pi)\times\Delta( \calM\times \Pi)\rightarrow \bbR$ as}
+%\begin{align}
+%    \air_{\eta}(p,\nu; \rho) = \E_{\pi\sim p}  \E_{(M, \pi^\star) \sim \nu} \E_{o\sim M(\cdot|\pi)}\left[ 
+% V_M(\pi^\star) - V_M(\pi) - \frac{1}{\eta}\KL\left(  \nu_{\bo{\pi^\star}}(\cdot | \pi, o), \rho \right) \right], 
+%\end{align}
+%where $\nu_{\bo{\pi^\star}}(\cdot|\pi,o)$ is a posterior distribution over $\pi^\star$ given $(\pi,o)$, calculated as $\nu(\pi^\star|\pi,o)\propto \sum_{M}\nu(M,\pi^\star)M(o|\pi)$. 
+%\begin{align}
+%    \nu_{\bo{\pi^\star}}(\pi^\star|\pi,o) = \frac{\sum_{M}\nu(M,\pi^\star)M(o|\pi)}{\sum_{M,\pi'}\nu(M,\pi')M(o|\pi)}.     \label{eq: for example}
+%\end{align}
+%\cite{foster2022complexity,xu2023bayesian} showed that in adversarial environments, there is an algorithm ensuring $\max_{\pi^\star}\E[\Reg(\pi^\star)]\leq \sum_t \E[\min_{p}\max_\nu \air_\eta(p,\nu;\rho_t)] + \frac{\log|\Pi|}{\eta}$.  %We place it in the subscript and make it bold to distinguish it from a realized value of that random variable. When the variable is clear, we omit this subscript. For example, the left-hand side of \pref{eq: for example} can be simply written as $\nu(\pi^\star|\pi, o)$. 
+%Similar to DEC in \pref{eq:DEC}, AIR also seeks the optimal balance between minimizing sub-optimality gap and maximizing information gain. The key difference is that AIR considers an arbitrary comparator policy $\pi^\star$ instead of $\pi_M$ as in DEC, with exploration measured by the information gain associated with $\pi^\star$. The flexibility of the comparator policy enables AIR to handle the adversarial setting. 
+%\begin{theorem}[\cite{foster2022complexity, xu2023bayesian}]
+%    For arbitrary $M_1, \ldots, M_T$, there is an algorithm ensuring $\max_{\pi^\star}\E[\Reg(\pi^\star)]\leq \sum_t \E[\min_{p}\max_\nu \air_\eta(p,\nu;\rho_t)] + \frac{\log|\Pi|}{\eta}\leq T\dec_\eta(\co(\calM)) + \frac{\log|\Pi|}{\eta}$. 
+%\end{theorem}
+
+\subsection{$\Phi$-Restricted Learning} \label{sec: hybrid setting}
+
+For DMSO, \cite{foster2021statistical, foster2023tight} and \cite{chen2022unified} studied the \emph{stochastic} setting where $M_t=M^\star$ for~all~$t$. They showed that the DEC characterizes the regret lower bound and captures the complexity of decision making. They proposed model-based algorithms with near-optimal upper bounds up to the model estimation complexity $\log|\calM|$. 
+On the other hand, \cite{foster2022complexity} and \cite{xu2023bayesian} studied the pure \emph{adversarial} setting where $M_t$ arbitrarily changes over time. For this setting, they identified that DEC of the convexified model class characterizes the regret lower bound, which could be significantly larger than DEC of the original model class. Their upper bound replaces $\log|\calM|$ by $\log|\Pi|$, reflecting that they perform policy-based learning without finegrained estimation of the model. 
+
+Several works go beyond pure model learning or pure policy learning. \cite{foster2024model} considered model-free value learning in the stochastic setting where only the value function is estimated, aiming to only incur $\log|\calF|$ estimation complexity, where $\calF$ is the value function set.  \cite{liu2025decision} and \cite{chen2025decision} considered the hybrid setting where part of the environment is stochastic and part adversarial, and the target of estimation is only on the optimal policy and the stochastic part of the environment. 
+
+We base our presentation in \cite{liu2025decision}'s formulation, which can cover all cases mentioned above. 
+\begin{definition}[Infosets and $\Phi$ \citep{liu2025decision,chen2025decision}]\label{def: infoset}
+   Let $\Phi$ be a collection of subsets of $\calM\times\Pi$ satisfying: 1) The subsets are disjoint, i.e., for any $\phi, \phi'\in \Phi$, if $\phi\neq \phi'$, then $\phi\cap \phi'=\emptyset$. 2) Every $\phi$ contains a single policy, i.e., if $(M,\pi), (M', \pi')\in \phi$, then $\pi=\pi'$.
+   We call a $\phi\in\Phi$ an \emph{information set} (\emph{infoset}). 
+   Due to 2) above, each $\phi\in\Phi$ is associated with a unique policy. We denote this policy as $\pi_\phi$. We also define $\Psi \triangleq \bigcup_{\phi \in \Phi} \phi \subseteq \calM \times \Pi$. 
+\end{definition}
+
+%\footnote{As in \cite{liu2025decision}, both assumptions are not required technically, but are satisfied in all considered applications. } 
+%We call these subsets \emph{information sets} (as called by  \cite{chen2025decision}) as they represent the targets the learner would like to estimate. 
+With \pref{def: infoset}, for given $\rho\in\Delta(\Phi)$, $p\in\Delta(\Pi)$, $\nu\in\Delta(\Psi)$, and $\eta>0$, \cite{liu2025decision} defined $\Phi$-AIR:
+\begin{align}
+    \air^{\Phi}_{\eta}(p,\nu; \rho) = \E_{\pi\sim p} \E_{(M,\pi^\star)\sim \nu} \E_{o\sim M(\cdot|\pi)}\left[V_M(\pi^\star) - V_M(\pi) - \frac{1}{\eta} \KL(\nu_{\bo{\phi}}(\cdot|\pi, o), \rho)\right],  \label{eq:phiair}
+\end{align}
+where $\nu_{\bo{\phi}}(\cdot|\pi,o)$\footnote{We use the notational convention in \cite{liu2025decision}: the bold subscript in $\nu_{\bo{\phi}}(\cdot|\pi,o)$ specifies the \emph{identity} of the variable represented by `~$\cdot$~', instead of a \emph{realized value} of that variable. The subscript may be omitted~when~clear.} is the posterior over $\phi$ given $(\pi, o)$, which satisfies $\nu(\phi|\pi,o)\propto \sum_{(M,\pi^\star)\in \phi} \nu(M,\pi^\star) M(o|\pi)$. 
+$\Phi$-AIR can characterize the decision-making complexity in the $\Phi$-restricted environment defined below: 
+\begin{definition}[$\Phi$-resitricted environment \citep{liu2025decision, chen2025decision}]\label{def: restricted env} A $\Phi$-restricted environment is an (adversarial) decision making problem in which the environment commits to $\phi^\star\in\Phi$ at the beginning of the game and henceforth selects $(M_t,\pi_{\phi^\star})\in \phi^\star$ in every round $t$ arbitrarily based on the history. 
+\end{definition}
+%\begin{align*}
+%    \nu(\phi|\pi,o) = \frac{\sum_{(M,\pi^\star)\in \phi} \nu(M,\pi^\star) M(o|\pi) }{\sum_{\phi'\in\Phi}\sum_{(M,\pi^\star)\in \phi'} \nu(M,\pi^\star) M(o|\pi)}. 
+%\end{align*}
+%Note that the $\bo{\phi}$ in the subscript of $\nu_{\bo{\phi}}(\cdot|\pi,o)$ is only an indicator of the variable represented by `~$\cdot$~', rather than a realized value, and it will be omitted when it is clear.  
+
+
+\begin{theorem}[\cite{liu2025decision}]\label{thm: air phi} For $\Phi$-restricted environment defined in \pref{def: restricted env}, there exists an algorithm ensuring $\E[\Reg(\picirc)]\leq  \E\big[\sum_{t}\min_p \max_\nu \air_\eta^\Phi(p,\nu;\rho_t)\big] + \frac{\log|\Phi|}{\eta}$. 
+\end{theorem}
+
+
+\subsection{Results and Open Questions in \cite{liu2025decision}} \label{sec: open question}
+\cite{liu2025decision}'s main results are based on $\Phi$-AIR: For \emph{model-free} learning in \emph{stochastic} MDPs, \cite{liu2025decision} obtained $\sqrt{T}$ regret for linear $Q^\star/V^\star$ MDPs (before their result, the best known rate is $T^{\frac{2}{3}}$). Unfortunately, their algorithm cannot handle other canonical settings such as bilinear classes, MDPs with bounded Bellman-eluder dimension, or MDPs with bounded coverability. For \emph{model-based} learning in \emph{hybrid} MDPs where the transition is fixed but the reward function changes arbitrarily over time, \cite{liu2025decision} obtained near-optimal regret bounds for general cases up to a $\log(|\calP||\Pi|)$ factor.  
+%\begin{enumerate}[leftmargin=1.5em]
+%    \setlength{\itemsep}{0pt}
+%    \setlength{\parskip}{0pt} 
+%    \setlength{\topsep}{0pt}
+%    \item 
+%    \item %\cite{liu2025decision} formed the partition $\Phi=\{\phi_{\pi^\star, P}: \pi^\star\in\Pi, P\in\calP\}$ where $\phi_{\pi^\star, P}=\{((P, R), \pi^\star):~ R\in\calR\}$. The $\Phi$-restricted environment defined with this $\Phi$ exactly corresponds to the fixed-transition adversarial-reward setting. 
+%\end{enumerate}
+
+An attempt was made by \cite{liu2025decision} to handle \emph{model-free} learning in \emph{hybrid} MDPs based on an extension of the optimistic DEC approach \citep{foster2024model}.  However, their result only handles \emph{full-information} reward feedback. Extension to the bandit setting is challenging under this framework as the optimistic update requires an explicit construction of the reward estimator. 
+
+%Although the $\Phi$-AIR approach of \cite{liu2025decision} is promising, its capability to handle model-free learning remains limited. Specifically, 
+%\begin{enumerate}[leftmargin=1.5em]
+%     \setlength{\itemsep}{0pt} % Adjust item spacing
+%    \setlength{\parskip}{0pt} 
+%    \setlength{\topsep}{0pt}
+%    \item For model-free learning in stochastic MDPs, \cite{liu2025decision} only addressed linear $Q^\star/V^\star$ MDPs, leaving out other canonical settings such as MDPs with bounded bilinear rank or Bellman-complete MDPs with bounded Bellman eluder dimension or coverability. 
+%    \item \cite{liu2025decision}'s $\Phi$-AIR does not extend to model-free learning in hybrid MDPs. Although they designed another algorithm based on the optimistic DEC framework \citep{foster2024model} to handle model-free learning in hybrid MDPs with \emph{full-information} reward feedback, they failed to extend it to the bandit feedback setting.  
+%\end{enumerate}
+In this work, we focus on model-free learning in both stochastic and hybrid MDPs. Our results generalize those of \cite{liu2025decision} in both directions: Our framework handles all canonical settings for \emph{model-free} learning in \emph{stochastic} MDPs, improving previous results by \cite{foster2024model}. It also handles \emph{model-free} learning in \emph{hybrid} MDPs with \emph{bandit} feedback under the same reward assumption as \cite{liu2025decision}.  %generalize their $\Phi$-AIR framework to handle canonical settings model-free learning in stochastic MDPs.   $\Phi$-AIR and address both open questions with a single unified framework. The new complexity measure we introduce simultaneously improves over both model-free DECs proposed in \cite{foster2024model} and \cite{liu2025decision}, even in the stochastic setting alone. 
+
+%\HL{Add examples of $\Phi$ here}
+%$\Phi$-AIR is a generalization of standard AIR  introduced in \cite{xu2023bayesian}. Through different choice of $\Phi$, solving $\min_{p \in \Delta(\Pi)}\max_{\nu \in \Delta(\Psi)}\air^{\Phi}_{\rho,\eta}(p,\nu)$ serves as a principled approach to choose behaviour distribution for either stochastic or adversarial settings with model-based or model-free approaches. AIR is also shown to have tight connection with DEC.
+
+%\jz{Note sure where it fits, but I think it is a useful discussion to have.}
+%In the $\Phi$-AIR approach of \cite{liu2025decision}, $\Phi$ is simultaneously a restriction on the environment, as well as a measure of complexity of the estimation error. The learner can choose to reduce the complexity by making $\Phi$-coarser, at the cost of making the adversary more powerful. 
+
+%Our general framework avoids this trade-off, it allows us to have a stricter constraint on the environment without always paying $\log(|\Phi|)$. Example in the full-information case, ...

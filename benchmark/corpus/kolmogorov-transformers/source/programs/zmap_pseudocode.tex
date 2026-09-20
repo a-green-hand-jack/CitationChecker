@@ -1,0 +1,30 @@
+\begin{figure}[ht]
+\centering
+\begin{minted}[
+  frame=single,
+  framesep=2mm, 
+  fontsize=\fontsize{8}{9}\selectfont\ttfamily,
+  ]{python}
+InputSequence = list[int]
+Logits = list[float]
+ModelFunction = Callable[[InputSequence], Logits]
+
+def zmap(machine_spec: PrefixMachineSpec,
+         program_prefix: list[int]) -> TransformerParameters:
+  alta_program_spec = build_prefix_turing_machine_program_spec(
+      machine_spec, program_prefix)
+  return alta_compiler(alta_program_spec)
+
+def mapping_fn(
+    machine_spec: PrefixMachineSpec,
+    params: TransformerParameters,
+) -> ModelFunction:
+  def model_fn(input_tokens: InputSequence) -> Logits:
+    # Prepend prompt and add special tokens.
+    transformer_input = preprocess_input(machine_spec, input_tokens)
+    return run_transformer(params, machine_spec, transformer_input)
+  return model_fn
+\end{minted}
+\caption{Pseudocode for \zmap~and corresponding mapping function.}
+\label{fig:zmap_pseudocode}
+\end{figure}

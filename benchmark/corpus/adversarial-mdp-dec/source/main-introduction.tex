@@ -1,0 +1,40 @@
+\section{Introduction}\label{sec: intro}
+\cite{foster2021statistical, foster2023tight} developed the framework of decision-estimation coefficient (DEC) that characterizes the complexity of general online decision making problems and provides a general algorithmic principle called Estimation-to-Decision (E2D). 
+In the state-of-the-art result by \cite{foster2023tight}, regret lower and upper bounds are established with a gap of $\log|\calM|$, where $\calM$ is the model class where the underlying true model lies. This $\log|\calM|$ reflects the price of \emph{model estimation}. 
+Essentially, the lower bound in \cite{foster2023tight} only captures the complexity of decision-making / exploration, while the upper bound additionally includes the complexity of model estimation. 
+Since E2D is a model-based algorithm that learns over models, it necessarily incurs this cost of model estimation. 
+
+On the other hand, a large class of existing reinforcement learning (RL) algorithms are model-free value-based algorithms, which only estimate value functions. 
+To better capture the decision-making complexity in this case, \citep{foster2024model} proposed a variant of E2D, called optimistic E2D, that achieves a regret upper bound characeterized by the complexity measure called optimistic DEC. However, unlike the model-based DEC/E2D framework \cite{foster2021statistical, foster2023tight} which drives exploration only through information gain, optimistic DEC/E2D leverages the \emph{optimism} principle to drive exploration, which may not be fundamental and could lead to sub-optimal performance in certain cases.  
+Overall, the precise tradeoff between model estimation complexity and decision-making complexity, along with the gap between upper and lower bounds, remain largely unsolved. 
+
+
+A parallel line of reserach seeks to relax the assumption that the environment remains stationary. \cite{foster2022complexity} and \cite{xu2023bayesian} studied the pure adversarial setting where the environment can choose a different model in every round. In this case, their algorithms only estimate the optimal policy and the price of estimation becomes $\log|\Pi|$ where $\Pi$ is the policy class. 
+In such pure adversarial environment, however, the decision-making complexity could become prohibitively high and is often vacuous in Markov decision processes (MDPs). 
+A simpler and more tractable setting is the that of \emph{hybrid} MDPs where the transition is stochastic but the reward is adversarial. This setting has been studied in various settings: tabular MDPs \citep{neu2013online, rosenberg2019online, jin2020learning, shani2020optimistic}, linear (mixture) MDPs \citep{luo2021policy, dai2023refined, sherman2023improved, liu2023towards, kong2023improved, li2024improved}, and low-rank MDPs \citep{zhao2023learning, liu2024beating}. The work of \cite{liu2025decision} first leveraged the DEC framework to obtain results for \emph{bilinear classes}. However, they only gave a model-based algorithm (incurring large estimation error) and a model-free algorithm that requires full-information reward feedback, leaving the model-free bandit case open.  
+
+
+We provide a unified framework that advances both directions discussed above: 
+\begin{itemize}[leftmargin=1em, before=\vspace{0pt}, after=\vspace{0pt}]
+ \setlength{\itemsep}{0pt} % Adjust item spacing
+    \setlength{\parskip}{0pt} 
+    \setlength{\topsep}{0pt}
+\item In the stochastic setting, we introduce a new model-free DEC notion, \decname, that improves over the optimistic DEC of \cite{foster2024model}. Our approach does not rely on the optimism principle, but adheres more closely to the general idea of DEC that drives exploration purely with information gain. For canonical settings such as bilinear classes or Bellman-complete MDPs with bounded Bellman eluder dimension or coverability, we recover their complexities with improved $T$-dependence in the regret, while in some constructed settings, the improvement can be arbitrarily large. 
+\item We establish the first sublinear regret for \emph{model-free} learning in \emph{hybrid} bilinear classes and Bellman-complete coverable MDPs with linear reward and bandit feedback, resolving the open question in \cite{liu2025decision}. 
+\item We improve the online function estimation procedure both in the case of average estimation error and squared estimation error. This allows us to improve the $T^{\frac{3}{4}}/T^{\frac{5}{6}}$ regret of \cite{foster2024model} to $T^{\frac{2}{3}}/T^{\frac{7}{9}}$ in the former case, and improve the $T^\frac{2}{3}$ regret of \cite{foster2024model} to $\sqrt{T}$ in the latter case. The techniques we use to achieve them could be of independent interest. % This new procedure can also be applied to \cite{agarwal2022non} and \cite{foster2024model}'s original algorithms and improve their rate. 
+\end{itemize}
+Tables that compare our results with previous ones are provided in \pref{app: comparison tables}. 
+Notably, our framework generalizes the Algorithmic Information Ratio (AIR) framework of \cite{xu2023bayesian} and \cite{liu2025decision}, substantially simplifying the analysis while enhancing algorithmic flexibility (\pref{sec: general framework}). This generalization may facilitate future development in this line of research. 
+
+
+
+
+
+We remark that, similar to \cite{foster2024model}, the term ``model-free'' learning in our work does not mean that the learner has no access to the model class $\calM$ or has computational constraints. Instead, it only means that the regret bound is independent of the size of the model set $\calM$. This implicitly restricts the learner from making fine-grained estimation over $\calM$. 
+
+
+
+%- Our contribution: 
+%1. a even more general framework and simple analysis 
+%2. A improved model-free DEC for stochastic setting that removes optimism, recovers/improves the bound in bilinear classes, and is significantly better in some special cases. 3. Model-free adversarial MDP with bandit feedback in bilinear classes etc. 
+

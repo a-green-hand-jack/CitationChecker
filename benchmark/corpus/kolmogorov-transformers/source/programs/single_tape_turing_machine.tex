@@ -1,0 +1,33 @@
+\begin{figure}[ht]
+\centering
+\begin{minted}[
+  frame=single,
+  framesep=2mm, 
+  fontsize=\fontsize{8}{9}\selectfont\ttfamily,
+  ]{python}
+class TransitionIn:
+  state: int
+  head_symbol: int
+
+class Move(enum.Enum):
+  LEFT = enum.auto()
+  RIGHT = enum.auto()
+
+class TransitionOut:
+  state: int
+  symbol: int | None
+  move: Move | None
+  halt: bool = False
+
+TransitionFn = Callable[[TransitionIn], TransitionOut]
+
+class MachineSpec:
+  transition_fn: TransitionFn  # Turing machine transition function.
+  num_states: int  # Turing machine number of states.
+  num_symbols: int  # Number of tape symbols.
+  num_steps: int  # Time resource bound.
+  num_registers: int  # Space resource bound.
+\end{minted}
+\caption{Transition function definition for standard single-tape Turing machine.}
+\label{fig:single_tape_turing_machine}
+\end{figure}

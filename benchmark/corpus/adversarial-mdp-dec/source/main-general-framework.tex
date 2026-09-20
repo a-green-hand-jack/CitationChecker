@@ -1,0 +1,284 @@
+\section{General Framework}\label{sec: general framework}
+This section introduce a general framework and complexity measure for the $\Phi$-restricted environment, which covers model-free learning in stochastic and hybrid MDPs as special cases. For given $\rho\in\Delta(\Phi)$, define for $p\in\Delta(\Pi)$ and $\nu\in\Delta(\Psi)$ %For any strictly convex function $F$, we define $\Phi/F$-AIR as
+%\jz{Notation suggestion: Maybe it is better to write these as $F(\nu;\pi,\rho)$, because we want strict convexity with regard to $\nu$, it's confusing to talk about strict convexity when it is only with regard to the middle argument.}\HL{Fixed}
+\begin{align}
+    \air^{\Phi, D}_{\eta}(p,\nu; \rho) = \E_{\pi \sim p}\E_{(M,\pi^\star) \sim \nu}\left[V_{M}(\pi^\star) -V_{M}(\pi) - \frac{1}{\eta} D^\pi(\nu\|\rho)\right],  \label{eq: new AIR} 
+\end{align}
+for some divergence measure $D^\pi(\nu\|\rho)$ convex in $\nu$ for any $\pi $ and $\rho$. $\Phi$-AIR defined in \pref{eq:phiair} is a special case where $D^\pi(\nu\|\rho) = \E_{M\sim \nu}\E_{o\sim M(\cdot|\pi)}[\KL(\nu_{\bo{\phi}}(\cdot|\pi,o), \rho)]$. The general algorithm designed based on \pref{eq: new AIR} is shown in \pref{alg:general}. 
+
+%For any differential function $F$, we define its Bregman divergence as $D_F(x,y) = F(x) - F(y) - \left\langle \nabla F(y), x-y \right\rangle$. \footnote{Although standard Bregman divergence is defined for strictly convex function, we abuse the notation and just define $D_F$ for any differential function.}
+
+
+%Although the $\Phi$-AIR approach \citep{liu2025decision} works well for model-based settings, it only work well for very restricted model-free settings like linear $Q^\star/V^\star$ MDPs. How to include richer model-free classes in to the AIR framework is still underexplored. Furthermore, although \citep{liu2025decision} design a seperate algorithm to handle model-free adversarial MDPs with full-information reward, it still fails to handle more challenging bandit feedback setups. To tackle these challenges, we propose a more general framework that not only cover existing results, but can also be applied to settings intractable by previous frameworks.
+
+\begin{algorithm}[H]
+    \caption{General Framework}
+     \label{alg:general}
+    \textbf{Input:} Set of partitions $\Phi$ and its union $\Psi$ (defined in \pref{sec: hybrid setting}). \\
+    $\rho_1(\phi) = 1/|\Phi|,\, \forall \phi \in \Phi$. \\
+    \For{$t=1, 2, \ldots, T$}{
+       Set $p_t, \nu_t$ as the solution of the following minimax optimization (defined in \pref{eq: new AIR}): 
+        \begin{align}
+            \min_{p \in \Delta(\Pi)}\max_{\nu \in \Delta(\Psi)} \air^{\Phi, D}_\eta(p,\nu; \rho_t). 
+            \label{eq:minmax}
+        \end{align}
+        Execute $\pi_t \sim p_t$, and observe $o_t\sim M_t(\cdot|\pi_t)$. 
+        \vspace{-5pt}
+        \begin{flalign}
+        &\text{Update\ } \rho_{t+1}= \postupdate(\nu_t, \rho_t, \pi_t, o_t). && \label{eq:rho}
+        \end{flalign}
+        
+        }
+        \vspace{-3pt}
+\end{algorithm}
+\pref{alg:general} has two main steps. First, given the infoset distribution $\rho_t\in\Delta(\Phi)$, solve the policy distribution $p_t$ and the worst-case world distribution $\nu_t$ in the saddle-point problem \pref{eq:minmax}. This is similar to the previous AIR framework in \cite{xu2023bayesian} and \cite{liu2025decision}. After taking policy $\pi_t\sim p_t$ and receiving the observation $o_t\sim M_t(\cdot|\pi_t)$, perform a posterior update by incorporating new information from $o_t$ (\pref{eq:rho}) and obtain the new infoset distribution $\rho_{t+1}\in\Delta(\Phi)$. In \cite{xu2023bayesian} and \cite{liu2025decision}, this posterior update step is simply $\rho_{t+1}(\phi) = \nu_t(\phi|\pi_t, o_t)$, but it could take different forms in our case depending on the specific divergence $D$ instantiated later. 
+%Our \pref{alg:general} is a generalization of the AIR framework \citep{xu2023bayesian, liu2025decision} with two extensions. Firstly, \pref{eq:minmax} solves a minimax problem which includes a general divergence measure $D^\pi(\cdot\|\rho_t)$. This generalizes the $\Phi$-AIR beyond KL-regularized loss, which is particularly useful for model-free settings. However, adding $F_1$ will introduce additional overhead to the regret. To tackle it, we update $\rho_{t+1}$ through an optimization with loss $F_2$, instead of simply set $\rho_{t+1} = \nu_{\bo{\phi}}(\cdot|\pi_t, z_t)$ as in \cite{xu2023bayesian, liu2025decision}. Carefully designed $F_2$ can effectively cancel the overhead caused by $F_1$ and lead to satisfactory regret bound. 
+
+The ability of our algorithm to handle a general divergence $D$ is enabled by our new analysis techniques. The update rule $\rho_{t+1}(\phi)=\nu_t(\phi|\pi_t, o_t)$ in \cite{xu2023bayesian} and \cite{liu2025decision} and the corresponding regret analysis heavily relies on a ``constructive minimax theorem'' \citep{xu2023bayesian} that is restricted to strictly convex divergence measures and somewhat cumbersome to generalize to divergence other than $\KL$. Our new analysis, on the other hand, is more flexible and nicely connects to the standard analysis of mirror descent. 
+
+%Technically, introducing these two losses is non-trivial. The analysis in \citep{xu2023bayesian, liu2025decision} largely relies on a constructive minimax theorem, which only works well for KL-regularized minimax optimization (i.e. their analysis requires $F_1$ is a KL-divergence), limiting extensions to more general losses. To address this challenge, we propose a new analysis based on online mirror descent, which is not only much simper, but also enables the algorithm to incoporate general losses in the minimax optimization.
+
+%\jz{we don't need strictly here, no?} \HL{Change descriptions, now need strict convex to ensure uniqueness of solution}
+%\jz{We should think of a way around this. We don't have strict convexity in our example of removing the two-step procedure in full-info hybrid MDPs.
+%$F_1(\nu)$ only depends there on the marginals $\nu(a|P,s)$, but $\nu$ is not uniquely defined by $\nu(P)$ and these marginals. So we don't have strict convexity. 
+%}\HL{You are right, change to convex, it does not hurt the uniqueness of minimax solution}
+
+Our analysis goes as follows. For any $(M,\pi)\in\calM\times\Pi$,  denote $\delta_{M,\pi}\in \Delta(\calM\times \Pi)$ as the Kronecker delta function centered at $(M,\pi)$. That is, $\delta_{M,\pi}(M,\pi)=1$ and $\delta_{M,\pi}(M',\pi')=0$ for any other $(M',\pi')$. By a simple first-order optimality condition (\pref{lem: bregman}) and the fact that $\nu_t$ is a best response to $p_t$ (\pref{eq:minmax}), we have (recall the definition of $\picirc$ in \pref{def: restricted env})
+\begin{align}
+    &\E_{\pi \sim p_t}\left[V_{M_t}(\picirc) - V_{M_t}(\pi) - \frac{1}{\eta}D^\pi(\delta_{M_t, \picirc} \| \rho_t)\right]  \label{eq:general-decom}
+    \\&\le \max_{\nu \in \Delta(\Psi)}\E_{\pi \sim p_t}\E_{(M,\pi^\star) \sim \nu}\left[V_{M}(\pi^\star) -V_{M}(\pi) - \frac{1}{\eta}D^\pi(\nu\| \rho_t)\right] - \E_{\pi \sim p_t}\left[\frac{1}{\eta} \breg_{D^\pi(\cdot\|\rho_t)}(\delta_{M_t, \picirc},  \nu_t)\right] \nonumber
+\end{align}
+where $\breg_{F}(x,y) = F(x) - F(y) - \inner{\nabla F(y), x-y}\geq 0$ is the Bregman divergence defined with a convex function $F$. %In \pref{eq:general-decom} the $F$ is $F(\nu) = \E_{\pi\sim p_t}[D^\pi(\nu\|\rho_t)]$. 
+%For any  convex function $F$, let $\nu' = \argmin_{\nu} F(\nu)$ be any of its minimizer\footnote{The analysis actually holds for any differential $F$, where $\nu'$ can be its any local minimizer. We require convexity here to ensure uniqueness of minimax value to define a complexity measure.}. From first-order optimality condition, for any $\nu$ we have $F(\nu) \ge F(\nu') + D_F(\nu, \nu')$. Given $p_t$ solved from \pref{eq:minmax}, we define $F_t(\nu) = -\E_{\pi \sim p_t}\E_{(M,\pi^\star) \sim \nu}\left[V_{M}(\pi^\star) -V_{M}(\pi) - F_1(\nu;\pi, \rho_t)\right]$. Let $\delta_{M_t, \pi^\star}$ be the $\delta$ distribution on $M_t, \pi^\star$, since $F_t(\nu)$ is convex in $\nu$, and $\nu_t = \argmin_{\nu \in \Psi} F_t(\nu)$, we have $F_t(\delta_{M_t, \pi^\star}) \ge F_t(\nu_t) + D_{F_t}(\delta_{M_t, \pi^\star}, \nu_t)$.
+%Let $\phi_t^\star$ be the aggregation that $(M_t, \pi^\star)$ lines in, and $\delta_{\phi}$ be the delta distribution on aggregation $\phi$, we have
+%\begin{align}
+%    &\E_{\pi \sim p_t}\left[V_{M_t}(\pi^\star) - V_{M_t}(\pi) - F_1(\delta_{M_t, \pi^\star}; \pi, \rho_t)\right]  \nonumber
+%    \\&\le \max_{\nu \in \Psi}\E_{\pi \sim p_t}\E_{(M,\pi^\star) \sim \nu}\left[V_{M}(\pi^\star) -V_{M}(\pi) - F_1(\nu; \pi, \rho_t)\right] - \E_{\pi \sim p_t}\left[D_{F_1^{t,\pi}}(\delta_{M_t, \pi^\star}, \nu_t)\right]\label{eq:general-decom}
+%\end{align}
+%\jz{Notation: $D_{F_1}(\delta_{M_t, \pi^\star,\nu_t})$ is not properly defined, because $F_1$ has two additional arguments. We can use $F_t$ here instead, but that might not ideal presentation wise because of the (irrelevant) linear term in $F_t$.}
+%where $F_1^{t, \pi}(\nu) = F_1(\nu; \pi, \rho_t)$. 
+Since $p_t$ is minimax solution in \pref{eq:minmax}, after rearrangement of \pref{eq:general-decom} and summation over $t$, we get
+\begin{align*}
+    &\sum_{t=1}^T \left(V_{M_t}(\picirc) - \E_{\pi\sim p_t} \left[V_{M_t}(\pi)\right]\right)  \label{eq:minimax-guarantee} \numberthis
+    \\[-15pt]&\le   \sum_{t=1}^T \min_{p \in \Delta(\Pi)}\max_{\nu \in \Delta(\Psi)}\air^{\Phi, D}_\eta(p,\nu; \rho_t) + \frac{1}{\eta} \overbrace{\sum_{t=1}^T \E_{\pi\sim p_t}\left[D^{\pi}(\delta_{M_t,\picirc}\|\rho_t) - \breg_{D^{\pi}(\cdot\|\rho_t)}(\delta_{M_t,\picirc}, \nu_t)\right] }^{\est}, 
+\end{align*}
+where we use the definition in \pref{eq: new AIR}. 
+From \pref{eq:minimax-guarantee}, we have the following theorem. 
+\begin{theorem}\label{thm: general thm}
+   \pref{alg:general} achieves $\E[\Reg(\picirc)]\leq \E\big[\sum_{t}\min_p \max_\nu \air^{\Phi, D}_\eta(p,\nu;\rho_t) + \frac{\est}{\eta}\big]$. 
+\end{theorem}
+The \postupdate in \pref{eq:rho} has  to be further designed in order to minimize $\est$. In \pref{app: recovering}, we show how our new analysis recovers previous results of \cite{xu2023bayesian} and \cite{liu2025decision} easily. We remark that when recovering \cite{liu2025decision}'s result for model-based learning in hybrid MDPs with full-information feedback, we chooses $D$ such that $\est$ does not even scale with $\log|\Phi|$, while they achieve it with a more complex two-level algorithm. This shows the flexibility of our framework. 
+In the next two subsection, we discuss about the two terms in the regret bound of \pref{thm: general thm}. 
+
+%Thus, to bound the regret, it remains to design the update rule of $\rho_t$ (\pref{eq:rho}) so that the \est term (standing for estimation error) in \pref{eq:minimax-guarantee} is sublinear in $T$. 
+%\jz{
+%I wonder if it makes more sense to present this as a sum over $T$ and get
+%\begin{align*}
+%    T\min_{p \in \Delta(\Pi)}\max_{\nu \in \Delta(\Psi)}\air^{\Phi}_{F_1, \rho_t}(p,\nu) +\E_{\pi \sim p_1}\left[F_1(\pi, \delta_{M_1, \pi^\star}; \rho_{1})\right]+ \sum_{t=1}^{T-1}\underbrace{\E_{\pi \sim p_t}\left[F_1(\pi, \delta_{M_{t+1}, \pi^\star}; \rho_{t+1})\right] -D_{F_1}(\delta_{M_t, \pi^\star}, \nu_t)}_{\text{overhead}}
+%\end{align*}
+%The rationale is that the traditional AIR has an overhead of 0 here.
+%}
+%\pref{eq:minimax-guarantee} bounds per-step regret with the complexity measure defined by $\Phi/F_1$-AIR with an additive overhead introduced by loss $F_1$. Such a overhead can be handled by a carefully designed $F_2$ when solving $\rho_{t+1}$ through \pref{eq:rho}. This will be more clear in our following examples.
+
+
+\subsection{Divergence Measure in \pref{alg:general} and $\mfdec$}
+To handle the MDPs of interest in \pref{sec: settings and assumptions}, we will instantiate \pref{alg:general} with the following divergence $D$: 
+%The algorithm we use to handle general bilinear class is \pref{alg:MF-S}. It is an instantiation of \pref{alg:general} with minor adaptation. First, it uses the divergence measure:  
+\begin{align}
+    D^\pi(\nu\|\rho) = \E_{M \sim \nu}\E_{o \sim M(\cdot|\pi)}\left[\KL\left(\nu_{\bo{\phi}}(\cdot|\pi, o), \rho\right) + \E_{\phi\sim \rho}\left[\tilD^\pi(\phi\|M)\right]\right], \label{eq: our divergence}
+\end{align}
+where $\tilD^\pi(\phi\|M)$ is another divergence that measures the discrepancy between infoset $\phi$ and model $M$. Two choices of $\tilD$ will be introduced later in \pref{sec: postupdate sec}: \emph{averaged estimation error} and \emph{squared estimation error}. %, which is suitable for bilinear classes \cite{du2021bilinear}, and the other is the \emph{squared Bellman error}, which is suitable for Bellman-complete MDPs with bounded Bellman eluder dimension or coverability \cite{jin2021bellman, xie2022role}. 
+
+With this definition of $D^\pi(\nu\|\rho)$, the first term in the regret bound in \pref{thm: general thm} can be bounded by the following complexity: 
+\begin{align*}
+    &\mfdec_\eta^{\Phi, \tilD}
+    \triangleq \max_{\rho\in\Delta(\Phi)} \min_{p\in\Delta(\Pi)} \max_{\nu\in \Delta(\Psi)} \air_\eta^{\Phi, D}(p, \nu; \rho)\\
+    &=\max_{\rho\in\Delta(\Phi)} \min_{p\in\Delta(\Pi)} \max_{\nu\in \Delta(\Psi)} \\ %\numberthis  \label{eq: digdec}\\
+    &\qquad \E_{\pi\sim p}\E_{(M, \pi^\star)\sim \nu}\left[ V_M(\pi^\star) - V_M(\pi) - \frac{1}{\eta}\E_{o\sim M(\cdot|\pi)}\left[\KL(\nu_{\bo{\phi}}(\cdot|\pi, o), \rho)\right] - \frac{1}{\eta} \E_{\phi\sim \rho}\left[\tilD^\pi(\phi\|M)\right]  \right].    \numberthis \label{eq: digdec}
+\end{align*}
+%In this work, $\tilD$ will be instantiated as either \emph{bilinear divergence} (\pref{sec: sto bilinear}) or \emph{squared Bellman error} (\pref{sec: sto BC}). 
+As both the KL and the $\tilD$ terms in \pref{eq: digdec} are measures of information gain, we call this complexity notion \emph{dual information gain decision-estimation coefficient} (Dig-DEC). In \pref{sec: compare DEC}, we compare in more detail how DigDEC is upper bounded by optimistic DEC --- the complexity achieved by the prior work \citep{foster2024model} in the stochastic setting, and when the improvement can be arbitrarily large. 
+%By our choice of divergence measure, the decision-making complexity underlying our algorithm is 
+%\begin{align*}
+%&\mfdec_\eta^{D_{\bi},\Phi}=\max_{\rho\in\Delta(\Phi)} \min_{p\in\Delta(\Pi)} \max_{\nu\in \Delta(\calM)} \\
+    %&\qquad \E_{\pi\sim p}\E_{M\sim \nu}\left[ V_M(\pi_M) - V_M(\pi) - \frac{1}{\eta}\E_{o\sim M(\cdot|\pi)}\left[\KL(\nu_{\bo{\phi}}(\cdot|\pi, o), \rho)\right] - \frac{1}{\eta} \E_{\phi\sim \rho}\left[D^\pi_{\bi}(\phi\|M)\right]  \right],    
+%\end{align*}
+%where ``$\mathsf{dig}$-'' stands for ``dual information gain,'' reflecting that there are two terms (i.e., the $\KL$ term and the $D_\bi$ term) involved in its definition that quantifies the information gain. 
+
+
+%\jz{We either have to talk about dig-dec earlier, or we change the Theorems in this section to be only about the Est term. I think the latter would flow better.} \cw{digdec can be defined right before Section 4.1 as the max min max value. }
+
+\subsection{\postupdate and bounds for $\est$}\label{sec: postupdate sec}
+%\cw{TODO: the $\Pi$ should contain exploration and greedy policies.}
+The $\tilD$ we would like to use in \pref{eq: our divergence} depends on the MDP class we consider. Below, we describe two classes of problems that are associated with different choices of $\tilD$, under which the achievable rates for $\est$ are different. 
+
+\subsubsection{Average Estimation Error}
+\begin{assumption}[Average estimation error]\label{assum: avg err}
+    There exists an estimation function $\ellest_h: \Phi\times \calO\to [-B,B]^{N}$ for every $h$ such that for any $\phi\in\Phi$ and any $M\in\phi$, it holds that for any $\pi\in\Pi$, 
+    \begin{align*}
+        \E^{\pi, M}[\ellest_h(\phi; o_h)] = 0.    
+    \end{align*}
+    %where $\pi \circ_h \esttt(\pi)$ denotes a policy that plays $\pi$ for the first $h-1$ steps and plays policy $\esttt(\pi)$\, at the $h$-th step.
+    %\jz{We currently need this}
+    Additionally, assume that the adversary is restricted such that for any $\pi,\phi$ and $t,t'\in[T]$, it holds that $\E^{\pi, M_t}[\ellest_h(\phi; o_h)]=\E^{\pi, M_{t'}}[\ellest_h(\phi; o_h)]$.
+\end{assumption}
+% \cw{Just say the $\ell$ here will be instantiated as the average Bellman error in Lemma~8 for all concrete examples. The general notion of `estimation error' is following Du et al.'s way of presenting it. This assumption is essentially the realizability assumption (stochastic setting is $Q^\star$ and hybrid setting is all $Q^\pi$). }
+
+The estimation function $\ell$ in \pref{assum: avg err} will be instantiated as the average Bellman error in \pref{lem: av assum reduction} for all concrete examples. In this case, \pref{assum: avg err}  is essentially the standard realizability assumption. We adopt the more general terminology of “estimation error’’ following \cite{du2021bilinear}.
+
+
+
+\begin{theorem}
+\label{thm: avg est}
+    Assume \pref{assum: avg err} holds. Then \pref{alg:general batched} with \pref{alg:MF-Epoch-final} as \postupdate with $\tilD^\pi(\phi\|M) = \tilD_\bi^\pi(\phi\|M) \triangleq \max_{j\in[N]}\frac{1}{B^2H}\sum_{h=1}^H  \left(\E^{\pi, M}\left[\ellest_h(\phi; o_h)_j\right]\right)^2$ ensures 
+    \begin{align*}
+        \E[\est] \lesssim N\log(|\Phi|)T^\frac{1}{3}. 
+    \end{align*}
+\end{theorem}
+
+
+% Assumptions 5 and 6 do not introduce additional restrictions on the problem class. They merely posit the existence of suitable “estimation functions’’ that can be used to test whether an observation is consistent with a given partition. Such functions always exist, and Lemmas 8 and 12 provide their concrete form in both the stochastic and hybrid settings.
+
+%\jz{Instead of writing this as examples, maybe making it a Lemma?}\cw{sounds good}
+\begin{lemma}\label{lem: av assum reduction}
+In the stochastic setting, \pref{assum: function approximation stochastic} implies \pref{assum: avg err} with $N=1$ estimation function
+$\ell_{h}(\phi;o_h)=f_{\phi}(s_h,a_h)-r_h-f_{\phi}(s_{h+1})$.
+In the hybrid setting, \pref{assum: function approximation hybrid}, \pref{assum: unique mapping} and \pref{assum: known feature} imply
+\pref{assum: avg err}
+with $N=d$ estimation functions 
+$\ell_h(\phi;o_h)_j=f_\phi(s_h,a_h;\bm{e}_j)-\varphi(s_h,a_h)^\top\bm{e}_j - f_{\phi}(s_{h+1};\bm{e}_j)$, where $\bm{e}_j$ as a reward represents the reward function defined as $R(s,a)=\varphi(s,a)_j$. 
+\end{lemma}
+
+
+
+\iffalse
+Bilinear class is a rich class of learnable MDPs identified by \cite{du2021bilinear}. Using the notation in \pref{assum: function approximation stochastic}, bilinear class is defined as the following: 
+\begin{assumption}[Bilinear class \citep{du2021bilinear}]
+\label{assum:sto bilinear}
+A model class $\calM$ and its associated $\Phi$ satisfying \pref{assum: function approximation stochastic} is a bilinear class with rank $d$ if there exists functions $X_h: \Phi \times \mathcal{M} \rightarrow \mathbb{R}^d$ and  $W_h: \Phi \times \mathcal{M} \rightarrow \mathbb{R}^d$ for all $h\in[H]$ such that for any $\phi \in \Phi$ and any $M \in \calM$, 
+    \begin{align*}
+        \left|V_\phi(\pi_\phi) - V_{M}(\pi_\phi)\right| \leq \sum_{h=1}^H \left|\langle X_h(\phi; M), W_h(\phi; M)\rangle\right|.
+    \end{align*}
+    Moreover, there exists an estimation policy mapping function $\esttt: \Pi \rightarrow \Pi$, and for every $h \in [H]$, there exists a discrepancy function $\ellest_h: \Phi \times \calO  \rightarrow \mathbb{R}$ such that for any $\phi, \phi' \in \Phi$ and any $M\in\calM$,  
+    \begin{align*}
+        \left|\langle X_h(\phi; M), W_h(\phi'; M) \rangle\right| = \left|\E^{\pi_{\phi} \,\circ_h\, \esttt(\pi_{\phi}),\, M} \left[\ellest_h(\phi'; o_h)\right]\right|
+    \end{align*}
+    where $o_h = (s_h,a_h, r_h, s_{h+1})$. $\E^{\pi, M}[\cdot]$ denotes the expectation of observation given $\pi$ and model $M$. Let $\pi \circ_h \esttt(\pi)$ denote playing $\pi$ for the first $h-1$ steps and play policy $\esttt(\pi)$\, at the $h$-th step.
+\end{assumption}
+For bilinear classes, we choose $\tilD$ in \pref{eq: our divergence} as  
+\begin{align}
+    \tilD^\pi(\phi\| M) = D^\pi_{\bi}(\phi\|M) \triangleq  \sum_{h=1}^H\left(\E^{\pi, M}\left[\ellest_h(\phi; o_h)\right]\right)^2  \label{eq:bi-div}
+\end{align}
+which is also used in \cite{foster2024model}. 
+\fi
+
+In order to minimize $\est$ in \pref{eq:minimax-guarantee}, we have to obtain an estimator of $\tilD^{\pi_t}_\bi(\phi\|M^\star)$ for all $\phi$. This can only be achieved via \emph{batching}, which results in the design of \pref{alg:general batched}: In each epoch $k=1,2,\ldots, T/\tau$, the learner uses the same policy $\pi_k$ to interact with the MDP for $\tau$ episodes. While similar epoching mechanism has been proposed in \cite{foster2024model}, our construction of the estimator improves their rate of $\est$ from $\sqrt{T}$ to $T^{\frac{1}{3}}$. To see the difference, consider the case $N=1$ in the stochastic setting, in which the goal is to approximate $\sum_{h=1}^H \left(\E^{\pi_k, M^\star}[\ellest_h(\phi; o_h)]\right)^2$. With observations $(o^1, \ldots, o^\tau)$ drawn from $M^\star(\cdot|\pi_k)$ in epoch $k$, we construct an \emph{unbiased} estimator as $L_k(\phi) =\sum_{h=1}^H\big(\frac{2}{\tau}\sum_{i=1}^{\tau/2} \ellest_h(\phi; o_{h}^i)\big)\big(\frac{2}{\tau}\sum_{i=\tau/2+1}^{\tau} \ellest_h(\phi; o_{h}^i)\big)$, while \cite{foster2024model} constructs a \emph{biased} estimator as $L_k(\phi) =\sum_{h=1}^H\big(\frac{1}{\tau}\sum_{i=1}^{\tau} \ellest_h(\phi; o_{h}^i)\big)^2$. The detail of this estimation procedure is provided in \pref{app: batching improve}. 
+
+
+%By choosing epoch length $\tau$ long enough, the estimation error can be controlled, and a properly designed \postupdate can make $\est$ sublinear in $T$. 
+
+\iffalse
+Overall, \pref{alg:MF-S} ensures the following:  
+
+%Through batching, the $\est$ in 
+
+%The regret guarantee of \pref{alg:MF-S} is established in the following theorem.  %Finally, we can show that the posterior update in \pref{eq:rho sto} is able to make $\est= O(\log|\Phi|)$. \cw{maybe some more $\tau$ dependency}
+
+
+
+%and divide the total $T$ episodes into $K$ epochs, solving policy distribution $p_k$ through \pref{eq:opt-dec-p} at the beginning of every epoch $k \in [K]$
+%\begin{align}
+%    p_k = \min_{p \in \Delta(\Pi)} \max_{M \in \calM} \E_{\pi \sim p}\E_{f \sim \rho_k}\left[f(\pi_f) - V_M(\pi) - \frac{1}{\eta} D^\pi_{bi}(f||M) \right], \label{eq:opt-dec-p}
+%\end{align}
+%where $\rho_k \in \Delta(\calF)$ is maintained through optimistic posterior update \citep{zhang2022feel}. Namely, let $\tau$ be the epoch length, the algorithm in \cite{foster2024model} samples a policy $\pi_k \sim p_k$ at the beginning of epoch $k$ and, playing it in the following $\tau$ rounds and observe $o_{k,h}^i = (s_{k,h}^i, a_{k,h}^i, r_{k,h}^i, s_{k,h+1}^i)$ at epoch $k$, episode $(k-1)\tau + i$, and step $h$. With uniform initalized $\rho_1$, $\rho_{k+1}$ is updated through \pref{eq:opt-rho}
+%\begin{align}
+%    \rho_{k+1}(f) \propto \rho_k(f)\exp\left(\gamma \left(\eta f(\pi_f)
+% - L_k(f)\right)\right). %\label{eq:opt-rho}
+%\end{align}
+%where $f(\pi_f)$ adds optimism to the posterior distribution, making it favors high-value functions, and 
+%\begin{align}
+%    L_k(f) = \sum_{h=1}^H\left(\frac{1}{\tau}\sum_{i=1}^{\tau} \ellest_h(f; o_{k,h}^i)\right)^2 \label{eq:Lkf}
+%\end{align}
+%is the estimation of divergence $ D^\pi_{bi}(f||M^\star)$ under the ground-truth model $M^\star$. 
+
+%Building on the design of \cite{foster2024model}, our approach \pref{alg:MF-S} instantiates \pref{alg:general} with $\Phi=\{\phi_f: f\in\calF\}$ where $\phi_f=\{(M,\pi_M): M\text{~induces~}f\}$, and $D^\pi(\nu||\rho_k) = \frac{1}{\eta}\E_{(M,\pi^\star) \sim \nu}\E_{o \sim M(\pi)}\left[\KL\left(\nu_{f|\pi, o}, \rho_k\right) + \frac{1}{4}\E_{f\sim \rho_k}\left[D_{bi}^\pi(f||M)\right]\right]$, resulting in optimization \pref{eq:minmax sto} to solve policy distribution $p_k$. Compared to the objective \pref{eq:opt-dec-p} in \cite{foster2024model}, which selects the comparator $\E_{f \sim \rho_k}[f(\pi_f)]$, our formulation instead adopts $\E_{(M, \pi^\star) \sim \nu}[V_M(\pi^\star)]$ as the comparator. This choice aligns our method more closely with classical DEC and AIR approaches in model-based settings. In addition, our optimization \pref{eq:minmax sto} includes an extra KL-divergence term beyond the bilinear divergence $D_{bi}^\pi$, which encourages exploration toward more informative actions. We demonstrate in \pref{thm:lower bound} that this term can yield strict advantages in specific scenarios over the method in \cite{foster2024model}. Since we change our comparator to $\E_{(M, \pi^\star) \sim \nu}\left[V_M(\pi^\star)\right]$, we no longer require the optimistic term to update $\rho_{k+1}$ as in \pref{eq:opt-rho}. However, the additional KL-divergence in \pref{eq:minmax sto} necessitates a corresponding update mechanism for $\rho_{k+1}$. Accordingly, our final update of $\rho_{k+1}$ follows \pref{eq:rho sto}, which jointly minimizes estimated bilinear divergence $L_k$ and KL-divergence based on observations, regularized on the last step $\rho_k$ to ensure stability. The guarantee of our \pref{alg:MF-S} is given in \pref{thm:mf-s}.
+
+
+
+
+\begin{theorem}\label{thm: bilinear result}
+For the  bilinear class defined in \pref{assum:sto bilinear}, \pref{alg:MF-S} ensures the following: If for all $\phi \in \Phi$, $\esttt(\pi_\phi) = \pi_\phi$, then $\E\left[\Reg(\pi_{M^\star})\right] \le \tilde{O}\big(\sqrt{dL\log|\Phi|}T^{\frac{3}{4}}\big)$,  where $L$ is an upper bound of $|\ellest_h|$;
+   if there exists $\phi \in \Phi$ such that \mbox{$\esttt(\pi_\phi) \neq \pi_\phi$, then $\E\left[\Reg(\pi_{M^\star})\right]\le \tilde{O}\big(\left(dL\log|\Phi|\right)^{\frac{1}{3}}T^{\frac{5}{6}}\big)$. }%\footnote{It is possible to achieve high probability bounds with minor modifications. See \pref{app:model-free stoc}. }  
+   %\cw{should have $L$ dependency} 
+\label{thm:mf-s}
+\end{theorem}
+\fi
+
+
+%We leave the proof and more details in \pref{app:model-free stoc}. Our algorithm can also achieve high-probability bound with minor modification---see \pref{app: high prob}. 
+%\pref{thm:mf-s} recovers the same results in \cite{foster2024model} \footnote{\cite{foster2024model} provides high-probability bounds. Our \pref{alg:MF-S} can also achieve high-probability bounds with small changes. See details in \pref{app:model-free stoc}.}. %Furthermore, in \pref{thm:lower bound}, we show that in special cases, our approach can have strict benefit compared with \cite{foster2024model}.
+
+%\begin{theorem}
+%There exists a three-arm bandit instance that satisfies the following properties for any $\eta \le \frac{1}{2}$,
+%\begin{itemize}
+%    \item The algorithm in \cite{foster2024model} (\pref{eq:opt-dec-p} and \pref{eq:opt-rho}) suffers $\Reg \ge \sqrt{T}$.
+%    \item Our \pref{alg:MF-S} has  $\Reg \le  O(1)$.
+%\end{itemize}
+%\label{thm:lower bound}
+%\end{theorem}
+
+%\pref{thm:lower bound} shows that there exists instances such that our \pref{alg:MF-S} enjoys constant regret but algorithms in \cite{foster2024model} must suffers $\sqrt{T}$ regret. The improvement comes from the additional KL-divergence in our optimization \pref{eq:minmax sto}, which tends to choose actions that are informative about the environment. Although these informative actions may have large suboptimality gap, they can provide valuable information that enables the learner to identify the optimal action quickly in the follow-up rounds. In comparison,  methods in \cite{foster2024model} does not have a mechanism to select suboptimal but informative actions, making their exploration less effective and suffer larger regret in certain cases. Similar benefits of informative action selection and the drawback of optimistic approaches can also be found in \cite{russo2014learning, lattimore2017end}. Detail proof of \pref{thm:lower bound} can be found in \pref{sec:lower} in \pref{app:model-free stoc}.
+
+\subsubsection{Squared Estimation Error}
+Under stronger assumptions on the estimation function, we can improve the rate further. 
+This is motivated by the class of Bellman-complete MDPs, given as followed. 
+\begin{definition}[Bellman completeness for the stochastic setting]\label{def: sto bc} A $\Phi$ satisfying \pref{assum: function approximation stochastic} is Bellman complete under model $M=(P, R)$ if for any $\phi\in\Phi$, there exists an $\phi'\in\Phi$ such that for any $s,a$,  
+\begin{align*}
+    f_{\phi'}(s,a) = R(s,a)+\E_{s'\sim P(\cdot|s,a)} [f_\phi(s')].  
+\end{align*}
+A $\Phi$ is Bellman complete if it is Bellman complete under all model $M\in\calM$\footnote{In fact, it suffices to assume Bellman completeness only under the ground-truth model $M^\star$ (as in \cite{foster2024model}). However, it is without loss of generality to assume Bellman completeness under all $M\in\calM$, as one can preprocess the model set $\calM$ by eliminating models under which Bellman completeness does not hold. For simplicity, we assume the latter. Similar for \pref{def: adv bc}. }. 
+\end{definition}
+\begin{definition}[Bellman completeness for the hybrid setting]\label{def: adv bc} A $\Phi$ satisfying \pref{assum: unique mapping} is Bellman complete under transition $P$ if for any $\phi\in\Phi$, there exists an $\phi'\in\Phi$ such that $\pi_{\phi'}=\pi_\phi$ and for any $s,a,R$,  
+\begin{align*}
+    f_{\phi'}(s,a; R) = R(s,a) + \E_{s'\sim P(\cdot|s,a)}[f_\phi(s'; R)].  
+\end{align*}
+A $\Phi$ is Bellman complete if it is Bellman complete under all transition $P\in\calP$. 
+\end{definition}
+
+
+\begin{assumption}\label{assum: squared est err}
+   There exists $\err_h: \Phi\times\Phi\times \calO \to [0, B^2]$ for every $h$ and $\calT_M: \Phi\to \Phi$ for every~$M$ such that for any $\phi$ and any $M\in\phi$, it holds that $\phi=\calT_M\phi$. Furthermore, for any $\phi', \phi\in\Phi$, any $M\in\calM$, and any $\pi\in\Pi$,  
+   \begin{align*}
+       4B^2\cdot \E^{\pi, M}\left[\err_h(\phi', \phi; o_h) - \err_h(\calT_{M}\phi, \phi; o_h)\right] &\geq \E^{\pi, M}\left[\left(\err_h(\phi', \phi; o_h) - \err_h(\calT_{M}\phi, \phi; o_h)\right)^2\right]. 
+   \end{align*}
+   Additionally, assume that the adversary is restricted such that $\calT_{M_t}\phi = \calT_{M_{t'}}\phi$ for all $\phi$ and all $t,t'\in[T]$. 
+\end{assumption}
+Similar to \pref{assum: avg err}, the function $\xi$ in \pref{assum: squared est err} will be instantiated as the square Bellman error in \pref{lem: sq assum reduction} for all concrete examples. In this case, \pref{assum: squared est err} corresponds to the standard realizability plus Bellman-completeness assumption.
+% \textcolor{blue}{\pref{assum: squared est err} is similar to \pref{assum: avg err} that does not introduce additional restrictions on the problem class, but only posit the existence of suitable “estimation functions’’ in Bellman completeness setting that can be used to test whether an observation is consistent with a given partition. Such estimation functions always exist given a valid partition, but their concrete forms differ between the stochastic and hybrid settings and are provided in \pref{lem: sq assum reduction}. 
+% We can leverage the estimation function defined in \pref{assum: squared est err} to instantiate the divergence $\tilD^\pi(\phi\|M)$ in \label{pref: our divergence} and the general regret bound is shown in \pref{thm: sq est} }
+
+
+\begin{theorem}
+\label{thm: sq est}
+    Assume \pref{assum: squared est err} holds. Then \pref{alg:general} with \pref{alg:MF-BiLevel-final} as \postupdate with $\tilD^\pi(\phi\|M) = \tilD_\sbe^\pi(\phi\|M) \triangleq \frac{1}{B^2H}\sum_{h=1}^H \E^{\pi, M}\left[\err_h(\phi, \phi; o_h) - \err_h(\calT_{M}\phi, \phi; o_h)\right]$ ensures
+    \begin{align*}
+        \E[\est] \lesssim \log^2|\Phi|. 
+    \end{align*}
+\end{theorem}
+
+\begin{lemma}\label{lem: sq assum reduction}
+In the stochastic setting, \pref{assum: function approximation stochastic} together with Bellman completeness (\pref{def: sto bc}) implies \pref{assum: squared est err} with the estimation function
+$\err_{h}(\phi',\phi;o_h)=(f_{\phi'}(s_h,a_h)-r_h-f_{\phi}(s_{h+1}))^2$ and $B^2=1$.  
+In the hybrid setting, \pref{assum: function approximation hybrid}, \pref{assum: unique mapping} and \pref{assum: known feature} together with Bellman completeness (\pref{def: adv bc}) imply
+\pref{assum: squared est err}
+with the estimation function 
+$\xi_h(\phi', \phi;o_h)=\|(f_{\phi'}(s_h,a_h;\bm{e}_j)-\varphi(s_h,a_h)^\top\bm{e}_j - f_{\phi}(s_{h+1};\bm{e}_j))_{j\in[d]}\|^2$ and $B^2=d$, where $\bm{e}_j$ as a reward represents the reward function defined as $R(s,a)=\varphi(s,a)_j$. 
+\end{lemma}
+
+%\cite{foster2024model} also discusses model-free learning under Bellman completeness (BC) and achieve improved regret bound. 
+%Under the Bellman completeness assumption, the bilinear divergence $D_{bi}^\pi(f||M)$ in \pref{eq:opt-dec-p} is replaced by square Bellman error divergence $D_{sbe}^\pi(f|| M) = \sum_{h=1}^H\E^{M, \pi}\left[\left(f(s_h, a_h) - R(s_h, a_h) - \E_{s' \sim P(\cdot|s_h, a_h)}\left[\max_{a'}f(s', a')\right]\right)^2\right]$ where $M = (R, P)$. 
+%\pref{assum: squared est err} covers settings satisfying Bellman completeness (\pref{lem: bellman com}). 
+With \pref{assum: squared est err}, \postupdate no longer needs to rely on batching. We leverage a two-timescale \postupdate learning procedure similar to that of \cite{foster2024model}, which in turn builds on \cite{agarwal2022non}. We refine their approach so $\est$ can be bounded by a constant, improving over \cite{foster2024model}'s $T^{\frac{1}{3}}$ bound. In addition, our approach comes with a simpler regret analysis. Our \postupdate features a two-layer learning structure with a biased loss on the top layer. It is related to model selection algorithms with comparator-dependent second-order bounds (e.g.,  \cite{chen2021impossible}), but also has its special structure not seen in prior work. Thus, we believe it is of independent interest.  The detail of this estimation procedure is provided in \pref{app: bilevel}.  %We provide a standalone algorithm in \pref{app: bilevel} to deal with this type of problems. 
+
+
+%More details are provided in \pref{app:BC}. 

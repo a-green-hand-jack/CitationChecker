@@ -1,0 +1,206 @@
+\section{Proof of Theorem \ref{thm:offlineRL-distill-1}}\label{sec:pfthm2}
+For ease of notation, we will use $O()$ notation to absorb absolute constants in the proof below.
+
+For convenience, like in the case supervised regression case, we shall homogenize the Bellman loss as follows. Let us define $\zeta(s,a,r) := (t_1, \dots, t_d, r)$ where $\phi(s,a) = (t_1, \dots, t_d)$. Note that since $\phi : \mc{B}(d_0, B_0) \times \mc{B}(d_0, B_0) \to \mc{B}(d, B)$, we have $\zeta : \mc{B}(d_0, B_0) \times \mc{B}(d_0, B_0) \times [0, R_{\tn{max}}]\to \mc{B}(q, B + R_{\tn{max}})$. We also define a class of functions $\mc{Q}$ mapping $\mc{B}(d_0, B_0) \times \mc{B}(d_0, B_0) \times [0, R_{\tn{max}}]$ to $\R$ where each $h \in \mc{Q}$ is given by $h(s,a,r) := \br^{\sf T}\zeta(s,a,r)$ for some $\br \in \R^{d+1}$. Let $\mc{Q}_1$ be the restricted class where $\|\br\|_2 \leq 2$
+
+Note that for any $f \in \mc{Q}_0$ given by $f(s,a) := \bv^{\sf T}\phi(s,a)$, taking $\br = (v_1, \dots, v_d, -\lambda)$ yields that $h \in \mc{Q}$ and $h(s,a,r) = f(s,a) - \lambda r$, and $f(s',a') = h(s',a',0)$. Thus, we define another version of the Bellman loss as:
+\begin{equation}
+    \tilde{L}_{\tn{Bell}}(D, h) := \E_{(s, a, r, s') \leftarrow D}\left[\left(h(s, a,r) - \gamma \max_{a' \in \mc{A}} h(s',a',0)\right)^2\right] \label{eqn:tildeL}
+\end{equation}
+Using this we can see that, for $f \in \mc{Q}_0$ where $f(s,a) := \bv^{\sf T}\phi(s,a)$, taking $\br = (v_1, \dots, v_d, -1)$ and $h(s,a,r) := \br^{\sf T}\zeta(s,a,r)$ we obtain that $h \in \mc{Q}_1$ and 
+\begin{equation}
+    L_{\tn{Bell}}(D, f) = \tilde{L}_{\tn{Bell}}(D, h). \label{eqn:LtildeL} 
+\end{equation}
+Further, for some $(f, \lambda) \in H$, where $f(s,a) := \bv^{\sf T}\phi(s,a)$, letting $\br = (v_1, \dots, v_d, -\lambda)$ and $h(s,a,r) := \br^{\sf T}\zeta(s,a,r)$, we obtain that $h \in \mc{Q}$ and 
+\begin{equation}
+    \hat{L}_{\tn{Bell}}(D, f, \lambda) = \tilde{L}_{\tn{Bell}}(D, h). \label{eqn:hatLtildeL} 
+\end{equation}
+Thus, by abuse of notation, we think of $h \in \mc{H}$ being chosen randomly by sampling $\br \in N(0,1)^{d+1}$. We shall use $q$ to denote $d+1$ in the rest of this section.
+We fix $D^{\sf orl}_{\tn{train}} = \{(s_i, a_i, r_i, s'_i)\}_{i=1}^n$ as the given training dataset, and for $\hat{D} = \left\{(\hat{s}_i, \hat{a}_i, \hat{r}_i, \hat{s}'_i) \in \mc{B}(d_0, B_0) \times \mc{B}(d_0, B_0)\times [0, R_{\tn{max}}] \times \mc{B}(d_0, B_0)\right\}_{i=1}^t$,
+we  define:
+\begin{equation}
+    \tilde{L}^{\tn{err}}_{\tn{Bell}}(D^{\sf orl}_{\tn{train}},  \hat{D}, h) := \left(\tilde{L}_{\tn{Bell}}(D^{\sf orl}_{\tn{train}}, h) - \tilde{L}_{\tn{Bell}}(\hat{D}, h)\right)^2 \label{eqn:tildeLerr}
+\end{equation}
+It is easy to see using the norm bounds and \eqref{eqn:tildeL}, \eqref{eqn:tildeLerr} that for any $h \in \mc{Q}_1$, $\tilde{L}_{\tn{Bell}}(D, h), \tilde{L}_{\tn{Bell}}(D^{\sf orl}_{\tn{train}}, h) \leq 16 (B + R_{\tn{max}})^2$ and $\tilde{L}^{\tn{err}}_{\tn{Bell}}(D^{\sf orl}_{\tn{train}},  \hat{D}, h) \leq 256 (B + R_{\tn{max}})^4$.
+
+
+\subsection{Probabilistic Lower bound for  fixed $\hat{h}$ and $\hat{D}$}
+We fix for this subsection $\hat{h} \in \mc{Q}_1$ and $\hat{D}$ as above. 
+First we prove the following lemma.
+\begin{lemma}
+    If $\tilde{L}^{\tn{err}}_{\tn{Bell}}(D^{\sf orl}_{\tn{train}},  \hat{D}, \hat{h}) \geq \Delta$, then  over the choice of $g \in H$, s.t. $g(s,a,r) := \br^{\sf T}\zeta(s,a,r)$,
+    \begin{equation}
+        \Pr\left[\left(\tilde{L}^{\tn{err}}_{\tn{Bell}}(D^{\sf orl}_{\tn{train}},  \hat{D}, g) \geq \Delta/8\right)\wedge\left(\|\br\|_2 \leq 2\right)\right] \geq \left(\frac{\Delta}{(\sqrt{d}(B + R_{\tn{max}})^4))}\right)^{(c_1 d)}.
+    \end{equation}
+    where $c_1 > 0$ is a constant.
+\end{lemma}
+\begin{proof}
+    Let $\hat{h}$ correspond to the vector  $\hat{c}\hat{\br} \in \R^{d+1}$ where $\|\hat{\br}\|_2 = 1$ and $\hat{c} \leq 2$. Thus, a random $\br \in N(0,1)^{d+1}$ corresponds to $\alpha \hat{\br} + \mb{H}\tilde{\br}$ where $\alpha \sim N(0,1)$ and $\tilde{\br} \sim N(0,1)^d$ are independently sampled and $\mb{H}$ is a $(d+1)\times d$ matrix of unit norm columns which are a completion of $\hat{\br}$ to a orthonormal basis. From the above upper bound, we have that $\tilde{L}^{\tn{err}}_{\tn{Bell}}(D^{\sf orl}_{\tn{train}},  \hat{D}, \hat{h}) \leq 256 (B + R_{\tn{max}})^4$ and therefore, $\Delta \leq 256 (B + R_{\tn{max}})^4$. 
+    
+    Let us condition on the event $\mc{E}$ that $\|\tilde{\br}\|_\infty \leq \left(c_0\Delta/(\sqrt{d}(B + R_{\tn{max}})^4))\right)$ and $\alpha \in [1, 3/2]$. Firstly, since $\left(c_0\Delta/(\sqrt{d}(B + R_{\tn{max}})^4))\right) = O(1)$, by the properties of the standard Gaussian distribution, one obtains that
+    \begin{equation}
+        \Pr[\mc{E}] \geq \left(\frac{\Delta}{\sqrt{d}(B+R_{\tn{max}})^4)}\right)^{c_1 d}
+    \end{equation}
+    for some $c_1$ depending on $c_0$ only. Now, $\mc{E}$ implies that $\left\|\mb{H}\tilde{\br}\right\|_2 \leq \left(c_0\Delta/(B + R_{\tn{max}})^4\right) = \upsilon < 0.1$ for which we choose $c_0 > 0$ small enough.
+    Since $\alpha > 0$ under $\mc{E}$ this implies that
+    \begin{align}
+        &\left(g(s, a,r) - \gamma \max_{a' \in \mc{A}} g(s',a',0)\right)^2 \nonumber \\
+        = & \left((\alpha \hat{\br} + \mb{H}\tilde{\br})^{\sf T}\zeta(s, a,r) - \gamma \max_{a' \in \mc{A}} (\alpha \hat{\br} + \mb{H}\tilde{\br})^{\sf T}\zeta(s', a',0)\right)^2 \nonumber \\
+        = &\left(\alpha \hat{\br}^{\sf T}\zeta(s, a,r) - \gamma  \max_{a' \in \mc{A}} \alpha \hat{\br}^{\sf T}\zeta(s', a',0) \pm O(\upsilon (B + R_{\tn{max}}))\right)^2 \nonumber \\
+        = &\left(\alpha \hat{\br}^{\sf T}\zeta(s, a,r) - \alpha\gamma  \max_{a' \in \mc{A}} \hat{\br}^{\sf T}\zeta(s', a',0) \pm O(\upsilon (B + R_{\tn{max}}))\right)^2 \nonumber \\
+        = &\left(\alpha \hat{\br}^{\sf T}\zeta(s, a,r) - \alpha\gamma  \max_{a' \in \mc{A}} \hat{\br}^{\sf T}\zeta(s', a',0)\right)^2 \pm O(\upsilon (B + R_{\tn{max}})^2) \nonumber \\
+    \end{align}
+    where we used the upper bound on $\alpha$.
+    Thus, 
+    using analysis similar to the proof of Lemma \ref{lem:vecnet}, we obtain that for some choice of $c_0 > 0$ small enough, $\mc{E}$ implies that 
+    \begin{equation}
+        \left|\tilde{L}^{\tn{err}}_{\tn{Bell}}(D^{\sf orl}_{\tn{train}},  \hat{D}, g) - \alpha^4\tilde{L}^{\tn{err}}_{\tn{Bell}}(D^{\sf orl}_{\tn{train}},  \hat{D},  (\hat{h}/\hat{c}))\right| \leq \Delta/64
+    \end{equation}
+    and since $\alpha \geq 1$ and and $\hat{c} \leq 2$, we have $\alpha^4\tilde{L}^{\tn{err}}_{\tn{Bell}}(D^{\sf orl}_{\tn{train}},  \hat{D},  (\hat{h}/\hat{c})) \geq \Delta/16$. Thus, 
+    \begin{equation}
+        \tilde{L}^{\tn{err}}_{\tn{Bell}}(D^{\sf orl}_{\tn{train}},  \hat{D}, g) \geq  \Delta/32.
+    \end{equation}
+    Moreover, since $\left\|\mb{H}\tilde{\br}\right\|_2 < 0.1$ and $\alpha \in [1, 3/2]$, we obtain that $\|\br\|_2 \leq 2$, which completes the proof.
+\end{proof}
+The following amplified version of the previous lemma is a direct implication.
+\begin{lemma} \label{lem:ampprbbd-orl}
+    Let $\tilde{L}^{\tn{err}}_{\tn{Bell}}(D^{\sf orl}_{\tn{train}},  \hat{D}, \hat{h}) \geq \Delta$. Then, for iid random $g_1, \dots, g_k \sim H$, s.t. $g_j(s,a,r) := \br_j^{\sf T}\zeta(s,a,r)$ we have
+\begin{equation*}
+        \displaystyle \Pr\left[\bigvee_{j=1}^k \left(\left(\tilde{L}^{\tn{err}}_{\tn{Bell}}(D^{\sf orl}_{\tn{train}},  \hat{D}, g_j) \geq \Delta/8\right)\wedge\left(\|\br_j\|_2 \leq 2\right)\right)\right] \geq 1 - \left(1- \left(\frac{\Delta}{(\sqrt{d}(B + R_{\tn{max}})^4))}\right)^{(c_1 d)}\right)^k
+        \end{equation*}
+\end{lemma}
+
+\subsection{Net over predictors $h$ and synthetic datasets $D^{\sf orl}_{\tn{syn}}$}\label{sec:net-orl}
+First we shall construct a net over predictors  $h \in \mc{Q}_1$, where $h(\bx) := \br^{\sf T}\zeta(s,a,r)$ for some $\br \in \mc{B}(q,2)$. Thus, we can consider the Euclidean net $\mc{T}(q, 2, \xi))$ and let $\hat{\mc{Q}}_1 := \{\hat{h} \in \mc{Q}_1 : \exists \hat{\br} \in \mc{T}(q, 2, \xi)\tn{ s.t. } \hat{h}(s,a,r) := \hat{\br}^{\sf T}\zeta(s,a,r)\}$, for some parameter $\xi \in (0,1)$ to be chosen later. The proof of the following simple approximation lemma  is exactly along the lines of the proof of Lemma \ref{lem:vecnet} and the analysis in the previous subsection accounting for the error in the $\tn{max}$ term of \eqref{eqn:tildeL} which is handled similarly. 
+\begin{lemma} \label{lem:vecnet-orl}
+    For any $D^{\sf orl}_{\tn{train}}$ and $\hat{D}$ as defined in the previous subsection, for any $h \in \mc{Q}_1$, $\exists \hat{h} \in \hat{\mc{Q}}_1$ s.t. 
+    \begin{equation}
+        \left|\tilde{L}^{\tn{err}}_{\tn{Bell}}(D^{\sf orl}_{\tn{train}}, \hat{D}, h) - \tilde{L}^{\tn{err}}_{\tn{Bell}}(D^{\sf orl}_{\tn{train}}, \hat{D}, \hat{h}) \right| \leq  300\xi(B+R_{\tn{max}})^4.
+    \end{equation}
+\end{lemma}
+The argument for net over the synthetic dataset is similar - we show that the synthetic data $D^{\sf orl}_{\tn{syn}}$ can be approximated with a much smaller dataset  $\hat{D}$ whose points are from a discrete set.
+\begin{lemma}\label{lem:datasetnet-orl}
+    Fix a $\tau, \nu \in (0,1)$. For any $D^{\sf orl}_{\tn{syn}}$, there exists a dataset $\hat{D}$ of size $s := O((p/\tau^2)\log(1/\tau))$ (where $p$ is the pseudo-dimension in Sec. \ref{sec:our_results}) whose points $(\hat{s}, \hat{a}, \hat{r}, \hat{s}')$ are s.t. $\hat{s}, \hat{a}, \hat{s}'$ are from the Euclidean net $\mc{T}(d_0, B_0, \nu(B+R_\tn{max})/(10L))$ and $\hat{r} \in \mc{T}(1, R_{\tn{max}},  \nu(B+R_\tn{max}))$ such that for any $h \in \mc{Q}_1$,
+    \begin{equation}
+        \left|\tilde{L}^{\tn{err}}_{\tn{Bell}}(D^{\sf orl}_{\tn{train}}, \hat{D}, h) - \tilde{L}^{\tn{err}}_{\tn{Bell}}(D^{\sf orl}_{\tn{train}}, D^{\sf orl}_{\tn{syn}}, h)\right| \leq O(\tau(B+R_{\sf max})^4 + \nu(B+R_{\sf max})^4)
+    \end{equation}
+    \end{lemma}
+\begin{proof}
+    Since $p$ is the pseudo-dimension is as defined in Sec. \ref{sec:our_results}), it is also the pseudo-dimension on the class of functions $\mc{V}$ given by $\tilde{L}_{\tn{Bell}}(\{s,a,r,s'\}, h)$  for $h \in \mc{Q}_1$. Thus, Let us first define  $\ol{D}$ probabilistically to be a set of $t := O((p/\tau^2)\log(1/\tau))$ points independently and u.a.r. sampled from $D^{\sf orl}_{\tn{syn}}$. Using the upper bound on $\mc{N}(\tau/16, \mc{V}, 2t)$ from Chapters 10.4 and 12.3, and Theorem 17.1 of [Anthony-Bartlett, 2009], we get that  for any $h \in \mc{Q}_1$,
+    \begin{equation}
+        \left|\tilde{L}_{\tn{Bell}}(\ol{D}, h) - \tilde{L}_{\tn{Bell}}(D^{\sf orl}_{\tn{syn}}, h)  \right| \leq 16\tau(B+R_{\tn{max}})^2
+    \end{equation}
+    with probability at least $ > 0$. Thus, using the above and arguments similar to those used earlier in this and the previous sections we obtain that there exists $\ol{D}$ of size $s$ s.t.
+    \begin{equation}
+        \left|\tilde{L}^{\tn{err}}_{\tn{Bell}}(D^{\sf orl}_{\tn{train}}, \ol{D}, h) - \tilde{L}^{\tn{err}}_{\tn{Bell}}(D^{\sf orl}_{\tn{train}}, D^{\sf orl}_{\tn{syn}}, h)\right| \leq O(\tau(B+R_{\tn{max}})^4)
+    \end{equation}
+    Lastly, to get $\hat{D}$ we replace each $(s,a,r,s')$ in $\ol{D}$ with the nearest point in the net $\mc{T}_1 := \mc{T}(d_0, B_0, \nu(B+R_\tn{max})/(10L)) \times \mc{T}(d_0, B_0, \nu(B+R_\tn{max})/(10L)) \times \mc{T}(1, R_{\tn{max}},  \nu(B+R_\tn{max}))) \times \mc{T}(d_0, B_0, \nu(B+R_\tn{max})/(10L))$. Using the Lipschitzness bound of $L$ on $\phi$ and the analysis used in the proof of Lemma \ref{lem:datasetnet}, we obtain that,
+    \begin{equation}
+        \left|\tilde{L}^{\tn{err}}_{\tn{Bell}}(D^{\sf orl}_{\tn{train}}, \ol{D}, h) - \tilde{L}^{\tn{err}}_{\tn{Bell}}(D^{\sf orl}_{\tn{train}}, \hat{D}, h)\right| \leq O(\nu(B+R_{\tn{max}})^4)
+    \end{equation}
+    Combining the above two inequalities completes the proof.
+\end{proof}
+
+\subsection{Union bound and proof of Theorem \ref{thm:offlineRL-distill-1}}
+We take $\xi, \tau$ and $\nu$ to be $O(\Delta/(B + R_{\tn{max}})^4)$, so that applying Lemmas \ref{lem:datasetnet-orl} and \ref{lem:vecnet-orl} yields,
+\begin{lemma}\label{lem:combinedned-orl}
+For any $h\in \mc{Q}_1$ and $D^{\sf orl}_{\tn{syn}}$, there exist $\hat{h} \in \hat{\mc{Q}}_1$ and $\hat{D} \in (\mc{T}_1)^t$ such that
+\begin{equation}
+    \left|\tilde{L}^{\tn{err}}_{\tn{Bell}}(D^{\sf orl}_{\tn{train}}, D^{\sf orl}_{\tn{syn}}, h) - \tilde{L}^{\tn{err}}_{\tn{Bell}}(D^{\sf orl}_{\tn{train}}, \hat{D}, \hat{h})\right| \leq C'\Delta
+\end{equation}
+where $C'>0$ is a small enough constant and $t := p(C_1/\tau^2)\log(1/\tau)$ for some constant $C_1$ and $\hat{\mc{Q}}_1$ is as defined in the previous subsection.
+\end{lemma}
+Now, the size of the net is bounded as follows:
+\begin{align}
+    \left|\hat{\mc{Q}}_1\right|\times \left|\mc{T}_1\right|^t \leq & \left(\frac{6}{\xi}\right)^q \cdot \left(\frac{6B_0L}{\nu(B+R_{\tn{max}})}\right)^{d_0t}  \nonumber \\
+    = & \tn{exp}\left(q\log((B+R_{\tn{max}})/\Delta) + d_0p\log((B_0L(B+R_{\tn{max}})/\Delta)\right) =: \ell
+\end{align}
+Now, using the above,  we take $k = \left(\frac{\Delta}{(\sqrt{d}(B + R_{\tn{max}})^4))}\right)^{(-c_1 d)}\ell\log(1/\delta)$ in Lemma \ref{lem:ampprbbd-orl} and apply union bound over the net (along the lines of the proof in Sec. \ref{sec:unionbd}).   To get back the lower bound with $D^{\sf orl}_{\tn{syn}}$ we apply Lemma \ref{lem:datasetnet-orl} to $g_j$ such that $\left|\br_j\right| \leq 2$ i.e. $g_j \in \mc{Q}_1$. This completes the proof. 
+
+\iffalse
+\subsection{Previous}
+
+Let the real data be $D_{real} = \{s_i,a_i,s'_i,r_i\}$ and synthetic data be $D_{synthetic} = \{z_i,b_i,z'_i,d_i\}$. We match the bellman loss for both in the final loss as before.
+
+\[
+L_{bellman}(D) = \sum_{D}(f(s,a) - r -\gamma \mathsf{max}_{a'}f(s',a'))^2 
+\]
+
+$f$ estimates the q-value for the RL task. We only consider linear q-value and value function frameworks. So we consider that for some vector $\vec{\bv} \in \mathbb{R}^d$, $f(s,a) = {\vec{\bv}}^{\sf T}\phi(s,a)$, where $\phi(s,a)$ is a representation.
+
+Assumptions: $\|\phi\| \leq 1$ and we consider $\|\vec{\bv}_1\|\leq B$.
+
+Define $L_{squared}$ as,
+\[
+    L_{squared}(\vec{v}) = \left(\sum_{D_{real}}(f(s,a) - r -\gamma \mathsf{max}_{a'}f(s',a'))^2 - \sum_{D_{synthetic}}(f(z,b) - d -\gamma \mathsf{max}_{b'}f(z',b'))^2 \right)^2
+\]
+\begin{theorem}
+    Let $L_{squared}(\vec{\bv}_1) > \Delta$ for some $\vec{\bv}_1$.
+    Then, when $\vec{\bv} \sim N(0,{\mb{I}})$, we have
+    \[
+    \Pr[L_{squared}(\vec{\bv}) \geq \frac{\Delta}{d^2}] \geq  \frac{\Delta^{\frac{d+1}{2}}}{4d^{d+2}}
+    \]
+\end{theorem}
+
+\begin{proof}
+We first lower bound the expectation $\mathbb{E}[L_{squared}(\vec{\br})]$ given that $L_{squared}(\vec{\br}_1)>\Delta$. 
+    
+We can find unit vectors $\vec{\br}_2, \dots, \vec{\br}_d$ such that $\vec{\br}_1, \dots, \vec{\br}_d$ is an orthogonal basis.
+For an arbitrary $\vec{\br}$, this means that we can can find real numbers $\alpha$ such that
+\[
+    \vec{\br} = \alpha_1 \vec{\br}_1 + \dots + \alpha_d \vec{\br}_d
+\]
+If $\vec{\br} \sim N(0,\mb{I})$, then for each $i$ we have $\alpha_i \sim N(0, 1/d)$. Define $\vec{\beta} = \sum_{i=2}^n \sum_{j=2}^d \alpha_{j}\vec{\br}_j$. Note that $\vec{\beta}$ is independent of $\alpha_1$. 
+Define $g(s,a,s',\vec{\bv}) = \vec{\bv}^{\sf T}\phi(s,a) - \gamma \mathsf{max}_{a'}(\vec{\bv}^{\sf T} \phi(s',a'))$.
+
+Now, with probability at least $\Omega(\Delta^{(d-1)/2 / d^d})$, we have $\| \beta \|_{\infty} \leq \frac{\sqrt{\Delta}}{96d^2}$. 
+
+We also know that w.p. 1/2, $\alpha_1 \geq 0$, which means that $g(\alpha_1 \vec{\bv}) = \alpha_1 g(\vec{\bv})$.
+
+Combing these, we get together with the upper bound on $\phi$, we get with probability at least $\Omega(\Delta^{(d-1)/2} / d^d)$,
+\[
+\alpha_1 g(s,a,s',\vec{\bv}_1) - \frac{\sqrt{\Delta}}{48d^2} \leq g(s,a,s',\alpha_1 \vec{\bv}_1 + \beta )\leq \alpha_1 g(s,a,s',\vec{\bv}_1) + \frac{\sqrt{\Delta}}{48d^2}
+\]
+
+Now, note that $|g| \leq 1+\gamma \leq 2$ for any parameters. Using this, we get 
+
+\[
+\alpha_1^2|\sqrt{L_{squared}(\vec{\bv}_1}|-\frac{\sqrt{\Delta}}{2d^2} \leq |\sqrt{L_{squared}(\alpha_1\vec{\bv}_1+ \beta)}|\leq \alpha_1^2|\sqrt{L_{squared}(\vec{\bv}_1}|+\frac{\sqrt{\Delta}}{2d^2} 
+\]
+
+Squaring and taking expectation over $\alpha_1$, we get
+\[
+\mathbb{E}[L_{squared}(\alpha_1 \vec{\bv}_1 + \beta)] \geq \frac{3L_{squared}(\vec{\bv}_1)}{d^2} - \frac{\sqrt{\Delta}\sqrt{L_{squared}(\vec{\bv}_1)}}{d^3} + \frac{\Delta}{4d^4} \geq \frac{2\Delta}{d^2}
+\]
+with probability at least $\Omega(\Delta^{(d-1)/2} / d^d)$.
+
+
+$L_{squared}(\vec{\bv})$ is a positive rv bounded above by 4. Using markov's inequality, we get
+\[
+\Pr[L_{squared}(\vec{\bv}) \geq \frac{\Delta}{d^2}] \geq  \frac{\Delta^{\frac{d+1}{2}}}{4d^{d+2}}
+\]
+\end{proof}
+
+\begin{lemma}
+    Let $L_{squared}(\vec{\br}_1) > \Delta$ for some unit $\vec{\br}_1$. Then, when $\vec{\bs}_1,\dots, \vec{\bs}_k \sim N(0, \mb{I})$, we have
+    \[
+        \Pr[L_{squared}(\vec{\bs}) > \frac{\Delta}{d^2}] \geq 1 - \delta
+    \]
+    for some $\vec{\bs} \in \{\vec{\bs}_1, \dots, \vec{\bs}_k\}$ for $k = O(\frac{d^{d+2}}{\Delta^{\frac{d+1}{2}}}\log(1/\delta))$.
+\end{lemma}
+
+\begin{proposition}
+    There exists a set $\bN =\{\vec{\bn}_1,\dots,\vec{\bn}_m\}$ such that if for some $\vec{\bv}_1$ with $\|\vec{\bv}_1\| \leq 1$, $L_{squared}(\vec{\bv}_1) > \Delta$, then we would have $L_{squared}(\vec{\bn}) > \Delta/2$ for some $\vec{\bn} \in \bN$ and $m = 2^{f(d,\Delta)}$.
+\end{proposition}
+\begin{proof}
+% {\color{red} ASK RISHI}
+\end{proof}
+
+\begin{theorem}
+    Let $\vec{\bR}_1,\dots, \vec{\bR}_k \sim N(0, \mb{I})$. If we have $\sum_{i}L_{squared}(\vec{\bR}_i) = L_{total} \leq \eps$, then for any unit $\vec{\br}$, we have
+    \[
+        \Pr[L_{squared}(\vec{\br}) \leq 2C\eps d^2] \geq 1-\delta
+    \]
+    for $k = O(f(d,\eps) \frac{d^{d+2}}{\eps^{\frac{d+1}{2}}}\log(1/\delta))$.
+\end{theorem}
+\fi

@@ -1,0 +1,91 @@
+\section{Experiments \& Analysis}
+\label{sec:experiments}
+
+%Here we apply our theoretical results and study various codes of practical interest.
+
+\subsection{Empirical Analysis of Variational Code}
+\label{sec:variational-code-experiments}
+
+First, we empirically evaluate the GMM-based adaptive variational code discussed in Section~\ref{sec:transformer-practical-code} as a computationally tractable and differentiable instance of an asymptotically optimal code for Transformers.
+
+\paragraph{Computing parity} We focus our initial investigation on the task of computing parity, i.e. given a sequence of 0s and 1s, determining whether there is an odd or even number of 1s. Computing parity is a common task for assessing Transformer expressivity and generalization~\citep{hahn2020theoretical,bhattamishra2020ability,chiang2022overcoming,ruoss2023randomized,deletang2022neural,anil2022exploring,zhou2022teaching,zhou2023algorithms}. Standard Transformers trained with maximum likelihood objectives struggle with consistent length generalization on this task, making it a useful benchmark for assessing whether an alternative objective can encourage stronger out-of-distribution generalization. 
+A key objective of our experiments is to distinguish between (1) failures of the proposed objective to select for compressible models with strong generalization and (2) failures to effectively optimize the proposed objective. To this end, for simple algorithmic tasks such as computing parity, we can again use ALTA, this time to manually determine a set of parameters that fits the training data and also has low complexity according to the proposed objective, establishing an upper bound on the minimum of the variational objective. We can then determine whether our optimization process, starting from a random initialization, can find a set of parameters with similar or lower loss. See~\ref{sec:transformer-exp-details} for details.
+
+
+The results for Transformers with different training objectives and initializations are shown in Table~\ref{tab:transformer_results}. Only the manually initialized model exhibits strong length generalization (OOD accuracy). All randomly initialized models fit the training set, but struggle with length generalization. The model trained with the variational objective from a random initialization does not achieve a loss comparable to the ALTA-compiler initialization. This suggests that while the objective may select for models with stronger generalization, standard optimization techniques fail to effectively find a strong minimizer, which we investigate further next.
+
+
+\begin{table}[t!]
+\centering
+\caption{Transformer performance on parity task for different training objectives and initializations.}
+\vspace{0.15cm}
+\scalebox{0.85}{
+\begin{tabular}{llccccc}
+\toprule
+\textbf{Init.} & \textbf{Objective} & \textbf{KL} (bits) & \textbf{Train NLL} (bits) &  \textbf{Train Acc.} & \textbf{OOD Acc.} \\
+\midrule
+        Random & MLE Baseline & --- & $2.5 \times 10^{1}$ & $100\%$ & $56.4\%$ \\
+        Random & Variational & $2.8 \times 10^{6}$ & $2.4 \times 10^{2}$ & $100\%$ & $60.4\%$ \\
+        Manual & Variational & $8.7 \times 10^{2}$ & $0.0$ & $100\%$ & $100\%$ \\
+%\midrule
+%Random & MLE Baseline & -- & 17.2 & -- & 100\% & 56.4\% \\
+%Random & Variational & 6.5M & 163.5 & 6.5M & 100\% & 60.4\% \\
+%Manual & Variational & 2.0K & 0.0 & 2.0K & 100\% & 100\% \\
+\bottomrule
+\end{tabular}
+}
+\label{tab:transformer_results}
+\end{table}
+
+
+\paragraph{Optimization analysis} To understand why our Transformer models underfit the proposed objective when randomly initialized, we study the simplified setting of a 2-layer MLP on a simple identity task, with details in \ref{sec:mlp-experiments}. We use a shared GMM prior and Gaussian posteriors for each weight. 
+Again, we see that random initialization fails to find a loss comparable to that achieved via manual initialization, indicating poor optimization of the proposed objective. By inspecting the learned prior and posterior distributions compared to those from manual initialization, we identify that one potential culprit is that the prior distribution collapses to a unimodal distribution (see Figure~\ref{fig:mlp_plots} in \ref{sec:mlp-experiments}). This is in contrast to our manually identified solution which consists of a multimodal distribution with low variance components, which leads to a significantly lower KL divergence. 
+These results suggests that future work should consider alternative optimization procedures that discourage this form of collapse, or consider alternative families of asymptotically optimal codes altogether. 
+
+\subsection{Asymptotic Bounds for Alternative Two-Part Codes}
+\label{sec:asymptotic-bounds}
+
+Next, we analyze asymptotic bounds for alternative two-part codes that may be of practical interest but do not strictly satisfy the conditions of asymptotic optimality. Recall from \ref{sec:two-part-codes-for-transformers} that the key requirement for satisfying the conditions of asymptotic optimality is that $\forall R \in \gR$ and $\forall z \in \gZ_{T,R}$, $-\log_2 \alpha_{M_R}(h^z) < |z| + c_T$ where $h^z = \zmap(T,R,z)$ and $c_T$ is an additive constant not depending on $R$ or $z$. % In other words, we want the description length for all model functions computable by $T$ within $R$, specified as $\alpha_{M_R}(h^z)$, to be less than or equal to $|z|$ up to an additive constant. 
+In Table~\ref{tab:asymptotic-bounds}, the \emph{Description Length Bound} refers to an upper bound on this model cost $-\log_2 \alpha_{M_R}(h^z)$, up to an additive constant, for various two-part codes that do not strictly satisfy this theoretical ideal. A sub-optimal bound for this quantity leads to a sub-optimal bound for the overall minimum codelength, %. This means that minimizing the codelength objective may not lead to optimal compression in the limit, 
+but close approximations could still be of practical interest. 
+
+
+
+ \begin{table}[h!]
+\centering
+\caption{Combining standard methods for quantization, adaptive selection of the prefix length, and layerwise weight sharing yields a two-part code with a description length upper bound (described in \ref{sec:asymptotic-bounds}) close to the theoretical ideal of $|z|$.  Ablating these methods degrades the bound, shifting the encoding cost away from the algorithmic complexity of the function computed by the network ($|z|$) and causing the encoding cost to scale linearly with the total parameter count of the network, driven by its maximum space ($R_s$) and time ($R_t$) resources.}
+\vspace{0.15cm}
+\scalebox{0.85}{
+\begin{tabular}{cccc}
+\toprule
+% \makecell[c]{\bf Quantization} & 
+%\makecell[c]{\bf Adaptive \\ \bf Prefix Length} & 
+%\makecell[c]{\bf Layerwise \\ \bf Weight Sharing} &
+%\makecell[c]{\bf Description Length \\ \bf Bound} \\
+\bf Quantization & \bf Adaptive Prefix Length & \bf Layerwise Weight Sharing &
+\bf Description Length Bound \\
+\midrule
+\greencheck & \greencheck & \greencheck & $|z| + \log R_s$  \\
+\redcross & \greencheck & \greencheck & $\gO(|z|) + \log R_s$ \\
+\redcross & \redcross & \greencheck & $\gO(R_s)$ \\
+\redcross & \redcross & \redcross & $\gO(R_s) + \gO(R_t)$ \\
+\bottomrule
+\end{tabular}
+} % scalebox
+\label{tab:asymptotic-bounds}
+\end{table}
+
+We show that combining a form of quantization, adaptive selection of the prefix length, and layerwise weight sharing yields a description length bound that is \emph{close} to the theoretically ideal description length bound of $|z|$, differing by only a $\log R_s$ term. \emph{Adaptive prefix length} means dynamically selecting the optimal prefix length, e.g. via a hyperparameter sweep; transmitting this quantity introduces the $\log R_s$ term. Sufficient quantization can be achieved by using an adaptive GMM prior similarly to the previously studied variational code, using the adaptive quantization method proposed by \citet{han2016deep}, or by restricting the prefix embeddings to a fixed vocabulary as in discrete prompt optimization. The bound becomes progressively worse as these aspects are ablated, ultimately resulting in a uniform encoding of the model weights. Note that by definition $|z| \leq R_s$, and we adopt $\gO(\cdot)$ notation to indicate a multiplicative factor $>1$. Overall, the $|z| + \log R_s$ bound can perhaps be seen as a relatively positive theoretical result for methods related to discrete prompt optimization. (See \ref{sec:quasi-optimal} for additional details and discussion.)
+
+
+
+ 
+ 
+\subsection{Alternative Transformer Families}
+\label{sec:alternative-families}
+
+The analysis in this paper has focused primarily on scaling the time and space resource bounds of a Transformer encoder by scaling the number of layers and the length of a prefix prepended the input, respectively, as described in \ref{sec:two-part-codes-for-transformers}. Here we briefly discuss alternative families of Transformers.
+
+\paragraph{Scaling Transformer Dimensionality} Rather than scaling the number of prefix token embeddings to represent increasingly complex programs, we could scale the dimensionality of the Transformer, effectively encoding the program tape in the MLP parameters. In \ref{sec:mlp-scaling} we discuss how a mapping analogous to $\zmap$ could be established for such a family of Transformers; however, this requires scaling the model and MLP dimensions linearly with program length. This results in the number of MLP parameters growing quadratically with program length, leading to a bound of $\gO(|z|^2) + \log R_s$ in the context of Table~\ref{tab:asymptotic-bounds} if applying similar techniques. The constructed MLP matrices are highly structured, but have rank that scales linearly with program length, and therefore cannot be easily compressed with standard techniques such as rank factorization. Therefore, identifying tighter asymptotic bounds for practical methods for MLP matrix compression would be of interest for future work. Otherwise, these results potentially indicate poor asymptotic bounds for standard methods related to MLP compression.
+
+\paragraph{Transformer Decoders} Rather than scaling the number of layers in a Transformer encoder to scale the time resource bound, we could scale the number of intermediate decoding steps in a Transformer decoder. This would not require explicit layerwise weight sharing to maintain a constant description length with respect to a growing time resource bound. The main challenge in implementing a mapping analogous to $\zmap$ for a Transformer decoder is in representing updates to the Turing machine tape given the decoder's attention mask, but such a result could build on prior work establishing the Turing completeness of Transformer decoders under various conditions \citep{perez2021attention,merrill2024expressive,li2025constant}. Future work could also study bounds for Transformer decoders that can interact with external tools.

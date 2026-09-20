@@ -1,0 +1,47 @@
+\section{Method}
+In the previous section, we analyzed the benefits of Bayesian RL and the role of self-reflection within the Bayesian RL framework. In what follows, we present a practical way to optimize the Bayesian RL objective in \eqref{eq_org_obj}. The policy gradient for \eqref{eq_org_obj} is as follows, which differs from the conventional policy gradient by replacing the value under $\mathcal{M}^*$ with a posterior-weighted value:
+\#\label{eq_bayes_gradient}
+\nabla_\theta\mathcal{J} = \EE_{s_0, \pi_\theta}\biggl[\sum_{t=0}^{T-1}\nabla_\theta \log\pi_\theta(a_t\mid h_t)\cdot\EE_{\mathcal{M}\sim p(\mathcal{M}\mid \mathcal{D}, h_t)}\bigl[Q^{\pi_\theta}_\mathcal{M}(h_t, a_t)\bigr]\biggr].
+\#
+Here, we use the state-action value $Q$ instead of calculating the advantage since the latter requires branched Monte Carlo rollouts at each step, which is computationally costly. By applying the Bayes rule, the posterior satisfies:
+\#\label{eq_post}
+p(\mathcal{M}\mid \mathcal{D}, h_t) = p(\mathcal{M}\mid \mathcal{D}, s_{0:t}, a_{0:t-1}, r_{0:t-1}) \propto p(\mathcal{M}\mid \mathcal{D}, s_{0:t}) \cdot p(r_{0:t-1}\mid s_{0:t}, a_{0:t-1}, \mathcal{M}),
+\#
+where $p(\mathcal{M}|\mathcal{D}, s_{0:t})$ conditions only on the CoT, excluding rewards, and can be modeled as the probability that the policy $\pi_\theta$, after training on $\mathcal{D}$, generates the solution $y_{s_0}^{\mathcal{M}}$. Interestingly, the second term $p(r_{0:t-1}| s_{0:t}, a_{0:t-1}, \mathcal{M})$ measures the likelihood of observing the rewards $r_{0:t-1}$ under $\mathcal{M}$ given the trajectory $s_{0:t}$. We follow \cite{ghosh2022offline} to write $p(r_{t}| s_{t}, a_t, \mathcal{M}) \propto \exp(-\beta|r_t - r_\mathcal{M}(s_t, a_t)|)$ with a hyperparameter $\beta$ to obtain
+\#\label{eq_error}
+p(r_{0:t-1}\mid s_{0:t}, a_{0:t-1}, \mathcal{M}) \propto \prod_{t'=0}^{t-1}p(r_{t'}\mid s_{t'}, a_{t'}, \mathcal{M}) = \prod_{t'=0}^{t-1}\exp\bigl(-\beta\bigl|r_{t'} - r_\mathcal{M}(s_{t'}, a_{t'})\bigr|\bigr),
+\#
+where the proportionality holds since $p(r_{t'}| r_{0:t'-1}, s_{0:t}, a_{0:t-1}, \mathcal{M}) = p(r_{t'}| s_{t'}, a_{t'}, \mathcal{M})$.
+
+Besides, the posterior-weighted value in \eqref{eq_bayes_gradient} satisfies
+\$
+\EE_{\mathcal{M}\sim p(\mathcal{M}\mid h_t)}\bigl[Q^{\pi_\theta}_\mathcal{M}(h_t, a_t)\bigr] = \EE_{\mathcal{M}\sim q(\mathcal{M}|s_0)}\biggl[Q^{\pi_\theta}_\mathcal{M}(h_t, a_t)\frac{p(\mathcal{M}\mid h_t)}{q(\mathcal{M}\mid s_0)}\biggr] = \sum_{i=0}^{|\mathcal{M}|}Q^{\pi_\theta}_{\mathcal{M}_i}(h_t, a_t)p(\mathcal{M}_i\mid h_t),
+\$
+where the proposal $q(\mathcal{M}|s_0)$ is the uniform distribution over the support of plausible MDPs, defined w.r.t. the ground-truth answer and candidate answers extracted from the model's CoTs. We draw $|\mathcal{M}|$ CoT rollouts of $\pi_\theta$ on prompt $s_0$ to form $\{\mathcal{M}_i\}_{i=1}^{|\mathcal{M}|}$. 
+The importance ratios are then self-normalized over $\{\mathcal{M}_i\}_{i=1}^{|\mathcal{M}|}$ and the ground-truth MDP $\mathcal{M}_0$ defined w.r.t. $y_{s_0}^*$.
+Substituting \eqref{eq_post} and \eqref{eq_error} into the above equation and letting $p(\mathcal{M}_i| s_{0:t})$ be the model's state-conditional belief gives
+\#\label{eq_adv_algo}\small
+\EE_{\mathcal{M}}\bigl[Q^{\pi_\theta}_\mathcal{M}(h_t, a_t)\bigr] = \sum_{i=0}^{|\mathcal{M}|}\underbrace{Q^{\pi_\theta}_{\mathcal{M}_i}(h_t, a_t)}_{\text{value in }\mathcal{M}_i} \underbrace{\pi_\theta(y_{s_0}^{\mathcal{M}_i}| s_{t}+ \text{</think>})}_{\text{model plausibility for }\mathcal{M}_i}\prod_{t'=0}^{t-1}\underbrace{\exp\bigl(-\beta\bigl|r_{t'} - r_{\mathcal{M}_i}(s_{t'}, a_{t'})\bigr|\bigr)}_{\text{consistency b/w observed \& } \mathcal{M}_i\text{'s reward}}\hspace{-0.09cm},\hspace{-0.05cm}
+\#
+where $r_{t'}$ is the actual observed reward as defined in \eqref{def_r}, and $r_{\mathcal{M}_i}$, $Q_{\mathcal{M}_i}^{\pi_\theta}$ are defined in \eqref{def_q_m} w.r.t. the hypothesis MDP $\mathcal{M}_i$. 
+Since rewards are not available at deployment time, they are not explicitly provided as inputs to the policy. Instead, maximizing the Bayesian RL objective forces the parameters $\theta$ to encode a prediction of the reward as a function of state, thus absorbing the dependence on rewards into $\theta$.
+For clarity, we have omitted the normalization constant when computing $p(\mathcal{M}_i| h_t)$ from the last two terms. Algorithm \ref{algorithm} provides the unbatched version of the pseudocode.
+\begin{algorithm}[H]
+\caption{Bayes-Adaptive RL for LLM Reasoning (BARL)}\label{algorithm}
+\begin{algorithmic}[1]
+\State \textbf{Input: } LLM $\pi_{\theta}$, prompt set $\{s_0\}$ with ground-truth answers $\{y_{s_0}^*\}$.
+\For{each prompt $s_0$ in the training data}
+\State Sample $|\mathcal{M}|$ CoTs from $\pi_\theta$ on $s_0$.
+\State Extract the $|\mathcal{M}|$ candidate answers from each CoT to form a candidate set $\{y_{s_0}^{\mathcal{M}_i}\}_{i=1}^{|\mathcal{M}|}$.
+\For{each of the $\mathcal{|M|}$ CoTs}
+\State Calculate posterior-weighted value with \eqref{eq_adv_algo} for each timestep $t$ and update $\theta$ with \eqref{eq_bayes_gradient}. 
+\EndFor
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+\vspace{-0.3cm}
+BARL offers a principled framework for stitching together plausible strategies, analogous to linearizing best-of-N reasoning, but with guidance on \textit{when} and \textit{how} LLMs should reflectively explore.
+
+\begin{remark}\label{remark_switch}
+BARL maximizes the weighted sum of values defined over each hypothesis MDP $\mathcal{M}_i$. The first weighting term $\pi_\theta(y_{s_0}^{\mathcal{M}_i}| \cdot)$ captures LLM's state-conditional belief in the plausibility of $\mathcal{M}_i$. The second product weighting term accumulates the discrepancy between predicted rewards $r_{\mathcal{M}_i}(s_{t'}, a_{t'})$ and observed rewards $r_{t'}$, which serves as a reflective signal for strategy switching by downweighting hypotheses that have high belief probabilities but are unlikely to be optimal.
+\end{remark}

@@ -1,0 +1,49 @@
+\section{Discussion}
+
+In this paper, we have demonstrated that the competition between ICL and IWL in Transformers is governed by the same principles of environmental predictability that shape biological adaptation. While stability and cue reliability dictate the asymptotic strategy (favoring IWL or ICL, respectively), our analysis of transience reveals that the trajectory of learning is driven by the cost of acquiring each strategy. We find that Transformers consistently adopt the easier strategy first (as determined by their inductive bias for a particular task) while the more costly but asymptotically optimal strategy develops over a longer timescale.
+
+% Our investigation, drawing analogies from evolutionary biology, has demonstrated that core principles of environmental predictability systematically govern the balance and dynamics between in-context learning (ICL) and in-weights learning (IWL) in Transformer models. We found that high environmental stability strongly promotes IWL, mirroring the selection for genetically fixed traits in stable biological environments, while high cue reliability enhances ICL efficacy, akin to phenotypic plasticity's reliance on dependable environmental signals. Furthermore, our findings revealed distinct, task-dependent transience patterns: models sometimes shift from ICL to IWL (resembling genetic assimilation) or, conversely, from IWL to ICL (resembling the evolution of plasticity). We proposed and provided evidence for a relative-cost hypothesis, suggesting these dynamics are driven by the comparative ease of learning and implementing each strategy within a given model and task context. These results affirm the utility of an evolutionary lens for understanding adaptive learning in artificial neural networks.
+
+\subsection{Limitations and future directions}
+\label{sec:limitations}
+
+While this work offers foundational insights into the learning dynamics of Transformers, we acknowledge specific limitations that define its scope, as well as promising avenues for future research.
+
+\textbf{Task simplification.} Our sinusoid and Omniglot environments are, by design, simplifications of the complex linguistic environments that LLMs are trained in. However, such controlled settings are essential for isolating variables (e.g., environmental predictability) and their causal influence on learning dynamics. Future work should aim to verify these principles in more complex domains.
+% The sinusoid regression and Omniglot classification tasks are, by design, simplifications of the complex, high-dimensional environments (e.g., natural language) where large language models typically operate. Such controlled settings are, however, essential for isolating variables and establishing clearer causal links between predictability and learning dynamics. They provide a foundational understanding that can inform future investigations in more complex domains.
+
+
+\textbf{Levels of analysis.}
+Our framework constitutes a computational-level analysis \cite{marr82vision, ku2025using}. We characterize the adaptive problem a system faces (optimizing prediction under varying uncertainty) and the functional logic of its solution (ICL vs. IWL). The analogy to evolutionary biology operates at this functional level of adaptation to statistical structure in the environment; we do not claim a direct mechanistic equivalence between IWL and ICL in Transformers and the specific genetic or developmental pathways of biological adaptation.
+
+
+\textbf{The Baldwin effect.}
+Beyond merely managing uncertainty, a key evolutionary function of plasticity is to accelerate adaptation on rugged fitness landscapes (the \textit{Baldwin Effect}). Plasticity smooths the fitness landscape by enabling individuals to survive in new environments, guiding the population toward regions where genetic assimilation can subsequently fix the trait \cite{hinton1987learning, fernando2018meta}. An exciting direction for future research is to determine if an analogous dynamic exists in Transformers --- does the early emergence of ICL serve as a scaffold for accelerating the acquisition of IWL solutions for complex tasks?
+% A key argument for biological plasticity, beyond managing uncertainty, is its potential to accelerate evolution on complex fitness landscapes (e.g., via the Baldwin Effect). Plastic individuals can more effectively explore and identify advantageous phenotypic regions, which can then be refined and genetically assimilated \cite{hinton1987learning,fernando2018meta}. An analogous question for Transformers is whether ICL not only provides flexibility but also speeds up the acquisition of robust IWL solutions for complex tasks, perhaps by IWL reusing or refining circuits initially developed for ICL \cite{singh_strategy_2025}.
+
+\subsection{Conclusion}
+
+By viewing Transformers through the lens of evolutionary biology, we show that their learning dynamics are governed by the statistical structure of their environments. We find that the preference for ICL versus IWL is strongly determined by dimensions of environmental predictability (specifically, environmental stability and cue reliability). Furthermore, our analysis of learning dynamics reveals that while the environment dictates the asymptotically optimal strategy, the learner's inductive bias leads to transient phases where the model exploits a lower-cost solution first. This framework establishes a more ecological perspective on model behavior, paving the way for training methodologies that cultivate systems capable of robustly and flexibly navigating the diverse and dynamic environments they increasingly encounter.
+
+% This research underscores the significant value of applying an evolutionary lens to artificial intelligence, demonstrating that disparate adaptive systems—from biological organisms to Transformers—arrive at convergent solutions when facing analogous challenges. By characterizing how environmental predictability shapes the competition between ICL and IWL, we establish a more fundamental understanding of how models adapt to their training data. These insights pave the way for a new ecological perspective on model behavior, offering principled guidance for designing training methodologies that yield systems capable of robustly and flexibly navigating the diverse environments they increasingly encounter.
+
+% This research underscores the significant value of drawing on established principles from evolutionary theory to illuminate complex learning behaviors in artificial systems. The insights gained not only contribute to a more fundamental understanding of how Transformers adapt to their training environments but also pave the way for designing more effective training methodologies -- bringing forth a more ecological perspective on model behavior. Ultimately, this line of inquiry can help guide the development of artificial systems capable of robustly and flexibly navigating the diverse and dynamic environments they increasingly encounter.
+
+% \subsection{Future Directions}
+
+% The current framework opens several exciting avenues for future research:
+
+%\textbf{Types of Predictability and Uncertainty:}
+%Uncertainty can stem from two primary sources: aleatory uncertainty (inherent environmental randomness) and epistemic uncertainty (arising from a lack of knowledge, reducible with more data or better models) \cite{der2009aleatory, kendall2017uncertainties,fox2011distinguishing}. Our manipulations of cue reliability (via noise) and environmental stability (via stochastic AR(1) processes) primarily addressed aleatory uncertainty. The influence of epistemic uncertainty -- for instance, how factors like the number of prompt examples ($N$) affect learning strategy -- remains an important area for future work. We held $N$, model size, and batch size constant to isolate the effects of our chosen predictability dimensions.
+
+
+% Future experiments could, for instance, test if pre-training regimes that explicitly foster diverse ICL capabilities lead to more sample-efficient IWL on challenging downstream tasks.
+
+% \textbf{Operationalizing predictability.}
+% Our use of noise for cue reliability and AR(1) processes for environmental stability represents specific implementations of predictability. Future work should explore other forms of environmental structure and change. This includes systematically varying the nature of aleatory uncertainty beyond our current manipulations -- for example, by introducing non-stationary predictability or more complex temporal structures (e.g., environments with punctuated equilibria \cite{gould1977punctuated}).
+% Furthermore, building on our distinction between uncertainty types, a crucial next step is to investigate the impact of epistemic uncertainty.
+% This could involve manipulating the number of prompt examples ($N$), the diversity of tasks seen during pre-training, or other factors that affect the model's effective knowledge about the current task context.
+
+% \textbf{Testing the Relative-Cost Hypothesis:}
+% Our relative-cost hypothesis posits that the computational ease of learning, representing, and executing a strategy dictates choice and transience. A key avenue for deepening our understanding and rigorously testing this hypothesis lies in developing theoretical models to formalize these "computational costs." Such models could draw inspiration from algorithmic information theory (e.g., Kolmogorov complexity, Solomonoff induction) \cite{li2008introduction, hutter2005universal} to quantify the inherent difficulty of learning or representing solutions via different modalities within the model \cite{goldblum2023no, elmoznino2024complexity}. Rigorously formalizing these relative costs will be crucial for moving beyond qualitative descriptions and making more precise, testable predictions.
+

@@ -1,0 +1,139 @@
+\documentclass[11pt]{article}
+
+
+% if you need to pass options to natbib, use, e.g.:
+%     \PassOptionsToPackage{numbers, compress}{natbib}
+% before loading neurips_2025
+
+% ready for submission
+%\usepackage{neurips_2025}
+
+\usepackage{times}
+\usepackage{makecell}
+\date{}
+
+\input{commands}
+\usepackage{subcaption}
+\DeclareMathOperator*{\esttt}{est}
+\DeclareMathOperator*{\unif}{unif}
+
+\newcommand{\bo}{\pmb}
+
+\renewcommand{\KL}{\text{KL}}
+% \newcommand{\dim}{\text{dim}}
+% to compile a preprint version, e.g., for submission to arXiv, add add the
+% [preprint] option:
+%     \usepackage[preprint]{neurips_2025}
+
+
+% to compile a camera-ready version, add the [final] option, e.g.:
+%     \usepackage[final]{neurips_2025}
+
+
+% to avoid loading the natbib package, add option nonatbib:
+%    \usepackage[nonatbib]{neurips_2025}
+
+\newcommand{\HL}[1]{{\color{orange}[\text{HL:} #1]}}
+
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{xcolor}         % colors
+
+%\title{\hspace*{-0pt}\scalebox{0.95}{Optimism No More: An Improved Model-Free Decision} \hspace*{-18pt}\scalebox{0.95}{Estimation Coefficient with Applications in Adversarial MDPs}}
+
+\PassOptionsToPackage{noend}{algorithm2e}
+
+\usepackage{titletoc}
+\usepackage{appendix}
+
+\oddsidemargin -0.15in
+\evensidemargin -0.15in
+\textwidth 6.7in
+\topmargin -0.5in
+\textheight 9.0in
+
+\title{An Improved Model-Free Decision-Estimation Coefficient with Applications in Adversarial MDPs}
+
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to LaTeX to determine where to break the
+% lines. Using \AND forces a line break at that point. So, if LaTeX puts 3 of 4
+% authors names on the first line, and the last on the second line, try using
+% \AND instead of \And before the third author name.
+
+
+\author{%
+    Haolin Liu \\
+    \scalebox{0.9}{University of Virginia}\\
+    \scalebox{0.9}{\texttt{srs8rh@virginia.edu}} 
+    \and 
+    Chen-Yu Wei \\
+    \scalebox{0.9}{University of Virginia} \\ 
+    \scalebox{0.9}{\texttt{chenyu.wei@virginia.edu}} 
+    \and Julian Zimmert \\
+    \scalebox{0.9}{Google Research} \\ 
+    \scalebox{0.9}{\texttt{zimmert@google.com}}
+}
+
+
+\begin{document}
+
+
+\maketitle
+
+
+\input{main-abstract}
+\input{main-introduction}
+\input{main-preliminary}
+\input{main-settings}
+\input{main-general-framework}
+\input{main-application}
+\input{main-comparison}
+\input{main-conclusion}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliographystyle{apalike}
+%\bibliographystyle{alpha}
+\bibliography{ref.bib}
+
+%\input{check-list}
+
+
+\clearpage
+\appendix
+
+\appendixpage
+
+{
+\startcontents[section]
+\printcontents[section]{l}{1}{\setcounter{tocdepth}{2}}
+}
+
+
+
+
+% \input{old-BC}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage
+
+
+\input{app-table}
+\input{app-recover-existing}
+\input{app-support-lemma}
+\input{app-full-info}
+\input{app-general-framework}
+\input{app-relating}
+\input{app-adv-mf-bandit}
+\input{app-comparison}
+
+
+\end{document}

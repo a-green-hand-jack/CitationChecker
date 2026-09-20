@@ -1,0 +1,128 @@
+\subsection{Experimental Details: Language Transfer}
+\label{app:language-transfer-details}
+
+In \Cref{sec:lang-transfer} we measure how much training on \emph{source language} $s$ is beneficial for the test loss on the \emph{target language} $t$.
+A language transfer score tells a practitioner the extent to which training with each language would help or hinder their target language $t$.
+There are two ways in which we can measure this language transfer:
+
+\begin{enumerate}[noitemsep]
+
+    \item \textsc{Bilingual Transfer Score.} This score measures how many training tokens a 50/50 ($s$, $t$) bilingual model needs, relative to a monolingual target language $t$ baseline, to reach the same validation loss $L_t$. A positive score indicates co-training with the source language has positive transfer, whereas a negative score indicates it hinders convergence.
+
+    \item \textsc{Finetuning Adaptation Score.} This score captures the effect on the target language's loss $L_t$, when a massively multilingual model is finetuned only on the source language $s$. 
+
+\end{enumerate}
+
+\subsubsection{\bts{} (\btsabb)}
+
+The \bts{} asks how data-efficient a bilingual learner is, relative to a purely monolingual one, on some target language $t$.
+To estimate this, we pretrain two models, a monolingual one on $t$ and a bilingual one that samples tokens equally (50/50) from the source and target languages ($s$, $t$).
+We then measure how many more training tokens it takes the bilingual model to attain the same validation loss $L_t$ as the monolingual model.
+This ``distance'' between the learning curves is measured throughout training, at different reference horizons---or, number of tokens trained on.
+In \Cref{fig:language-transfer-heatmap} we use models with 2B parameters, and a reference horizon of $d\!=\!42B$ tokens, as it roughly equates to $10,000$ pretraining steps for our 2B parameter models, and learning curves have stabilized.
+In \Cref{fig:language-transfer-nd} we measure how the \btsabb{} varies by model size, and by number of training tokens seen.
+
+We are able to compute the bilingual transfer scores, across every combination of pairings between 10 languages: English, Russian, Spanish, French, German, Portuguese, Chinese, Vietnamese, Japanese, and Hindi.
+These languages were chosen to give a distribution of high- and mid-resource languages from a variety of language families.
+This totals 10 monolingual experiments (one for each language), and $C(10,2)=45$ bilingual experiments, which provide the results for a 10x10 grid of Bilingual Transfer Scores. 
+
+In more detail, let $d_{mono}$ be the number of tokens trained on language $t$ by a monolingual model. This model attains test loss of $L_{t}(d_{mono})$ after $d_{mono}$ tokens on language $t$.  
+We record the number of training tokens $d_{bi}$ at which the bilingual model reaches the same loss, $L_{t}(d_{\text{bi}}) = L_{t}(d_{mono})$.
+We define the \textbf{Bilingual Transfer Score} (BTS) as the signed step surplus
+
+\[
+\mathrm{BTS}_{s\!\rightarrow t}  = - \frac{\sigma_{\text{bi}}(L_{\text{t}}(d_{\mathrm{mono}})) - 2d_{\mathrm{mono}}}{d_{\mathrm{mono}}}
+\]
+
+where $d_{\text{bi}}=\sigma_{\text{bi}}(L_{\text{t}}(d_{\mathrm{mono}}))$. $\sigma_{\text{bi}}$ maps a loss value to the number of steps taken by the bilingual model to reach that loss.
+In short, this score measures the relative training efficiency of the bilingual model compared to a monolingual model at reaching the same loss level for language $t$. 
+Subtracting $2d_{\mathrm{mono}}$ and dividing by $d_{\mathrm{mono}}$ simply centers the value on 0, and forces positive transfer to give a positive value.
+A value of 0, implies \emph{neutral} transfer, as the multilingual model requires exactly the same number of steps in the target language $t$ as the monolingual model, a value below 0 implies \emph{negative} transfer, as the multilingual model is slower to reach the loss $L_{\text{t}}(d_{\mathrm{mono}})$, and a value above 0 implies \emph{positive} transfer, as the bilingual model reaches the target loss in $<2d_{\mathrm{mono}}$.
+Note that for \Cref{fig:language-transfer-heatmap} these scores are anchored on 2B parameter models, trained for $d\!=\!42B$ tokens, for consistency.
+But as model size increases, or tokens trained decreases, the language transfer scores improve monotonically.
+
+\subsubsection{\fas{} (\fasabb)}
+
+Complementary to \btsabb{}, the \fas{} measures the \emph{instantaneous impact} of continued exposure to a single language on all others while holding model capacity fixed.  
+Specifically, it measures how finetuning a massively multilingual model on source language $s$ affects the performance of target language $t$.
+Because we only need to train on each source language once, and evaluate on all languages, it is less computationally expensive than \btsabb{}, which requires training on every pair of languages.
+As such, we are able to derive $38*38=1444$ ($s$, $t$) comparisons from 38 finetuning experiments.
+
+We start from a shared multilingual checkpoint: a \unimax{} pretrained model, trained for $1T$ tokens.
+For each source language $s$, we continue pre-training (for simplicity we denote this as \emph{finetune}) exclusively on this language, and evaluate at regular intervals on every target language's $t\!\in\!\mathcal{L}$ validation set.  
+Let $L_{s\!\rightarrow\!t}(d)$ be the validation loss on $t$ after $d$ additional updates on $s$, and let $L^{unimax}_t$ denote the baseline loss of the shared \unimax{} checkpoint, before finetuning has begun.  
+The \fas{} (\fasabb) aggregates the reduction in loss over a common time window $[0,d_{\max}]$:
+\[
+\mathrm{FAS}_{s\!\rightarrow t}
+=\frac{1}{d_{\max}}
+\int_{0}^{d_{\max}}
+\!\bigl[L^{unimax}_t - L_{s\!\rightarrow\!t}(d)\bigr]\,
+\mathrm{d}d.
+\]
+Positive values indicate that exposing the model to $s$ accelerates learning or yields immediate gains on $t$ (``helpful transfer''), whereas negative values capture negative interference. Normalising by $d_{\max}$ makes the score comparable across language pairs and training horizons.
+
+Because finetuning on language $s$ can cause unpredictable behavior in the validation loss of a target language $t$ (it might immediately increase, or decrease then eventually increase), we start with deriving a series of features about the finetuning loss curve. 
+We calculate the following features for a finetuning loss curve:
+
+\begin{itemize}%[noitemsep]
+
+    \item \textbf{Baseline Loss Deviation ($\delta_{s\rightarrow t}$).} 
+    For each language pair $s\neq t$ we quantify the deviation in validation loss between the baseline $L^{unimax}_t$ and the loss $L_{s \rightarrow t}$ on the final step: $$\delta_{s\rightarrow t} = L_{s \rightarrow t}(d_\text{max}) - L^{unimax}_t(d_\text{max})$$
+    $\delta_{s\rightarrow t}<0$ means fine–tuning on $s$ helps\/ $t$;
+    $\delta_{s\rightarrow t}>0$ means it hurts.
+    
+    \item \textbf{Adaptation Gain ($g_{l}$).} This measures the area normalized reduction in loss on language $l$ from finetuning on language $l$. This allows us to capture the relative learning dynamics of both the source and target language.
+    $$g_{l} = \frac{1}{d_{max}} \int_{0}^{d_{\text{max}}} \bigl[\,L^{unimax}_l - L_{s \rightarrow t}(d)\,\bigr]\; \mathrm{d}s.$$
+    $g_l>0$ indicates net improvement; large values imply that $l$
+    benefits greatly from additional supervision.
+
+\end{itemize}
+
+For each language transfer pair ($s$, $t$), we compose the following feature vector $x_{s \rightarrow t}$. 
+As languages differ in intrinsic difficulty, we normalize each feature. 
+%
+\begin{align}
+\tilde{g}_l &=
+\frac{g_l - \mu_g}{\sigma_g},
+&
+\tilde{\delta}_{s\rightarrow t} &=
+\frac{\delta_{s\rightarrow t}-\mu_{\delta,t}}{\sigma_{\delta,t}},
+\label{eq:zscore}
+\end{align}
+%
+For adaptation gain, we use the global mean and standard deviation $(\mu_g,\sigma_g)$, and for baseline loss deviation we compute the mean and standard deviation $(\mu_{\delta,t},\sigma_{\delta,t})$ across all source languages $s$ for each fixed target language $t$.
+
+\subsection{Estimating \bts{} (\btsabb)}
+\label{app:lang-transfer-bts-estimation}
+
+% From there we compute the feature vector $x_{s \rightarrow t}$ using the 90 \bts experiments.
+
+In the \bts{} experiments we empirically measured language transfer scores
+${y}_{s\rightarrow t}^{\text{true}}$ for a subset
+$\mathcal{P}_{\text{obs}}\subset\mathcal{L}\!\times\!\mathcal{L}$. 
+We construct a training set from these 90 experiments, using them as the gold labels.
+%
+\begin{equation}
+\mathbf{x}_{s\rightarrow t}
+=
+\bigl[
+\tilde{g}_s,\;
+\tilde{g}_t,\;
+\tilde{g}_s-\tilde{g}_t,\;
+\tilde{\delta}_{s\rightarrow t}
+\bigr]^{\!\top},
+\qquad
+y_{s\rightarrow t}=y^{\text{true}}_{s\rightarrow t},
+\label{eq:features}
+\end{equation}
+%
+% excluding trivial self–pairs $(s=s)$.  
+% Missing $\tilde{\delta}_{s\rightarrow t}$ values (rare) are imputed with the column mean.
+
+We fit a random-forest regressor $\varphi_{\boldsymbol{\theta}}:\mathbb{R}^4\!\rightarrow\!\mathbb{R}$ with $300$ trees and unlimited depth.  
+The predictive performance is assessed by $k$-fold cross-validation
+($k\!=\!5$), obtaining an $R^{2}=0.85$ and Spearman correlation of $\rho=0.88$.
+After training on all observed pairs, $\varphi$ is invoked on every unlabelled $(s,t)\!\in\!\mathcal{L}\!\times\!\mathcal{L}$, yielding predicted \btsabb{} values, that estimate the language transfer shown in \Cref{fig:language-transfer-heatmap}.
+
+
+

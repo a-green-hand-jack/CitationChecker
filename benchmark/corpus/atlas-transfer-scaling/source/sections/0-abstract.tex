@@ -1,0 +1,29 @@
+\begin{abstract}
+
+Scaling laws research has focused overwhelmingly on English---yet the most prominent AI models explicitly serve billions of international users. 
+In this work, we undertake the largest multilingual scaling laws study to date, totaling 774 multilingual training experiments, spanning 10M-8B model parameters, 400+ training languages and 48 evaluation languages. 
+We introduce the \ourscl{} (\oursclabb) for both monolingual and multilingual pretraining, which outperforms existing scaling laws' out-of-sample generalization often by more than $0.3$ $R^2$.
+Our analyses of the experiments shed light on multilingual learning dynamics, transfer properties between languages, and the curse of multilinguality.  
+First, we derive a cross-lingual transfer matrix, empirically measuring mutual benefit scores between $38 \times 38=1444$ language pairs.
+Second, we derive a language-agnostic scaling law that reveals how to optimally scale model size and data when adding languages without sacrificing performance.
+Third, we identify the computational crossover points for when to pretrain from scratch versus finetune from multilingual checkpoints.
+We hope these findings provide the scientific foundation for democratizing scaling laws across languages, and enable practitioners to efficiently scale models---beyond English-first AI.
+
+\end{abstract}
+
+% MAIN PAPER PLOTS:
+% 1. SCLs: Monolingual vs Unimax [SHAYNE]
+% 2. SCLs Table of performances for Monolingual, Unimax, & Multilingual [SHAYNE]
+% 3. Lang-Lang Benefits: Heatmap [V1, SNEHA]
+% 4. Lang-Lang Benefits: Transfer-score as a fn of N and D, pair of line plots. [X, I-HUNG/SHAYNE]
+% 5. Lang-Lang Benefits: Transfer score by family and by script. Script > Family. [V1, SAYNA]
+% 6. Pretrain vs Finetune: Pretrain vs Finetune over number of Tokens, to show where one is better. [X, SHAYNE]
+% 7. Pretrain vs Finetune: Line of best fit for where Pretrain > Finetune, based on model size. [X, I-HUNG/SHAYNE]
+% 8. Capactiy: N vs K vs L contour plot. [X, SHAYNE]
+% 9. Capacity: K to K*r (and table of R2) [X, SHAYNE]
+
+% APPENDIX:
+% 2. SCLs: alpha vs beta per language [SAYNA?]
+% Multilingual Benefit plot
+% Symmetry of Language Transfer?
+% Irreducible Loss plots by Regular/Unimax -- seems confusing to me though.

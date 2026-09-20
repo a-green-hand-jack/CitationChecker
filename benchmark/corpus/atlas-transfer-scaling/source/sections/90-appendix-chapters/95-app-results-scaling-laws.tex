@@ -1,0 +1,55 @@
+\section{Extended Results}
+
+\subsection{Extended Results: Scaling Laws}
+\label{app:scaling-laws}
+
+\input{tables/mono-scaling-laws}
+
+In \Cref{tab:mono-scaling-laws} we illustrate the fitted scaling laws for each language.
+Specifically, we show the scaling law parameters for each language when trained with a monolingual vocabulary on monolingual data, when trained with a multilingual vocabulary on monolingual data, and when trained with a multilingual vocabulary on the \unimax{} multilingual mixture.
+These results match up with those presented in \Cref{fig:monolingual-scaling}.
+
+\subsection{Extended Results: Language Transfer}
+\label{app:lang-transfer}
+
+\textbf{Research Question:} \emph{How does language transfer change with larger models, or when you train for longer?}
+
+We further investigated how language transfer evolves with training data (D) and model size (N) in \Cref{fig:language-transfer-nd}. Our analysis of transfer scores over the course of training reveals that transfer dynamics are established early. The performance gap between synergistic pairs (e.g., es $\rightarrow$ pt) and interfering pairs (e.g., en $\rightarrow$ zh) appears within the initial stages of training and remains largely consistent, suggesting that the fundamental compatibility of languages is not significantly altered by longer training. However, the impact of model scale is more pronounced. As illustrated in \Cref{fig:language-transfer-nd}, we observe a clear trend in which larger models are more effective in facilitating cross-lingual transfer. For synergistic pairs, the positive transfer score increases modestly with model capacity. More importantly, for challenging pairs that exhibit interference in smaller models, larger models are significantly better at mitigating this negative effect, bringing the score closer to zero.  This is similar to what has been observed while training larger and larger foundation models \citep{team2024gemini}. Given that transfer dynamics change at scale, it is an important factor to consider when designing multilingual foundation models that are performant for all languages being trained on. 
+
+% For instance, \sneha{get example language pairs}.
+% \sneha{Feels a lil filler: This suggests that increased model capacity is crucial for overcoming the "curse of multilinguality," as it allows the model to learn shared, beneficial representations in distinct parameter subspaces rather than suffering from catastrophic interference.}
+
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=\textwidth]{figures/language-transfer/langtransfer_dn_score_publication.pdf}
+    \caption{
+    \textbf{Left:} X-axis is training tokens (D), Y-axis is language-transfer score.
+    \textbf{Right:} X-axis is model size (N), Y-axis is language-transfer score.}
+    \label{fig:language-transfer-nd}
+    \vspace{-4mm}
+% \begin{figure*}[t]
+%   \centering
+%   %----------------------- Left panel ----------------------
+%   \begin{subfigure}[t]{.5\textwidth}
+%     \includegraphics[width=\linewidth]{figures/language-transfer/langtransfer_d_score.pdf}
+%     \caption{X-axis is training tokens (D), Y-axis is language-transfer score.}
+%     \label{fig:language-transfer-d}
+%   \end{subfigure}%
+%   % ← the percent sign above kills the inter-box whitespace
+%   %---------------------- Right panel ----------------------
+%   \begin{subfigure}[t]{.5\textwidth}
+%     \includegraphics[width=\linewidth]{figures/language-transfer/langtransfer_n_score.pdf}
+%     \caption{X-axis is model size (N), Y-axis is language-transfer score.}
+%     \label{fig:language-transfer-n}
+%   \end{subfigure}
+
+  % \caption{\TODO{FIX FIGURE: (0) Remove titles. Add better x- and y-axis labels, and increase the font size of the ticks and labels so they are more visible. Make each figure larger, and position them so when they are side-by-side there is less whitespace between them (a tighter display). (1) Add lines connecting relevant points in the rightside figure, like in the leftside one (maybe, see how it looks). (2) Get better lines of best fit and have them annotated in a box, so we know the formula and gradient of each just by looking at the figure. (3) I don't think I like the style of having each figure in a black box. Let's just have the x and y axis visible.} \niklas{Similar to heatmap, maybe worth pointing to explanation of the transfer score so readers can reason more easily about what y=0.5 means} \sneha{nice - could we have a legend for this so we can improve the story in the text}}
+\end{figure*}
+
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/language-transfer/multilingual_heatmap_v1.pdf}
+    \caption{The language transfer scores measure the benefit to the target language of (co-)training with the source language. We bold the top-5 source languages for each target language. The top left 9x9 are the Bilingual Transfer Score computed directly, whereas the rest are estimated from the Finetuning Adaptation Score. While English is the best source language for many of  of languages, we find language similarity is highly predictive of these scores.  \label{fig:language-transfer-heatmap-full}}
+\end{figure*}

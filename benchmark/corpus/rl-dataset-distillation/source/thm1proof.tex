@@ -1,0 +1,201 @@
+\section{Proof of Theorem~\ref{thm:supervised-distill-1}}\label{sec:Mainpfthm1}
+ $D^{\sf sup}_{\tn{train}} = \{(\bx_i, y_i) \in \mc{B}(d, B) \times [-b, b]\}_{i=1}^n$ is the given training dataset consisting of feature-vector and real-valued label pairs for a regression task. 
+ For ease of notation in the proof of this theorem we shall drop the concatenation operator $\zeta$ and instead use vectors to denote the data point with the feature-vector and label concatenated. Further, we let $q := d+1$ represent the dimensionality so that the domain of $\mc{F}$ is $\R^q$. With this notation,  $D^{\sf sup}_{\tn{train}} = \{\bx_i \in \mc{B}(q-1,B)\times [-b,b]\}_{i=1}^n$ is the given training dataset. We use an analogous notation for the datapoints of the synthetic datasets in the analysis below.
+ 
+\subsection{Bounds for fixed $\hat{h}$ and fixed synthetic dataset $\hat{D}$} 
+We begin by fixing (i) $\hat{h} \in \mc{F}$ s.t. 
+\begin{equation}
+    \hat{h}(\bx) := \hat{c}\bu^{\sf T}\bx \tn{ for some } \bu \in \R^q \tn{ s.t. } \|\bu\|_2 = 1 \tn{ and } \hat{c} \in [1,2] \label{eqn:hath}
+\end{equation}
+and, $\hat{D} = \{\hat{\bz}_i \in \mc{B}(q-1, B) \times [-b, b]\}_{i=1}^s$ for some $s \in \mathbb{Z}^+$. Using this, we have
+\begin{equation}
+    L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \hat{D}, \hat{h}) = \left(\frac{1}{n}\sum_{i=1}^n(\hat{c}\bu^{\sf T}\bx_i)^2-\frac{1}{s}\sum_{i=1}^s(\hat{c}\bu^{\sf T}\hat{\bz}_i)^2\right)^2  \label{eqn:Lossu}
+\end{equation}
+The following lemma provides a key probabilistic lower bound.
+\begin{lemma} \label{lem:probbd}
+    Let $L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \hat{D}, \hat{h})  \geq \Delta$. % for some regressor $g_1(\bx, y) := \br_1^{\sf T}\zeta(\bx, y)$ with $ \|\br_1\| \leq 2$.
+    Then, for a randomly chosen $g \sim G(\mc{F})$ s.t. $g(\bx) := \br^{\sf T}\bx$, we have
+    \[
+        \Pr\left[\left(L^{\tn{err}}_{mse}(D^{\sf sup}_{\tn{train}}, \hat{D}, g)  \geq \frac{\Delta}{C_0q^2}\right)\bigwedge\left(\|\br\|_2^2 \leq 10\right)\right] \geq \frac{7}{30}
+    \]
+    for some absolute constant $C_0 > 0$. 
+\end{lemma}
+\begin{proof}
+    We first lower bound the expectation $\E\left[L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \hat{D}, g)\right]$.
+    Sampling a random $g \in G$ corresponds to sampling $\br \sim N(0,1/q)^q$ u.a.r. and letting $g(\bx) := \br^{\sf T}\bx$ for $\bx \in \R^q$.
+    Letting $\br_1 := \bu$, we can find unit vectors $\br_2, \dots, \br_q$ such that $\br_1, \dots, \br_q$ is an orthonormal basis.
+    Writing $\br := \alpha_1 \br_1 + \dots + \alpha_q \br_q$, we obtain that $\alpha_j$ is iid $N(0,1/q)$ for each $j \in q$.
+    
+    Therefore, 
+    \begin{equation}
+        L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \hat{D}, g) = \left( \frac{1}{n}\sum_{i=1}^n \left(\sum_{j=1}^q\alpha_j \br_1^{\sf T}\bx_i\right)^2  - \frac{1}{s}\sum_{i=1}^s \left(\sum_{j=1}^q\alpha_j\br_j^{\sf T}\hat{\bz}_i \right)^2 \right)^2
+    \end{equation}
+    Define $\beta_i = \sum_{j=2}^q \alpha_{j}\br_j^{\sf T}\bx_i$ for $i \in [n]$ and similarly $\gamma_j = \sum_{j=2}^q \alpha_{j}\br_j^{\sf T}\hat{\bz}_i$ for $i \in [s]$. Note that both $\{\beta_i\}_{i=1}^n, \{\gamma_i\}_{i=1}^s$ are independent of $\alpha_1$.
+    We now rewrite the squared loss in terms of $\{\beta_i\}_{i=1}^n, \{\gamma_i\}_{i=1}^s$ to obtain:
+    \begin{align}
+    L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \hat{D}, g) =& \left( \frac{1}{n}\sum_{i=1}^n (\alpha_1 \br_1^{\sf T}\vec{\bx}_i + \beta_i)^2  - \frac{1}{s}\sum_{i=1}^s (\alpha_1 \br_1^{\sf T}\hat{\bz}_i + \gamma_i)^2 \right)^2 \nonumber \\
+        =&\left[\alpha_1^2 \left(\frac{1}{n}\sum_{i=1}^n(\br_1^{\sf T}\bx_i)^2-\frac{1}{s}\sum_{i=1}^s(\br_1^{\sf T}\hat{\bz}_i)^2\right)\right. \nonumber \\ 
+        &+ \left.2\alpha_1 \left(\frac{1}{n}\sum_{i=1}^n\beta_i\br_1^{\sf T}\bx_i -  \frac{1}{s}\sum_{i=1}^s\gamma_i\br_1^{\sf T}\hat{\bz}_i\right) + \left(\frac{1}{n}\sum_{i=1}^n\beta_i^2 -\frac{1}{s}\sum_{i=1}^s\gamma_i^2\right)\right]^2 \label{err-mse-eq1}
+    \end{align}
+    At this point, we let $\kappa := \left(\frac{1}{n}\sum_{i=1}^n(\br_1^{\sf T}\bx_i)^2-\frac{1}{s}\sum_{i=1}^s(\br_1^{\sf T}\hat{\bz}_i)^2\right)$, $\omega = \left(\frac{1}{n}\sum_{i=1}^n\beta_i^2 -\frac{1}{s}\sum_{i=1}^s\gamma_i^2\right)$ and 
+    $\lambda = 2 \left(\frac{1}{n}\sum_{i=1}^n\beta_i\br_1^{\sf T}\bx_i -  \frac{1}{s}\sum_{i=1}^s\gamma_i\br_1^{\sf T}\hat{\bz}_i\right)$. Note that $\kappa, \omega, \lambda$ are independent of $\alpha_1$. Substituting these into \eqref{err-mse-eq1} we obtain
+    \begin{align}
+         L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \hat{D}, g) =& \left(\alpha_1^2 \kappa + \alpha_1\lambda + \omega\right)^2\nonumber\\
+         =& \alpha_1^4 \kappa^2 + \alpha_1^2 \lambda^2 + \omega^2 + 2\alpha_1^3 \lambda \kappa + 2 \alpha_1 \lambda\omega + 2 \alpha_1^2 \omega \kappa\nonumber
+    \end{align}
+    Taking the expectation over $\alpha_1$ yields,
+    \begin{align}
+        \E_{\alpha_1}[L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \hat{D}, g)] =& \E\left[\alpha_1^4\right]\kappa^2 + \E\left[\alpha_1^2\right] \lambda^2 + \omega^2 + 2\E\left[\alpha_1^3\right] \lambda \kappa + 2 \E\left[\alpha_1\right] \lambda\omega 
+        + 2 \E[\alpha_1^2] \omega \kappa \nonumber \\
+        =& (3/q^2)\kappa^2 + \lambda^2/q + \omega^2 + (2/q)\omega \kappa \nonumber \\
+        =& (2/q^2)\kappa^2 + (\kappa/q + \omega)^2 + \lambda^2/q \nonumber \\
+        \geq& (2/q^2)\kappa^2 \nonumber \\
+        =& \frac{2}{q^2}\left(\frac{1}{n}\sum_{i=1}^n(\br_1^{\sf T}\bx_i)^2-\frac{1}{s}\sum_{i=1}^s(\br_1^{\sf T}\hat{\bz}_i)^2\right)^2 \nonumber \\
+        =& 2\left(\frac{1}{q\hat{c}}\right)^2\left[\frac{1}{n}\sum_{i=1}^n(\hat{c}\bu^{\sf T}\bx_i)^2-\frac{1}{s}\sum_{i=1}^s(\hat{c}\bu^{\sf T}\hat{\bz}_i)^2\right]^2 \nonumber \\
+        =& 2\left(\frac{1}{q\hat{c}}\right)^2L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \hat{D}, \hat{h})
+        \geq \frac{\Delta}{2q^2} \label{eqn:lowerbdexp}
+    \end{align}
+    where we used \eqref{eqn:hath} and \eqref{eqn:Lossu} along with the fact that $\alpha_1 \sim N(0,1/q)$. Observe that $L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \hat{D}, g)$ is a degree-$4$ square polynomial in $\{\alpha_j\}_{j=1}^q$ and hence is always positive. Observe that the lower bound in \eqref{eqn:lowerbdexp}  is independent of $\{\alpha_j\}_{j=2}^q$ and is thus an lower bound for the expectation over $\{\alpha_j\}_{j=1}^q$. Applying Carbery-Wright (see Appendix \ref{sec:carbery}) to \eqref{eqn:lowerbdexp} we obtain
+    \begin{eqnarray}
+        \Pr\left[L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \hat{D}, g) \geq \left(\frac{1}{72}\right)^4\frac{\Delta}{2q^2}\right] \geq \frac{1}{3}.\label{eqn:1div3}
+    \end{eqnarray}
+    Further, since $\E[\|\br\|_2^2] = 1$, by Markov's inequality, $\Pr[\|\br\|_2^2 > 10] < 1/10$. This along with the \eqref{eqn:1div3} and taking $C_0 = (1/2)(1/72)^4$ completes the proof. 
+\end{proof}
+The following is a straightforward implication of Lemma \ref{lem:probbd} along with the Chernoff Bound (Theorem \ref{thm:Chernoff}). 
+\begin{lemma} \label{lem:ampprbbd}
+    Let $L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \hat{D}, \hat{h})  > \Delta$. Then, for iid random $g_1, \dots, g_k \sim G(\mc{F})$, s.t. $g_j(\bx) := \bv_j^{\sf T}\bx$ we have
+\begin{equation*}
+        \displaystyle \Pr\left[\left|\left\{j \in [k] : \left(L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \hat{D}, g_j) \geq \frac{\Delta}{C_0q^2}\right)\wedge \left(\|\bv_j\|_2^2 \leq 10\right)\right\}\right| \geq \frac{7k}{60}\right] \geq 1 - \tn{exp}\left(\frac{-7k}{240}\right)
+        \end{equation*}
+\end{lemma}
+
+\subsection{Net over regressors $h$ and synthetic datasets $D^{\sf sup}_{\tn{syn}}$}\label{sec:net}
+First we shall construct a net over regressors $h \in \mc{F}$, where $h(\bx) := \br^{\sf T}\bx$ for some $\br \in \mc{B}(q,2)$. Thus, we can consider the cover $\mc{T}(q, 2, \xi))$ (see Appendix \ref{sec:nets}) and let $\hat{\mc{F}} = \{\hat{h} : \exists \hat{\br} \in \mc{T}(q, 2, \xi)\tn{ s.t. } \hat{h}(\bx) := \hat{\br}^{\sf T}\bx\}$, for some parameter $\xi \in (0,1)$ to be chosen later. The following is a simple approximation lemma.
+\begin{lemma} \label{lem:vecnet}
+    For any $D^{\sf sup}_{\tn{train}}$ and $\hat{D}$ as defined in the previous subsection, for any $h \in \mc{F}$, $\exists \hat{h} \in \hat{\mc{F}}$ s.t. 
+    \begin{equation}
+        \left|L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \hat{D}, h) - L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \hat{D}, \hat{h}) \right| \leq  65\xi(B+b)^4.
+    \end{equation}
+\end{lemma}
+\begin{proof}
+    Let $h(\bx) := \br^{\sf T}\bx$, where $\br \in \mc{B}(q,2)$. Choose $\hat{\br} \in \mc{T}(q, 2, \xi)$ s.t. $\|\br - \hat{\br}\|_2 \leq \xi$ and define $\hat{h}$ to be $\hat{h}(\bx) := \hat{\br}^{\sf T}\bx$. Thus, for every $\bx_i \in D^{\sf sup}_{\tn{train}}$, $\left|(\br^{\sf T}\bx_i)^2 - (\hat{\br}^{\sf T}\bx_i)^2\right| \leq \left((\br - \hat{\br})^{\sf T}\bx_i\right)^2 + 2 \left|\left((\br - \hat{\br})^{\sf T}\bx_i\right)\br^{\sf T}\bx_i\right| \leq (\xi (B+b))^2 + 4\xi(B+b)^2 \leq 5\xi(B+b)^2$ since $\xi \leq 1$. Using this, along with \eqref{eqn:Lossu} we have that $L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \hat{D}, \hat{h}) = \left(\sqrt{L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \hat{D}, h)} + \upsilon\right)^2$ where $\upsilon \in \R$ s.t. $|\upsilon| \leq 5\xi(B+b)^2$. 
+    
+    Therefore, $\left|L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \hat{D}, \hat{h}) - L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \hat{D}, h)\right| \leq 2 |\upsilon|\sqrt{L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \hat{D}, h)} + |\upsilon|^2$. It is easy to see using the norm bounds on the regressor vectors and the data points along with \eqref{eqn:Lossu} that $\sqrt{L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \hat{D}, h)} \leq 4(B+b)^2$. Thus, $2|\upsilon|\sqrt{L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \hat{D}, h)} + |\upsilon|^2 \leq 40\xi(B+b)^4 + 25\xi^2(B+b)^4 \leq 65\xi(B+b)^4$, which completes the proof.
+\end{proof}
+
+
+We now show that the synthetic data $ D^{\sf sup}_{\tn{syn}}$ can be approximated with a much smaller dataset  $\hat{D}$ whose points are from an appropriate Euclidean net.
+
+\begin{lemma}\label{lem:datasetnet}
+    Fix a $\nu \in (0,1)$. For any $D^{\sf sup}_{\tn{syn}}$, there exists a dataset $\hat{D}$ of size $s := q$ 
+    whose points are from Euclidean net $\mc{T}(q, \sqrt{q}(B+b), \nu\sqrt{q}(B+b)/2)$  such that for any $h \in \mc{F}$,
+    \begin{equation}
+        \left|L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \hat{D}, h) - L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, D^{\sf sup}_{\tn{syn}}, h)\right| \leq 65\nu q^2(B+b)^4
+    \end{equation}
+    \end{lemma}
+\begin{proof}
+    Let us first take $\ol{D}$ (bounded in a ball of radius $\sqrt{q}(B+b)$) to be the dataset of size $q$ from Lemma~\ref{lem:subsetreplace} such that 
+    \begin{equation}
+        L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \ol{D}, h) = L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, D^{\sf sup}_{\tn{syn}}, h)
+    \end{equation}
+    Then we create $\hat{D}$ by replacing each point in $\ol{D}$ with the closest point in $\mc{T}(q, \sqrt{q}(B+b), \sqrt{q}\nu(B+b)/2)$. Using arguments analogous to those in the proof of  Lemma \ref{lem:vecnet} we obtain,
+    \begin{equation}
+        \left|L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \hat{D}, h) - L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \ol{D}, h)\right| \leq 65\nu q^2(B+b)^4
+    \end{equation}
+    Combining the above two inequality and equation completes the proof.
+\end{proof}
+
+\subsection{Union bound over net and completing the proof} \label{sec:unionbd}
+To use the analysis in Sec. \ref{sec:net}, let us set $\xi= \Delta/(10^8 C_0 q^2 (B+b)^4)$ and $\nu = \Delta/(10^8 C_0 q^4 (B+b)^4)$. 
+Applying Lemma \ref{lem:datasetnet} and followed by Lemma \ref{lem:vecnet} directly yields the following combined net for the regressors $h$ and the synthetic dataset.
+\begin{lemma}\label{lem:combinedned}
+For any $h\in \mc{F}$ and $D^{\sf sup}_{\tn{syn}}$, there exist $\hat{h} \in \hat{\mc{F}}$ and $\hat{D} \in \mc{T}(q, \sqrt{q}(B+b), \nu\sqrt{q}(B+b)/2)^s$ such that
+\begin{equation}
+    \left|L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \hat{D}, \hat{h}) - L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, D^{\sf sup}_{\tn{syn}}, h)\right| \leq \Delta/(10^6 C_0 q^2(B+b)^4)
+\end{equation}
+where $s := q$ for some constant $C_1$ and $\hat{\mc{F}} = \{\hat{h} : \exists \hat{\br} \in \mc{T}(q, 2, \xi)\tn{ s.t. } h(\bx) := \hat{\br}^{\sf T}\bx\}$.
+\end{lemma}
+Observe that 
+\begin{equation}
+    \left|\hat{\mc{F}} \times \mc{T}(q, \sqrt{q}(B+b), \nu\sqrt{q}(B+b)/2)^s\right| \leq \left(\frac{6}{\xi}\right)^q \cdot \left(\frac{6}{\nu}\right)^{qs} = \tn{exp}\left(O\left({q^2}\log\left(\frac{q(B+b)}{\Delta}\right)\right)\right) \nonumber
+\end{equation}
+Thus, one can apply Lemma \ref{lem:ampprbbd} with $k = O\left({q^2}\log\left(\frac{q(B+b)}{\Delta}\right)\log\left(\frac{1}{\delta}\right)\right)$ %along with Lemma \ref{lem:combinedned} 
+and take a union bound over $\hat{\mc{F}} \times \mc{T}(q, \sqrt{q}(B+d), \nu\sqrt{q}(B+b)/2)^s$ to obtain the following: with probability $(1-\delta)$ over iid random $g_1, \dots, g_k \sim G$, if $L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \hat{D}, \hat{h})  > \Delta$ then there exist $7k/60$ distinct $j^* \in [k]$ s.t.,  
+\begin{equation}
+    \left(L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \hat{D}, g_{j^*}) \geq \frac{\Delta}{C_0q^2}\right)\wedge \left(\|\bv_{j^*}\|_2^2 \leq 10\right) 
+\end{equation}
+Now, since $\|\bv_{j^*}\|_2^2 \leq 10$, $\tilde{c}g_{j^*} \in \mc{F}$ for some $\tilde{c} \geq 2/\sqrt{10}$. And since $L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \hat{D}, g_{j^*})$ is proportional to $\|\bv_{j^*}\|_2^4$, applying Lemma \ref{lem:datasetnet} to $L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \hat{D}, \tilde{c} g_{j^*})$ yields that 
+\begin{equation*}
+    L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}},D^{\sf sup}_{\tn{syn}} , g_{j^*}) \geq \frac{\Delta}{2C_0q^2}
+\end{equation*}
+which implies,
+\begin{equation*}
+    \sum_{j=1}^kL^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}},D^{\sf sup}_{\tn{syn}} , g_j) \geq \frac{7 k \Delta}{120 C_0q^2}
+\end{equation*}
+completing the proof of Theorem \ref{thm:supervised-distill-1}.
+
+\iffalse
+
+\begin{lemma}
+    There exist sets($\eps$-nets) for the regressor and subsampled synthetic dataset $\bN =\{{\bn}_1,\dots,{\bn}_p\}$,  $\mathbb{D} =\{{\bD}_1,\dots,{\bD}_q\}$ (${\bD}_i = \{\bd_{i,1}, \cdots, \bd_{i,d+1} \} \in \mathbb{R}^{(d+1)d}$) such that if for some regressor $g_1(\bx, y) := \br_1^{\sf T}\zeta(\bx, y)$ with $ \|\br_1\| \leq 2$ and $D^{\sf sup}_{\tn{syn}}$, we have $L^{\tn{err}}_{mse}(D^{\sf sup}_{\tn{train}}, D^{\sf sup}_{\tn{apx}}, g_1) > \Delta$, then we would have $L^{\tn{err}}_{mse}(D^{\sf sup}_{\tn{train}}, \bD, \bn) \geq \frac{{\Delta}}{4^{d+1}}$ for some ${\bn} \in \bN \text{ and } {\bD} \in \mathbb{D}$ with $p = \left(\frac{B^{4}}{\Delta}\right)^{d/2}$, $q = \left(\frac{B^{4}}{d^2\Delta}\right)^{d^2/2}$.
+\end{lemma}
+
+\begin{proof}
+\underline{Part 1. Net over regressors} \\
+Let $\eps$-net of the unit ball in $d$-dimensions be  $\bN =\{\vec{\bn}_1,\dots,\vec{\bn}_p\}$, where $(\frac{1}{\eps})^d\leq m \leq(\frac{3}{\eps})^d$ (cite HDP textbook). This means that for any $\vec{\bx}$, there exists some index $i$ such that $\|\vec{\bx} -  \vec{\bn}_i\| < \eps$.
+
+Let $\vec{\br_1} = \vec{\bn}_k + \vec{\delta}$ for some $k$, where $\|\vec{\delta}\| < \eps$. Let us bound the difference between $\sqrt{L^{\tn{err}}_{mse}(D^{\sf sup}_{\tn{train}}, D^{\sf sup}_{\tn{apx}}, g_1)}$ and $\sqrt{L^{\tn{err}}_{mse}(D^{\sf sup}_{\tn{train}}, D^{\sf sup}_{\tn{apx}}, \bn_k)}$. 
+
+We assume that $\|\vec{\bz}_i\| <B$.
+\begin{eqnarray}
+    \sqrt{L^{\tn{err}}_{mse}(D^{\sf sup}_{\tn{train}}, D^{\sf sup}_{\tn{apx}}, \bn_k)} &=& |\frac{1}{n}\sum_{i=1}^{n} (\vec{\br_1}\cdot\vec{\bx}_i)^2 + \frac{1}{n}\sum_{i=1}^{n}(\vec{\delta}\cdot\vec{\bx}_i)^2 -\frac{1}{n}\sum_{i=1}^{n}2(\vec{\br_1}\cdot\vec{\bx}_i)(\vec{\delta}\cdot\vec{\bx}_i) - \nonumber \\ 
+        && \quad\frac{1}{d+1}\sum_{i=1}^{d+1} (\vec{\br_1}\cdot\vec{\bz'}_i)^2 -\frac{1}{d+1}\sum_{i=1}^{d+1}(\vec{\delta}\cdot\vec{\bz'}_i)^2 +\frac{1}{d+1}\sum_{i=1}^{d+1}2(\vec{\br_1}\cdot\vec{\bz'}_i)(\vec{\delta}\cdot\vec{\bz'}_i)|\nonumber
+\end{eqnarray}
+\begin{eqnarray}
+    \sqrt{L^{\tn{err}}_{mse}(D^{\sf sup}_{\tn{train}}, D^{\sf sup}_{\tn{apx}}, \bn_k)} &\geq& \sqrt{L^{\tn{err}}_{mse}(D^{\sf sup}_{\tn{train}}, D^{\sf sup}_{\tn{apx}}, g_1)} -|\frac{1}{n} \sum_{i=1}^{n}(\vec{\delta}\cdot\vec{\bx}_i)^2| -|\frac{1}{n}\sum_{i=1}^{n}2(\vec{\br_1}\cdot\vec{\bx}_i)(\vec{\delta}\cdot\vec{\bx}_i)| \nonumber \\ 
+        && \quad-|\frac{1}{d+1}\sum_{i=1}^{d+1}(\vec{\delta}\cdot\vec{\bz'}_i)^2| -|\frac{1}{d+1}\sum_{i=1}^{d+1}2(\vec{\br_1}\cdot\vec{\bz'}_i)(\vec{\delta}\cdot\vec{\bz'}_i)|\nonumber
+\end{eqnarray}
+\[
+    \sqrt{L^{\tn{err}}_{mse}(D^{\sf sup}_{\tn{train}}, D^{\sf sup}_{\tn{apx}}, \bn_k)} \geq \sqrt{L^{\tn{err}}_{mse}(D^{\sf sup}_{\tn{train}}, D^{\sf sup}_{\tn{apx}}, g_1)} - \eps^2 - 2\eps -B^2\eps^2 - 2B\eps
+\]
+For $\eps = \frac{\sqrt{\Delta}}{4(B+B^2)}$, we get that
+\[
+    \sqrt{L^{\tn{err}}_{mse}(D^{\sf sup}_{\tn{train}}, D^{\sf sup}_{\tn{apx}}, \bn_k)} \geq \frac{\sqrt{\Delta}}{2} \text{ or equivalently }{{L^{\tn{err}}_{mse}(D^{\sf sup}_{\tn{train}}, D^{\sf sup}_{\tn{apx}}, \bn_k)}} \geq \frac{{\Delta}}{4}
+\]
+Note that the size of the set $\bN$, is $p = O(\frac{B^{2d}}{\Delta^{d/2}})$.
+
+\underline{Part 2. Net over subsampled synthetic data} \\
+Let $\eps$-net of the $B$-norm ball in $d$-dimensions be  $\bU_1 =\{\vec{\bd}_{1,1},\dots,\vec{\bd}_{l,1}\}$, where $(\frac{B}{\eps})^d\leq l \leq(\frac{B}{\eps})^d$ (cite HDP textbook). This means that for any $\vec{\bx}$, there exists some index $i$ such that $\|\vec{\bx} -  \vec{\bd}_{i,1}\| < \eps$.
+
+Let $\vec{\bz'_1} = \vec{\bd}_{t,1} + \vec{\delta}$ for some $t$, where $\|\vec{\delta}\| < \eps$. Let us bound the difference between $\sqrt{L^{\tn{err}}_{mse}(D^{\sf sup}_{\tn{train}}, D^{\sf sup}_{\tn{apx}}, \bn_k)}$ and $\sqrt{L^{\tn{err}}_{mse}(D^{\sf sup}_{\tn{train}}, \{\bd_{t,1},\bz'_2,\cdots, \bz'_{d+1}\}, \bn_k)}$.
+We are currently only approximating one single data point in the subsampled synthetic dataset. We will take the net over all synthetic data points later.
+Like the last part, we can get the inequality
+\[
+    \sqrt{L^{\tn{err}}_{mse}(D^{\sf sup}_{\tn{train}}, \{\bd_{t,1},\bz'_2,\cdots, \bz'_{d+1}\}, \bn_k)} \geq \sqrt{L^{\tn{err}}_{mse}(D^{\sf sup}_{\tn{train}}, D^{\sf sup}_{\tn{apx}}, \bn_k)} -\frac{1}{d+1}|(\vec{\delta}\cdot\vec{\br_1})^2| -\frac{1}{d+1}|2(\vec{\br_1}\cdot\vec{\bz'}_1)(\vec{\delta}\cdot\vec{\br_1})|
+\]
+\[
+    \sqrt{L^{\tn{err}}_{mse}(D^{\sf sup}_{\tn{train}}, \{\bd_{t,1},\bz'_2,\cdots, \bz'_{d+1}\}, \bn_k)} \geq \sqrt{L^{\tn{err}}_{mse}(D^{\sf sup}_{\tn{train}}, D^{\sf sup}_{\tn{apx}}, \bn_k)} -\frac{1}{d+1}(\eps^2 + 2B\eps)
+\]
+
+Doing this for all $d+1$ samples in the subsample dynthetic dataset, we get
+
+\[
+    \sqrt{L^{\tn{err}}_{mse}(D^{\sf sup}_{\tn{train}}, \bD_t, \bn_k)} \geq \sqrt{L^{\tn{err}}_{mse}(D^{\sf sup}_{\tn{train}}, D^{\sf sup}_{\tn{apx}}, \bn_k)} -(\eps^2 + 2B\eps)
+\]
+
+For $\eps = \frac{\sqrt{\Delta}}{4(1+2B)}$, we have
+\[
+     \sqrt{L^{\tn{err}}_{mse}(D^{\sf sup}_{\tn{train}}, \bD_t, \bn_k)} \geq \frac{\sqrt{\Delta}}{4} \text{ or equivalently } { \sqrt{L^{\tn{err}}_{mse}(D^{\sf sup}_{\tn{train}}, \bD_t, \bn_k)}} \geq \frac{{\Delta}}{16}
+\]
+
+Consider the set $\mathbb{D}$ to be the cross product of all the nets for the individual $m$ points $\bU$. This makes the size of the net $\mathbb{D}$ to be $q =O( \left(\frac{B^{2d}}{\Delta^{d/2}} \right)^{d+1}) = O( \left(\frac{B^{4}}{\Delta} \right)^{d^2/2})$.
+\end{proof}
+
+To complete the proof, we sum up over the $\eps$-nets from the last lemma, to get that when $L_{squared}(\br_i) < \frac{\Delta}{Cd^2}$ for all $i \in [k]$ (with number of randomly sampled regressors $k = O(\log(1/\delta))$), we have with probability at most
+$\left(\frac{B^{4}}{\Delta}\right)^{d/2} \left(\frac{B^{4}}{\Delta}\right)^{d^2/2}\delta$:
+\[
+    L_{squared}(\br) \geq {64}{\Delta}
+\]
+Substituting these values for $\eps, \delta$, we finish the proof.
+
+\fi

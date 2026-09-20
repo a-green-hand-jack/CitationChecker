@@ -1,0 +1,257 @@
+\usepackage[T1]{fontenc}
+\usepackage{titlesec}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{complexity}
+
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath,amsopn,mathtools}
+\usepackage{mathrsfs}
+\usepackage{ifxetex,ifluatex}
+\usepackage{ifthen}
+\usepackage{fixltx2e} 
+\usepackage{bbm}
+\usepackage{dsfont}
+\usepackage{mathtools}
+\usepackage{enumerate}
+
+\usepackage[colorlinks]{hyperref}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{changepage}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{mathpazo}
+\hypersetup{
+  citecolor=blue,
+  linkcolor=black,
+  urlcolor=black,
+}
+
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{listings}
+\usepackage{multicol}
+\usepackage{wrapfig}
+
+
+
+\usepackage[shortlabels]{enumitem}
+\setlist{topsep=0pt,parsep=0pt,partopsep=0pt,itemsep=0pt}
+
+\newcommand{\cqed}{\hfill$\lrcorner$}
+\newcommand{\mdp}{{\textsc{GapDist}}}
+\newcommand{\sncp}{{\textsc{GapSNC}}}
+\newcommand{\odd}{{\textsc{GapOddSet}}}
+\newcommand{\kvec}{\textsc{MLD}}
+\newcommand{\gapvec}{\textsc{GapVectorSum}}
+\newcommand{\csp}{\textsc{Gap2CSP}}
+\newcommand{\kclique}{k\textsc{-clique}}
+\newcommand{\kdense}{k\textsc{-Densest}}
+\newcommand{\snvp}{\textsc{GapSNV}}
+\newcommand{\svp}{GapSVP}
+\newcommand{\den}{\textsc{Den}}
+\newcommand{\bA}{{\mathbf{A}}}
+\newcommand{\bB}{{\mathbf{B}}}
+\newcommand{\bx}{{\mathbf{x}}}
+\newcommand{\by}{{\mathbf{y}}}
+\newcommand{\bL}{{\mathbf{L}}}
+\newcommand{\bT}{{\mathbf{T}}}
+\newcommand{\bs}{{\mathbf{s}}}
+\newcommand{\bz}{{\mathbf{z}}}
+\newcommand{\bp}{{\mathbf{p}}}
+\newcommand{\bzero}{{\mathbf{0}}}
+\newcommand{\uni}{\text{unique}}
+\newcommand{\Id}{{\rm Id}}
+
+
+\newcommand{\card}[1]{\ensuremath{|#1|}}
+\DeclareMathOperator*{\val}{val}
+\DeclareMathOperator*{\var}{var}
+\DeclareMathOperator*{\cl}{cl}
+\DeclareMathOperator*{\opt}{OPT}
+\DeclareMathOperator*{\disa}{disagr}
+\DeclareMathOperator*{\rdisa}{rdisagr}
+\DeclareMathOperator*{\lp}{LP}
+\DeclareMathOperator*{\lpc}{\mathcal{L}}
+\DeclareMathOperator*{\argmin}{argmin}
+\DeclareMathOperator*{\argmax}{argmax}
+\DeclareMathOperator*{\polyloglog}{polyloglog}
+\DeclareMathOperator*{\supp}{supp}
+\DeclareMathOperator{\sos}{sos}
+\DeclareMathOperator{\cli}{CLIQUE}
+\DeclareMathOperator*{\maj}{Majority}
+\DeclareMathOperator*{\unsat}{UNSAT}
+\DeclareMathOperator*{\EX}{\mathbb{E}}
+
+\newcommand{\etal}{\text{et al.}}
+\newcommand{\etals}{\text{et al. }}
+\newcommand{\cQ}{\mathcal{Q}}
+\newcommand{\cG}{\mathcal{G}}
+\newcommand{\cW}{\mathcal{W}}
+\newcommand{\tcW}{\widehat{\cW}}
+\newcommand{\cC}{\mathcal{C}}
+\newcommand{\cV}{\mathcal{V}}
+\newcommand{\cX}{{\rm{X}}} 
+\newcommand{\cI}{\mathcal{I}}
+
+\newcommand{\cK}{\mathcal{K}}
+\newcommand{\cA}{\mathcal{A}}
+\newcommand{\cB}{\mathcal{B}}
+
+\newcommand{\cT}{\mathcal{T}}
+\newcommand{\cF}{\mathcal{F}}
+\newcommand{\tcS}{\widetilde{\cS}}
+\newcommand{\tcT}{\widetilde{\cT}}
+\newcommand{\cU}{\mathcal{U}}
+\newcommand{\cD}{\mathcal{D}}
+\newcommand{\tGamma}{\tilde{\Gamma}}
+\newcommand{\tG}{\tilde{G}}
+\newcommand{\tV}{\tilde{V}}
+\newcommand{\tE}{\tilde{E}}
+\newcommand{\tw}{\tilde{w}}
+\newcommand{\tC}{\tilde{C}}
+\newcommand{\tO}{\tilde{O}}
+\newcommand{\tcF}{\tilde{\cF}}
+\newcommand{\tSigma}{\tilde{\Sigma}}
+\newcommand{\ttau}{\tilde{\tau}}
+\newcommand{\tP}{\tilde{P}}
+\newcommand{\tS}{\tilde{S}}
+\newcommand{\tU}{\tilde{U}}
+\newcommand{\tu}{\tilde{u}}
+\newcommand{\tv}{\tilde{v}}
+\newcommand{\tcP}{\tilde{\cP}}
+\newcommand{\tPhi}{\widetilde{\Phi}}
+\newcommand{\x}{\times}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Fp}{\mathbb{F}_p}
+\newcommand{\F}{\mathbb{F}_2}
+\newcommand{\bbA}{\mathbb{A}}
+\newcommand{\scrA}{\mathscr{A}}
+\newcommand{\scrP}{\mathscr{P}}
+\newcommand{\Rz}{\mathbb{R}_{\geq 0}}
+\newcommand{\ind}{\mathds{1}}
+\newcommand{\vone}{\mathbf{1}}
+\newcommand{\cost}{\cC}
+\newcommand{\geqs}{\geqslant}
+\newcommand{\leqs}{\leqslant}
+
+\newcommand{\ow}{\overline{w}}
+\newcommand{\f}{\frac}
+\newcommand{\reg}{\text{reg}}
+\newcommand{\greedy}{\text{greedy}}
+\renewcommand{\bar}{\overline}
+\renewcommand{\epsilon}{\varepsilon}
+\newcommand{\nullset}{\emptyset}
+\newcommand{\set}[1]{\{#1\}}
+\newcommand{\DYES}{\mathcal{D}_{YES}}
+\newcommand{\DNO}{\mathcal{D}_{NO}}
+\newcommand{\YES}{{\sc YES}~}
+\newcommand{\NO}{{\sc NO}~}
+\newcommand{\loglog}{\log\log}
+\renewcommand{\polylog}{\text{polylog}}
+\renewcommand{\poly}{\text{poly}}
+\newcommand{\psim}{\psi_{\text{maj}}}
+\newcommand{\agr}{\text{agree}}
+\newcommand{\napprox}{\not\approx}
+
+\newcommand{\beq}{\begin{equation}}
+\newcommand{\eeq}{\end{equation}}
+\def\bal#1\eal{\begin{align}#1\end{align}}
+
+\usepackage{xcolor}
+
+\definecolor{xxxcolor}{rgb}{0.8,0,0}
+\newcommand{\TODO}[1]{{\color{xxxcolor}{[TODO: }\emph{#1}{]}}}
+
+
+\newenvironment{proofof}[1][Proof]{\par
+  \normalfont
+  \topsep6\p@\@plus6\p@ \trivlist
+\item[\hskip\labelsep\itshape
+  Proof of #1.]\ignorespaces
+}{%
+  \qed\endtrivlist
+}
+\newenvironment{subproof}[1][Proof]{\par
+  \normalfont
+  \topsep6\p@\@plus6\p@ \trivlist
+\item[\hskip\labelsep\itshape
+  #1.]\ignorespaces
+}{%
+  \cqed\endtrivlist
+}
+
+\newcommand{\result}{{\bf Result. }}
+
+\newcommand{\qed}{\mbox{}\hspace*{\fill}\nolinebreak$\square$}
+
+
+\let\Oldforall\forall
+\renewcommand{\forall}{~\Oldforall} 
+\renewcommand{\arraystretch}{1.5} 
+
+\let\Oldsum\sum
+
+\let\Oldinf\inf
+\renewcommand{\inf}{\Oldinf\limits}
+\let\Oldsup\sup
+\renewcommand{\sup}{\Oldsup\limits}
+
+
+\IfFileExists{microtype.sty}{\usepackage{microtype}}{}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\emergencystretch}{3em}  
+
+\newcounter{section-preserve}
+\newcounter{theorem-preserve}
+\newcommand{\blank}[1]{}
+\newtoks\magicAppendix
+\magicAppendix={}
+\newtoks\magictoks
+\newif\iflater
+\laterfalse
+\long\def\later#1{\magictoks={#1}%
+  \edef\magictodo{\noexpand\magicAppendix={\the\magicAppendix \par
+      \the\magictoks%
+  }}
+  \magictodo}
+\long\def\both#1{\magictoks={#1}%
+  \edef\magictodo{\noexpand\magicAppendix={\the\magicAppendix \par
+      \noexpand\setcounter{theorem-preserve}{\noexpand\arabic{theorem}}%
+      \noexpand\setcounter{theorem}{\arabic{theorem}}%
+      \noexpand\setcounter{section-preserve}{\noexpand\arabic{section}}%
+      \noexpand\setcounter{section}{\arabic{section}}%
+      \noexpand\let\noexpand\oldsection=\noexpand\thesection
+      \noexpand\def\noexpand\thesection{\thesection}
+      \noexpand\let\noexpand\oldlabel=\noexpand\label
+      \noexpand\let\noexpand\label=\noexpand\blank
+      \the\magictoks%
+      \noexpand\setcounter{theorem}{\noexpand\arabic{theorem-preserve}}%
+      \noexpand\setcounter{section}{\noexpand\arabic{section-preserve}}%
+      \noexpand\let\noexpand\thesection=\noexpand\oldsection
+      \noexpand\let\noexpand\label=\noexpand\oldlabel
+  }}
+  \magictodo
+  \the\magictoks}
+\def\magicappendix{\latertrue \the\magicAppendix}
+
+
+\newif\ifabstract
+\abstracttrue
+
+\newif\iffull
+\ifabstract \fullfalse \else \fulltrue \fi
+
+\iffull
+\long\def\both#1{#1}
+\let\later=\both
+\def\magicappendix{}
+\fi
+
+\newcommand\inote[1]{\iffalse{\bf (Irit:~} {#1}{\bf )}\fi}

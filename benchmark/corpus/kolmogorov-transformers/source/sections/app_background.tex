@@ -1,0 +1,148 @@
+
+\section{Additional Background}
+\label{sec:app-background}
+
+We first give an overview of relevant concepts related to Kolmogorov complexity and the Minimum Description Length (MDL) principle, and refer the reader to other resources for further reading, such as \citet{li2008introduction}, a reference text for Kolmogorov complexity and related topics. Other texts that cover these topics include \citet{cover2006elements} and \citet{hutter2005universal}. Some material is also covered in tutorials \citet{grunwald2008algorithmic} and \citet{grunwald2004tutorial}. Other notable resources include \citet{barron1985logically} which discusses the Kolmogorov complexity of probability distributions, \citet{rathmanner2011philosophical} which offers a more philosophical and intuitive discussion, and the introduction of \citet{schmidhuber1997discovering} which offers a concise summary for a machine learning audience. 
+
+\subsection{Binary Strings}
+\label{sec:binary-strings}
+
+ Let $\B$ denote the set of finite \emph{binary strings} or sequences, e.g.:
+\begin{equation}
+\{0,1\}^* = \{\eps, 0, 1, 00, 01, 10, 11, 000, \ldots \},
+\label{eq:binary-strings}
+\end{equation}
+with $\eps$ denoting the empty string. We denote the \emph{length} of a string $x \in \{0,1\}^*$ as $|x|$, e.g. $|0101| = 4$.
+
+Note that there is a one-to-one correspondence between the set of binary strings and the natural numbers $\gN$, e.g. \eqref{eq:binary-strings} shows a standard enumeration. Therefore, there is also a one-to-one mapping between the elements of any countable set and binary strings. 
+
+\subsection{Codes and Description Lengths}
+\label{sec:codes-and-description-lengths}
+
+We consider settings where a sender (e.g., Alice) wants to transmit some information to a receiver (e.g., Bob). Formally, consider the case where Alice wants to transmit an element from some countable set $\gX$ to Bob by sending a message consisting of some binary string, such that Bob can reconstruct the element from the transmitted message. Thus, prior to communication, Alice and Bob must agree on a \emph{code}, or \emph{description method}, which can be characterized by a \emph{decoding function} $D : \{0,1\}^* \rightarrow \gX$. We refer to the binary strings in the domain of the decoding function as \emph{codewords} (or \emph{programs}, for reasons which will become clear in the following sections). For each code $D$, we can therefore associate a \emph{description length measure}, or \emph{complexity measure}, $L_D: \gX \rightarrow \gN$, where the complexity measure's value for every $x$ is equal to the length of the shortest program that generates $x$:
+\begin{align}
+    L_D(x) &= \text{length of the shortest  program}~z~\text{such that}~D(z)=x \nonumber \\ 
+        &= \min_{z  ~:~ D(z) = x} |z| \label{eq:description-length2}
+\end{align}
+Therefore, a code $D$ establishes a \emph{compression scheme}, where Alice can transmit an element $x \in \gX$ to Bob using $L_D(x)$ bits.
+
+\paragraph{Prefix codes and Kraft's inequality} If Alice wants to send Bob a sequence of elements in $\gX$, not all codes guarantee that such a sequence is \emph{uniquely decodeable}, i.e. that the sequence can be unambiguously reconstructed when the messages for each of the elements are concatenated. This ambiguity can be resolved by considering a \emph{prefix code}. A set $\gB \subset \{0,1\}^*$ is \emph{prefix-free} if no element in $\gB$ is a prefix of any other element in $\gB$. A decoding function specifies a \emph{prefix code} if its domain is \emph{prefix-free}. A common example of a prefix-free code is a \emph{Huffman code}.
+
+\emph{Kraft's inequality} captures an important relation between description length measures and prefix codes. It states that there exists a prefix code $D$ over $\gX$ with description lengths $L_D$ if and only if:
+\begin{equation}
+\sum_\gX 2^{-L_D(x)} \leq 1.
+\label{eq:kraft-inequality}
+\end{equation}
+
+\paragraph{Prefix codes and probability distributions} Beyond the practical advantages of self-delimiting codes, a primary theoretical motivation for considering prefix-free codes is their close connection with probability distributions. Given a probability distribution $p(x)$ over $\gX$, there exists a prefix-free code $D$ for $\gX$ such that:
+\begin{equation}
+L_D(x) = \lceil-\log_2~p(x)\rceil,
+\end{equation}
+where we round up to form integer-length codewords. One method for constructing such a code is \emph{Shannon-Fano} coding, where more likely elements are assigned shorter codewords. 
+As we are primarily interested in theoretical \emph{codelengths} rather than practical \emph{codes}, we will typically omit the additive constant from this rounding and consider non-integer codelengths.
+
+\paragraph{Universal prefix codes} Let us consider the set of all computable prefix-free partial functions mapping from binary strings to elements of some set $\gX$, denoted as $\gD$. Each decoding function $D \in \gD$ has a corresponding description length measure, $L_D$, given by equation~\ref{eq:description-length2}.
+In general, $L_D$ may be an unsatisfying complexity measure for elements of $\gX$ due to its strong dependence on the potentially arbitrary choice of $D$. However, in the following section, we will show that there exists a subset of functions in $\gD$, that are \emph{universal} in the sense of offering \emph{at least as much compression} as any other description length measure, up to an additive constant that does not depend on the complexity of the element being encoded.
+
+
+\subsection{Kolmogorov Complexity}
+\label{sec:background-kolmogorov-complexity}
+
+The definition of \emph{Kolmogorov complexity} (also called \emph{algorithmic complexity}) and the proof of its universality come from \citet{kolmogorov1965three}, with similar formulations appearing independently in \citet{solomonoff1964formal} and \citet{chaitin1969length}.
+
+Intuitively, we can think of the Kolmogorov complexity $K(x)$ of an object $x$ as the shortest program written in some standard programming language (such as Python) that prints $x$. To make this notion more precise, Kolmogorov complexity is typically defined with respect to a special class of Turing machines, called prefix Turing machines. (With some effort, it could be defined with respect to any universal model of computation.) 
+
+\paragraph{Prefix Turing machines} Prefix Turing machines are multi-tape Turing machines. As with all multi-tape Turing machines, the behavior of the machine is specified by a \emph{transition function}. At each step of computation, the transition function takes as input the current state and the register values at current ``head'' position of any readable tape. The transition function can then optionally update the register values of any writeable tapes at their current ``head'' positions and optionally move each ``head'' to an adjacent register. The machine then updates the state for the next step or halts the computation. 
+
+The defining characteristic of a \emph{prefix} Turing machine is a binary, unidirectional, read-only \emph{program tape} with no blank symbols. The machine also consists of a bidirectional, read-write work tape. The machine also has at least one read-only input tape, and at least one write-only output tape.\footnote{Note that in some constructions, programs and inputs are encoded on the same tape, although this detail only affects the resulting definition of Kolmogorov complexity by an additive constant.}
+
+For a prefix Turing machine $T$, we abuse notation and write $T$ to denote the partial function that the machine computes, i.e. where $y = T(x,z)$ denotes that the Turing machine $T$, with the input tape initialized with $x$ and the program tape initialized with prefix $z$, runs for some number of steps before halting with $y$ written to the output tape. The function is undefined for $(x,z)$ that do not halt.
+
+\paragraph{Universal Turing machines} Notably, there exists a subset of prefix Turing machines that are \emph{universal} in the sense of being able to simulate the computation of any other prefix Turing machine. Such a machine can effectively take as input the description of any other Turing machine, and emulate the computation of that machine. 
+
+\paragraph{Kolmogorov complexity} 
+
+The more commonly used notion of Kolmogorov complexity -- used throughout this paper -- is called \emph{prefix} Kolmogorov complexity, to distinguish from \emph{plain} Kolmogorov complexity, which lacks some of the desirable formal properties.
+
+The (prefix) Kolmogorov complexity of a string $x \in \B$ with respect to a universal prefix Turing machine $T$ is:
+\begin{equation}
+K_T(x) = \min_{z  ~:~ T(\epsilon,z) = x} |z|,
+\end{equation}
+where $\epsilon$ denotes the empty string.
+
+Similarly, the \emph{conditional} Kolmogorov complexity of a string $y$ given $x$ is:
+\begin{equation}
+K_T(y|x) = \min_{z  ~:~ T(x,z) = y} |z|.
+\end{equation}
+
+Note that Kolmogorov complexity $K_T(x)$ satisfies Kraft's inequality because the set of halting programs is prefix-free.
+
+\paragraph{Invariance theorem} 
+The \emph{invariance theorem} is the key result that gives Kolmogorov complexity its \emph{universal} property. Given any two \emph{universal} prefix-free Turing machines $T^1, T^2$:
+\begin{equation}
+    \forall x,~| K_{T^1}(x) - K_{T^2}(x) | < c,
+\end{equation}
+where $c$ is a constant that depends on the choice of $T^1$ and $T^2$ but not on $x$, and therefore we write $\forall x,~K_{T^1}(x) \eqc K_{T^2}(x)$, recalling the notation from Section~\ref{sec:background}. The invariance theorem intuitively follows from the result that a \emph{universal Turing machine} can simulate the computation of any other Turing machine. Informally, the constant $c$ captures the cost of constructing an \emph{interpreter} for programs written for $T^2$ in the language of $T^1$. The result also extends to conditional Kolmogorov complexity.
+
+Therefore, as we are primarily interested in inequalities that hold up to an additive constant, we write Kolmogorov complexity as $K(x)$ and drop the explicit dependence on a particular choice of reference machine.
+
+\paragraph{Computability}
+ Kolmogorov complexity is formally uncomputable due to the halting problem. If we try to enumerate programs from shortest to longest, some may never halt. It is, however, upper semicomputable. Any program that halts and generates the given object provides an upper bound. This upper bound becomes increasingly tight as we run more programs for more steps.
+
+\paragraph{Universality of Kolmogorov complexity} As a corollary to the invariance theorem, Kolmogorov complexity is a \emph{universal description length measure} as described in Section~\ref{sec:codes-and-description-lengths}, i.e. for any computable prefix-free decoding function $D$ and corresponding description length measure $L_D$,
+\begin{equation}
+    \forall x~~K(x) \leqc L_D(x).\label{eq:kolmogrov-universality}
+\end{equation}
+
+In other words, Kolmogorov complexity can be interpreted as a \emph{compression scheme}, where Alice encodes a string $x$ by the shortest program that generates $x$. This compression scheme offers \emph{at least as much} compression of $x$, for any $x$, as any other computable prefix code up to an additive constant that does not depend on $x$. Thus, as the complexity of $x$ increases, the additive constant becomes negligible, and all such universal description length measures are asymptotically equivalent.
+Conversely, any description length measure provides an upper bound on Kolmogorov complexity, up to an additive constant, however this bound may be arbitrarily loose for some objects.
+
+\paragraph{Kolmogorov complexity of countable objects} 
+
+The definition of Kolmogorov complexity naturally extends to countable sets other than the non-binary strings. For example, for $x \in \gX$ and $y \in \gY$ where $\gX$ and $\gY$ are countable, we have:
+\begin{equation}
+K(y \mid x) = \min_{z ~:~ T \left( e_{\gX}(x),z \right) = e_{\gY}(y)} |z|,
+\end{equation}
+or $\infty$ if no such $z$ exists, where $e_{\gX}(x) : \gX \rightarrow \B$ and $e_{\gY}(y) : \gY \rightarrow \B$ are one-to-one computable functions mapping from $x$ and $y$ to binary encodings, and $T$ is a universal prefix Turing machine.
+While $K(y \mid x)$ therefore depends on a specific choice of $e_{\gX}$ and $e_{\gY}$, we leave this implicit in the notation. Since $e_{\gX}$ and $e_{\gY}$ are computable functions, the specific choice only affects $K(y \mid x)$ up to an additive constant that does not depend on $y$ or $x$, similar to the choice of $T$. 
+
+For structured objects such as tuples, we can consider prefix Turing machines with multiple output tapes, in order to simplify the encoding of such objects. For such a universal prefix Turing machine $T$, we use the same notation as above, assuming that both $T(x,z)$ and $e_{\gY}$ output a tuple of strings with a number of elements equal to the number of output tapes. Again, such a choice only affects the resulting definition of Kolmogorov complex up to an additive constant, as the number of tapes does not affect the machine's expressive power~\citep{papadimitriou1994computational}.
+
+\paragraph{Kolmogorov complexity of discrete functions} We can extend the definition of Kolmogorov complexity to functions. This is relatively straightforward for a function $f: \gX \rightarrow \gY$ if the domain $\gX$ and range $\gY$ are countable such that the inputs and outputs of the function can be encoded as binary strings. Again, we choose a reference universal prefix Turing machine $T$.
+\begin{equation}
+    K(f) = \min_{z ~:~ \forall x,~T(e_\gX(x),z) = e_\gY(f(x))} |z|,
+\label{eq:kolmogorov-discrete-function}
+\end{equation}
+or $\infty$ if no such $z$ exists, which is the case if $f$ is uncomputable, e.g. it solves the halting problem. 
+As a direct analogue to the invariance theorem for Kolmogorov complexity of strings, the same property holds for the Kolmogorov complexity of functions. 
+Extensions to real-valued functions are discussed in Appendix~\ref{sec:real-valued-distributions}. 
+
+\paragraph{Resource-bounded Kolmogorov complexity} We can consider computable, resource-bounded approximations to Kolmogorov complexity \citep[section 7]{li2008introduction}. 
+
+Consider a \emph{resource bound} $R = (R_t, R_s) \in \gR$, representing a bound on the time $R_t \in \N$ and $R_s \in \N$ space resources available.
+
+Given a universal prefix Turing machine $T$, let $y = T_R(x,z)$ denote the partial function computed by $T$ if the execution given $x$ and $z$ halts within $R_t$ steps and uses at most $R_s$ registers on each tape; otherwise $T_R(x,z)$ is undefined. We can then define time and space bounded Kolmogorov complexity with respect to $T$ and $R$:
+\begin{equation}
+    K_{T,R}(y \mid x) = \min_{z ~:~ T_R(x,z) = y} |z|,
+    \label{eq:bounded-kolmogorov}
+\end{equation}
+or $\infty$ if no such $z$ exists, with an analogous definition for functions.
+
+The resource-bounded version lacks the universal properties of unbounded Kolmogorov complexity. However, $K_{T,R}(y \mid x)$ is monotonically non-increasing with respect to increasing $R_t$ and $R_s$, decreasing to $K_T(y \mid x)$ as $R_t$ and $R_s$ go to $\infty$.
+
+\paragraph{Coding theorem}
+\label{sec:app-coding-theorem}
+
+The \emph{coding theorem} is a central result in algorithmic information theory~\citep[Section 4]{li2008introduction}, and relates to the universality of Kolmogorov complexity. A key result of the coding theorem is that if $m$ is a lower semicomputable semimeasure, then:
+\begin{equation}
+    K(x) \leqc -\log_2 m(x).
+    \label{eq:coding-theorem}
+\end{equation}
+where a \emph{semimeasure} is a generalization of probability distribution, such that a semimeasure $m$ over a domain $\gX$ satisfies:
+\begin{equation}
+\sum_{x \in \gX} m(x) \leq 1.
+\end{equation}
+
+Note that because $K(x)$ is upper semicomputable and satisfies Kraft's inequality, $2^{-K(x)}$ is a lower semicomputable semimeasure.
+
+This result also extends to conditional Kolmogorov complexity, and, as a direct analogue, to the Kolmogorov complexity of discrete functions.

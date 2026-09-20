@@ -1,0 +1,60 @@
+\begin{figure}[ht]
+\centering
+\begin{minted}[
+  frame=single,
+  framesep=2mm, 
+  fontsize=\fontsize{8}{9}\selectfont\ttfamily,
+  ]{python}
+from alta import program_builder as pb
+
+def build_turing_machine_program_spec(spec: MachineSpec) -> pb.ProgramSpec:
+  """Returns ALTA program spec for a Turing machine emulator."""
+
+  variables = {
+      "halted": pb.var(2),
+      "state": pb.var(spec.num_states),
+      "symbol": pb.input_var(spec.num_symbols),
+      "head": pb.input_var(2, init_fn=lambda x: x == START),
+      "one": pb.var(2, default=1),  # Constant for queries.
+  }
+  attention_heads = {
+      # Read the symbol at the current head position.
+      "head_symbol": pb.qkv("one", "head", "symbol"),
+      # Identify tape cells to the left and right of the head.
+      "head_left": pb.v_relative("head", -1),
+      "head_right": pb.v_relative("head", 1),
+  }
+
+  def ffn_fn(x):
+    """FFN function for Turing machine emulator."""
+    if x["halted"]:
+      return
+
+    # Get the next action from the state transition function.
+    output = spec.transition_fn(
+        TransitionIn(state=x["state"], head_symbol=x["head_symbol"])
+    )
+    x["state"] = output.state
+    if output.halt:
+      x["halted"] = 1
+
+    # Write a new symbol at current head position if specified.
+    if x["head"] and output.symbol is not None:
+      x["symbol"] = output.symbol
+
+    # Move the tape head to left or right if specified.
+    if output.move is not None and x["head"]:
+      x["head"] = 0
+    if output.move == Move.RIGHT and x["symbol"] != START and x["head_left"]:
+      x["head"] = 1
+    elif output.move == Move.LEFT and x["symbol"] != END and x["head_right"]:
+      x["head"] = 1
+
+  return pb.program_spec(
+      ffn_fn=ffn_fn, variables=variables, heads=attention_heads,
+      output_name="symbol", input_range=spec.num_symbols + 2, position_range=None,
+  )
+\end{minted}
+\caption{ALTA program specification for emulating a single-tape Turing machine.}
+\label{fig:single_tape}
+\end{figure}

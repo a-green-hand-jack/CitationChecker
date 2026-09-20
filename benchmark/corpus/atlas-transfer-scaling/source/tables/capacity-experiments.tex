@@ -1,0 +1,30 @@
+\begin{table}
+\small
+\setlength{\tabcolsep}{3pt}
+\caption{\textbf{The set of experiments designed to measure the \emph{curse of multilinguality}---or how language performance is impacted by both the number of training languages and the model size.} 
+We defined \textsc{Version} mixtures with \textsc{Num} languages, ranging between 4 and 50. For mixtures with 4 languages, we define a few different versions oriented to languages that might be more likely to be grouped together.
+This set of experiments are summarized in the \textbf{Capacity} row of \Cref{tab:experiment-summary}.}
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{ll p{12cm}}
+\toprule
+\textsc{Version} & \textsc{Num} & \textsc{Languages (alphabetical)} \\
+\midrule
+\textbf{4v0}  & 4  & de, es, fr, pt \\
+\textbf{4v1}  & 4  & de, en, es, fr \\
+\textbf{4v2}  & 4  & hi, ja, vi, zh \\
+\textbf{4v3}  & 4  & en, hi, pt, ru \\
+\textbf{6v0}  & 6  & de, en, es, fr, pt, ru \\
+\textbf{8v0}  & 8  & de, en, es, fr, pt, ru, vi, zh \\
+\textbf{8v1}  & 8  & de, en, fr, hi, ja, ru, vi, zh \\
+\textbf{12v0} & 12 & de, en, es, fr, hi, it, ja, pl, pt, ru, vi, zh \\
+\textbf{16v0} & 16 & de, en, es, fr, hi, id, it, ja, nl, pl, pt, ru, sv, tr, vi, zh \\
+\textbf{24v0} & 24 & cs, da, de, en, es, fa, fi, fr, hi, hu, id, it, ja, nl, pl, pt, ro, ru, sv, th, tr, uk, vi, zh \\
+\textbf{32v0} & 32 & ar, bg, ca, cs, da, de, el, en, es, fa, fi, fr, hi, hu, id, it, ja, ko, lt, nl, no, pl, pt, ro, ru, sk, sv, th, tr, uk, vi, zh \\
+\textbf{50v0} & 50 & af, ar, ba, bm, bn, ca, ckb, cy, de, ee, el, en, es, fa, fil, fr, gn, gu, ha, he, hi, hr, id, it, ja, jv, kk, ko, mr, ms, my, nl, no, om, pl, ps, pt, ro, ru, sm, sv, sw, te, th, tr, uk, ur, vi, yo, zh \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+
+\label{tab:capacity-exps}
+% \vspace{-5mm}
+\end{table}

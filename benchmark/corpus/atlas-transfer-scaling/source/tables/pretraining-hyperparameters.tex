@@ -1,0 +1,40 @@
+\begingroup
+\setlength{\tabcolsep}{4pt}
+
+\begin{table*}[ht]
+    \centering
+    \small
+    \caption{
+    \textbf{The pretraining hyperparameters used across experiments.} We detail the batch size scheduling, the vocabulary choice, as well as fine-grained hyperparameter choices. Each choice is justified and grounded in prior work, discussed in the Explanation column.}
+    \begin{tabular}{l | l | p{8cm}} % Changed last column to p{6cm}
+        \toprule
+        \textsc{Parameter} & \textsc{Value} & \textsc{Explanation} \\
+        \midrule
+        \multicolumn{3}{c}{\textsc{\emph{General Training Parameters}}} \\
+        \midrule
+        Learning Rate Scheduler & WSD & We adopt the Warmup Stable Decay (WSD) learning rate schedule, designed to efficiently study data-model scaling law without extensive retraining \citep{hu2024minicpm,hagele2024scaling} \\
+        Optimizer & AdamW & Commonly used in scaling law experiments \citep{loshchilov2018decoupled, hoffmann2022training} \\
+        Base Learning Rate & 2e-4 & Following \citep{muennighoff2024scaling} and confirmation it works well in initial experiments. \\ % Added & to keep the table structure
+        Warmup Steps & 1000 & Standard practice, as in \citep{longpre2023pretrainer} \\ % Added & to keep the table structure
+        Decay Period & 10\% & Following \citep{hu2024minicpm,hagele2024scaling} this is the minimum well performing decay length. \\
+        Sequence Length & 2048 & As in \citep{longpre2023pretrainer,muennighoff2024scaling}. \\
+        Training Steps & 30k+ & We vary the steps according to experiments, to always ensure we are well above likely chinchilla compute optimal ranges. \\
+        Dropout & 0.1 & While English scaling laws work tends to use a dropout of 0.0, we see little notable difference, except for lower resource languages, with repeating epochs.  \\
+        \midrule
+        \multicolumn{3}{c}{\textsc{\emph{Batch Size Schedule}}} \\
+        \midrule
+        Batch Size (<150M params) & 256 & \multirow{4}{8cm}{\citet{hu2024minicpm,muennighoff2024scaling} both find the optimal batch size increases with model size. We adopt a slightly larger rising batch size than \citet{muennighoff2024scaling}, following initial empirical results.} \\ % Added width to multirow
+        Batch Size (<1B params) & 512 &  \\
+        Batch Size (<2B params) & 1024 &  \\
+        Batch Size (2B+ params) & 2048 &  \\
+        \midrule
+        \multicolumn{3}{c}{\textsc{\emph{Vocabulary}}} \\
+        \midrule
+        Vocab Size & 64k &  \\
+        Vocab (Unimax) & & Vocabulary by \citeauthor{kudugunta2024madlad}, with $T=100$ and 99.9995\% character coverage. \\
+        Vocab (Monolingual) & &  Same settings as above, but trained only on sentences from the language being considered. \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:pretrain-hyperparams}
+\end{table*}
+\endgroup

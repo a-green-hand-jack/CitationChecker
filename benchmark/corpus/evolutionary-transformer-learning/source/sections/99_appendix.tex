@@ -1,0 +1,53 @@
+\appendix
+
+\section{Technical appendices and supplementary material}
+\label{sec:appendix}
+
+\subsection{Parameter sweeps and replication}
+\label{sec:sweep}
+
+To investigate the effects of environmental predictability, we performed dense parameter sweeps for the Sinusoid regression and Omniglot classification tasks.
+Unless otherwise specified, all results reported in figures are the mean across 3 runs using different random seeds, and plotted error bars represent $\pm 1$ standard error of the mean (SEM).
+
+\textbf{Sweep 1: Sinusoid regression}
+
+The following grid of parameter values was used:
+\begin{itemize}
+    \item $\alpha \in \{0.0, 0.1, 0.3, 0.5, 0.7, 0.8, 0.9, 0.95, 0.99, 0.999, 1.0 \}$
+    \item $\sigma^2 \in \{0.0, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.5, 0.75, 1.0, 1.5\}$
+\end{itemize}
+
+\textbf{Sweep 2: Omniglot classification}
+
+The following grid was used, where $\alpha$ is determined from $\gamma$ via $\alpha = 2\gamma - 1$, as described in the main text.
+\begin{itemize}
+    \item $\alpha \in \{ 0.   , 0.1  , 0.2  , 0.4  , 0.6  , 0.8  , 0.9  , 0.95 , 0.99 , 0.999, 1. \}$
+    \item $\rho \in \{0.5 , 0.55, 0.6 , 0.65, 0.7 , 0.75, 0.8 , 0.85, 0.9 , 0.95, 0.99, 1.  \}$
+\end{itemize}
+
+\textbf{Sweep 3: Omniglot vocabulary size}
+
+To generate Figure~\ref{fig:reversal}, environmental stability and cue reliability were held at high values ($\alpha=0.999$, $\rho = 0.95$), while IWL cost was varied via the vocabulary size:
+\begin{itemize}
+    \item $|\mathcal{C}| \in \{100, 200, 400, 600, 800, 1000, 1200, 1400, 1623\}$
+\end{itemize}
+
+These sweeps comprise $(11\times12) + (11\times12) + 9 = 273$ unique experimental configurations. Including the 3 random seeds per configuration, this resulted in a total of 819 model training runs.
+
+\subsection{Compute resources}
+\label{sec:compute}
+
+All models were trained on single TPUv3 cores. Each of the 819 training runs took approximately 30 minutes to complete the 50,000 training steps (detailed in Section \ref{sec:experimental_design}). The total compute usage was approximately 410 TPU-hours.
+
+\subsection{Prequential codelength}
+\label{sec:prequential}
+
+The standard and formal definition of prequential codelength is \cite{blier2018description}:
+
+$$L(D) = -\sum_{t=1}^n \log P(y_t|x_t; \theta_{t-1})$$
+
+where $D = ((x_1, y_1), ..., (x_n, y_n))$ is a sequence of observed data points and $\theta_{t-1}$ represents the model parameters trained on the data observed up to time $t-1$: $((x_1, y_1), ..., (x_{t-1}, y_{t-1}))$. 
+
+\section{Use of large language models}
+
+During the preparation of this manuscript, a large language model was used to assist with editing the prose for clarity and to aid in literature discovery. This latter function was particularly valuable for exploring the evolutionary biology literature that provides the conceptual framework for this study. All scientific claims and the final content of the paper were written and verified by the authors.

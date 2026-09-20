@@ -1,0 +1,298 @@
+\section{Additional Experiments} \label{app:experiments}
+\subsection{Additional experimental details for the {Wine Quality} dataset} \label{sec:expts-wine}
+
+The red wine dataset has 1599 wine samples and the white wine dataset has 4898 wine samples. For both red and white wines, we use the feature QUALITY as the label and regress on the remaining $11$ features. We pre-process the data by standardizing each feature column and label. We randomly shuffle the samples into an 80/20 split into training and test data.
+
+We use a linear homogeneous model (i.e. $f(\bx) = \br^{\sf T} \bx$) for regression on the label. We sample $k=100$ linear regressors from the standard normal distribution as well as $N_{\sf eval} = 100$ another regressors from the same distribution. Using a fixed learning rate of $0.01$ on the {\sf Adam} optimiser and at most $5000$ steps, we optimize the randomly initialised synthetic data until the objective has minimum value on the $N_{\sf eval} = 100$ regressors. The model is then trained on the four datasets using the {\sf Adam} optimizer with a learning rate of $0.001$ and the mean loss is reported in Table~\ref{table1}.
+
+We observe that a model trained on $D_{\sf syn}$ performs better than ones trained on both $D_{\sf rand}$ and $D_{\sf lev}$. We also observe that the test loss of a model trained on $D_{\sf syn}$ decreases, as expected.
+
+\begin{table}
+\centering
+\caption{Homogeneous Linear Regression MSE loss over {\it white and red wine quality} data}\label{table1}
+\begin{tabular}{ p{2.0cm}p{1.0cm}p{2.0cm}p{2.0cm}p{2.0cm}p{2.0cm} }
+ \hline
+ {wine color} & $N_{\tn{syn}}$ & $D_{\tn{train}}$ & $D_{\tn{syn}}$ & $D_{\tn{rand}}$ & $D_{\tn{lev}}$\\
+ \hline
+  & $20$ & & $0.85\pm0.20$ & $1.82\pm1.22$ & $1.21 \pm 0.45$\\
+ \textit{red} & $50$ & $0.65\pm0.04$ & $0.65 \pm 0.07$ & $0.97 \pm 0.22$& $0.80\pm 0.08$\\
+ & $100$ & & $0.67\pm0.05$ & $0.81\pm 0.16$ & $0.73\pm 0.07$\\
+ \hline
+  & $20$ & & $1.00\pm0.21$ & $1.81\pm0.44$ & $1.31\pm 0.30$\\
+ \textit{white} & $50$ & $0.74\pm0.04$ & $0.82 \pm 0.17$ & $1.04 \pm 0.19$ & $0.90\pm 0.11$\\
+  & $100$ & & $0.75\pm0.02$ & $0.83\pm 0.05$ & $0.84 \pm 0.05$\\
+ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Additional experimental details for the the Boston Housing Dataset} \label{sec:expts-housing}
+
+The Boston Housing dataset has 506 samples. We use the feature MEDV (Median value of owner-occupied homes in $1000$'s) as the label and regress on the remaining 13 features. 
+We preprocess the data by standardising each feature column
+and label. We randomly shuffle the samples into an 80/20 split into training and test data.
+The sizes of the synthetic dataset $N_{\sf syn}$ we consider are $\{20, 50, 100\}$. 
+
+We take $k = 100$ random homogeneous linear regressors in Algorithm 1. 
+Using a fixed learning rate of $0.01$ on the {\sf Adam} optimiser and at most $5000$ steps, we optimise the randomly initialised synthetic data until the objective has minimum value on the $N_{\sf eval} = 100$ randomly sampled regressors. The model is then trained on the four datasets using the {\sf Adam} optimiser with a learning rate of $0.001$.
+The mean test loss of models trained on respective datasets (over 10 trials) are included in Table~\ref{table4}.
+
+We observe that a model trained on $D_{\sf syn}$ performs better than one trained on $D_{\sf rand}$ and on par with $D_{\sf lev}$. We also observe that the test loss of a model trained on $D_{\sf syn}$ decreases, as expected.
+
+\begin{table}
+\centering
+\caption{Homogeneous Linear Regression MSE loss over {\it Boston Housing} data}\label{table4}
+\begin{tabular}{ p{1.0cm}p{2.0cm}p{2.0cm}p{2.0cm}p{2.0cm} }
+ \hline
+  $N_{\tn{syn}}$ & $D_{\tn{train}}$ & $D_{\tn{syn}}$ & $D_{\tn{rand}}$ & $D_{\tn{lev}}$ \\
+ \hline
+  $20$ & & $0.57\pm0.23$ & $1.77\pm1.71$ & $0.57\pm0.20$\\
+    $50$ & $0.27\pm0.05$ & $0.40 \pm 0.14$ & $0.44 \pm 0.16$ & $0.38\pm0.08$\\
+ $100$ & & $0.29\pm0.07$ & $0.29\pm 0.08$& $0.36\pm0.09$\\
+ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Additional Experiments and Details for the {Cartpole} Environment} \label{sec:expts-cartpole}
+
+In this environment, a pole is attached by an un-actuated joint to a cart, which moves along a frictionless track. The pendulum is placed upright on the cart and the goal is to balance the pole by applying forces in the left and right direction on the cart.
+The action indicates the direction of the fixed force the cart is pushed with and can take two discrete values.
+The observation is an array with shape $(4,)$ with the values corresponding to the positions and velocities. The episode terminates if the pole angle or position goes beyond a certain range and is artificially truncated after $500$ time-steps.
+Since the goal is to keep the pole upright for as long as possible, by default, a reward of $+1$ is given for every step taken, including the termination step.
+
+We sample $n=10000$ steps of completely random policies in this environment to get $D_{\tn{train}}$, which contains both terminated and non-terminated states. We separate them into $D_{\tn{train--terminated}}$ and $D_{\tn{train-nonterminated}}$. We have to do this in our implementation as the theoretical result only analyzes infinite horizon MDP's. In practice, the $q$-value function for the terminated states does not have any max term as the trajectory ends there, i.e. for a terminated state $s_{\sf term}$, the q-value is simply the reward, so we use $f(s_{\sf term},a) = r$. We use our data distillation routine to get a distilled version of each of these datasets separately and combine them together to get $D_{\tn{syn-nonterminated}}+D_{\tn{syn-terminated}}= D_{\tn{syn}}$. Note that the ratio of the terminated and non-terminated states in $D_{\tn{syn}}$ and $D_{\tn{train}}$ is artificially kept the same and we take the total size of the synthetic dataset $D_{\tn{syn}}$ to be $N_{\tn{syn}}$.
+
+Our model architecture for this experiment is fixed to a 2-layer (10,10) ReLU based neural network. For the synthetic data generation, we sample $k$ models and we use the {\sf Adam} optimiser and perform a search over the learning rate among $\{ 3{\sf e}$-1$, 1{\sf e}$-1, $3{\sf e}$-2, $1{\sf e}$-2, $3{\sf e}$-3, $1{\sf e}$-3, $3{\sf e}$-4, $1{\sf e}$-4$\}$ for the distillation processes of both the terminated and non-terminated states and report the synthetic dataset that performs the best on evaluation.
+
+We train the three datasets using the Fitted-Q iteration algorithm that iteratively optimises the Bellman loss to get a $q$-value predictor. We test the optimal policy corresponding to the $q$-value predictor on the real environment and report the returns. We report an extensive evaluation with multiple values of $k, N_{\sf syn}$ in Table~\ref{tab:table3}. We observe that on average, policies trained on our generated synthetic data perform better than both real and random data. As expected, we see that as the size of $D_{\sf syn}$ increases (i.e. $N_{\sf syn}$ increases), the model trained on it performs better. Surprisingly, increasing the number of randomly sampled action-value predictors $k$ does not seem to have a discernible impact on performace. 
+
+\begin{table}[h!]
+\centering
+\caption{Extended Evaluation for the Cartpole Environment with $(10,10)$-layer NN.}
+\begin{tabular}{ccccc}
+\hline
+$k$ & $N_{\tn{syn}}$ & $D_{\tn{train}}$ & $D_{\tn{rand}}$ & $D_{\tn{syn}}$ \\ \hline
+5 & 10 & 339.10 $\pm$ 132.07 & 13.50 $\pm$ 0.67 & 500.00 $\pm$ 0.00 \\ 
+10 & 10 & 332.70 $\pm$ 129.18 & 13.90 $\pm$ 0.54 & 500.00 $\pm$ 0.00 \\ 
+20 & 10 & 416.30 $\pm$ 133.73 & 13.50 $\pm$ 0.50 & 455.40 $\pm$ 133.80 \\ 
+50 & 10 & 343.10 $\pm$ 129.38 & 13.40 $\pm$ 0.66 & 181.00 $\pm$ 21.87 \\ 
+100 & 10 & 368.20 $\pm$ 116.77 & 13.30 $\pm$ 1.19 & 464.00 $\pm$ 108.00 \\ \hline
+5 & 20 & 332.10 $\pm$ 117.26 & 135.20 $\pm$ 41.38 & 500.00 $\pm$ 0.00 \\
+10 & 20 & 377.20 $\pm$ 122.43 & 148.20 $\pm$ 43.15 & 240.50 $\pm$ 212.56 \\ 
+20 & 20 & 348.50 $\pm$ 144.20 & 141.30 $\pm$ 70.23 & 500.00 $\pm$ 0.00 \\ 
+50 & 20 & 325.80 $\pm$ 139.27 & 146.60 $\pm$ 36.67 & 500.00 $\pm$ 0.00 \\
+100 & 20 & 324.60 $\pm$ 124.09 & 145.30 $\pm$ 48.06 & 450.00 $\pm$ 130.99 \\ \hline
+5 & 50 & 339.80 $\pm$ 139.34 & 174.60 $\pm$ 11.71 & 500.00 $\pm$ 0.00 \\ 
+10 & 50 & 346.70 $\pm$ 128.98 & 174.50 $\pm$ 12.89 & 500.00 $\pm$ 0.00 \\ 
+20 & 50 & 341.80 $\pm$ 123.77 & 172.40 $\pm$ 19.69 & 500.00 $\pm$ 0.00 \\ 
+50 & 50 & 330.10 $\pm$ 120.47 & 177.80 $\pm$ 10.39 & 500.00 $\pm$ 0.00 \\ 
+100 & 50 & 326.00 $\pm$ 151.14 & 178.10 $\pm$ 17.01 & 500.00 $\pm$ 0.00 \\ \hline
+5 & 100 & 337.70 $\pm$ 115.30 & 135.90 $\pm$ 76.44 & 500.00 $\pm$ 0.00 \\ 
+10 & 100 & 329.00 $\pm$ 122.08 & 148.40 $\pm$ 104.72 & 500.00 $\pm$ 0.00 \\ 
+20 & 100 & 328.90 $\pm$ 124.00 & 124.10 $\pm$ 47.61 & 500.00 $\pm$ 0.00 \\ 
+50 & 100 & 332.20 $\pm$ 123.10 & 129.50 $\pm$ 61.10 & 500.00 $\pm$ 0.00 \\ 
+100 & 100 & 386.40 $\pm$ 132.20 & 136.30 $\pm$ 93.81 & 500.00 $\pm$ 0.00 \\ \hline
+5 & 200 & 354.00 $\pm$ 126.69 & 158.40 $\pm$ 53.20 & 500.00 $\pm$ 0.00 \\
+10 & 200 & 331.90 $\pm$ 130.53 & 169.90 $\pm$ 93.20 & 500.00 $\pm$ 0.00 \\ 
+20 & 200 & 371.20 $\pm$ 133.87 & 176.60 $\pm$ 81.36 & 500.00 $\pm$ 0.00 \\ 
+50 & 200 & 332.80 $\pm$ 125.28 & 175.60 $\pm$ 62.60 & 500.00 $\pm$ 0.00 \\ 
+100 & 200 & 340.60 $\pm$ 144.32 & 199.20 $\pm$ 97.88 & 500.00 $\pm$ 0.00 \\ \hline
+\end{tabular}
+\label{tab:table3}
+\end{table}
+
+\subsection{Additional Experiments and Details for the Mountain Car Environment} \label{sec:expts-mountain}
+
+The Mountain Car MDP~(\cite{moore1990}, \cite{Cartpole} MIT License) is a deterministic MDP that consists of a car placed stochastically at the bottom of a sinusoidal valley, with the only possible actions being the accelerations that can be applied to the car in either direction. The observation space is continuous with two dimensions and there are three discrete actions possible. The goal is to reach the flag placed on top of the right hill as quickly as possible, as such the agent is penalised with a reward of $-1$ for each timestep. The episode truncates after $200$ timesteps and is also terminated if the position of the car goes beyond a certain range. 
+
+To generate the offline data, we sample $5000$ samples through a uniformly random policy and another $5000$ samples through an expert policy trained using tabular $q$-learning on a discretized state space.
+
+We use the same learning rate search method as mentioned in Appendix~\ref{sec:expts-cartpole} and optimizers to get the synthetic data, partitioned into terminated and non-terminated samples. We use a neural network with two hidden layers with $64$ neurons and ReLU activations for the $q$-value predictor with the Fitted-Q iteration algorithm for training. Policies trained on the three datasets are evaluated in the environment and the average returns over $10$ trials are reported in Table~\ref{tab:table5}. We observe that the policies trained on the random datasets are not able to reach the top of the hill and are all truncated. Policies trained on the synthetic data are on average able to reach the top of the hill, albeit slower than ones trained on the full offline dataset. As in the Cartpole environment, increasing $N_{\sf syn}$ increases our performance, but increasing $k$ as no impact on performance.
+
+
+
+
+
+\begin{table}[h!]
+\centering
+\caption{Evaluation for Mountain Car with $(64,64)$-layer NN.}
+\begin{tabular}{ccccc}
+\hline
+$k$ & $N_{\tn{syn}}$ & $D_{\tn{train}}$ & $D_{\tn{rand}}$ & $D_{\tn{syn}}$ \\ \hline
+5 & 10 & -111.40 $\pm$ 13.16 & -200.00 $\pm$ 0.00 & -200.00 $\pm$ 0.00 \\ 
+10 & 10 & -109.80 $\pm$ 27.92 & -200.00 $\pm$ 0.00 & -200.00 $\pm$ 0.00 \\ 
+20 & 10 & -111.60 $\pm$ 15.10 & -200.00 $\pm$ 0.00 & -157.70 $\pm$ 2.28 \\ 
+50 & 10 & -110.10 $\pm$ 22.39 & -200.00 $\pm$ 0.00 & -200.00 $\pm$ 0.00 \\ 
+100 & 10 & -106.50 $\pm$ 15.23 & -200.00 $\pm$ 0.00 & -195.90 $\pm$ 8.28 \\ \hline
+% 5 & 20 & -110.40 $\pm$ 21.91 & -200.00 $\pm$ 0.00 & -200.00 $\pm$ 0.00 \\ 
+% 10 & 20 & -109.50 $\pm$ 15.34 & -200.00 $\pm$ 0.00 & -200.00 $\pm$ 0.00 \\ 
+% 20 & 20 & -108.80 $\pm$ 14.93 & -200.00 $\pm$ 0.00 & -191.60 $\pm$ 6.10 \\ 
+% 50 & 20 & -105.80 $\pm$ 14.57 & -200.00 $\pm$ 0.00 & -200.00 $\pm$ 0.00 \\ 
+% 100 & 20 & -110.50 $\pm$ 14.51 & -200.00 $\pm$ 0.00 & -199.20 $\pm$ 2.09 \\ \hline
+5 & 50 & -106.30 $\pm$ 15.49 & -200.00 $\pm$ 0.00 & -183.90 $\pm$ 24.61 \\ 
+10 & 50 & -104.80 $\pm$ 15.14 & -200.00 $\pm$ 0.00 & -200.00 $\pm$ 0.00 \\ 
+20 & 50 & -104.50 $\pm$ 13.97 & -200.00 $\pm$ 0.00 & -129.50 $\pm$ 30.31 \\ 
+50 & 50 & -108.90 $\pm$ 16.26 & -200.00 $\pm$ 0.00 & -162.60 $\pm$ 17.24 \\ 
+100 & 50 & -106.90 $\pm$ 14.45 & -200.00 $\pm$ 0.00 & -159.00 $\pm$ 25.60 \\ \hline
+% 5 & 100 & -106.40 $\pm$ 12.40 & -200.00 $\pm$ 0.00 & -162.20 $\pm$ 4.14 \\ 
+% 10 & 100 & -106.50 $\pm$ 14.60 & -200.00 $\pm$ 0.00 & -189.30 $\pm$ 11.44 \\ 
+% 20 & 100 & -112.40 $\pm$ 22.23 & -200.00 $\pm$ 0.00 & -151.00 $\pm$ 25.66 \\ 
+% 50 & 100 & -109.30 $\pm$ 16.14 & -200.00 $\pm$ 0.00 & -158.30 $\pm$ 1.19 \\ 
+% 100 & 100 & -104.60 $\pm$ 13.86 & -200.00 $\pm$ 0.00 & -156.40 $\pm$ 44.65 \\ \hline
+5 & 200 & -109.80 $\pm$ 16.02 & -200.00 $\pm$ 0.00 & -149.60 $\pm$ 25.39 \\ 
+10 & 200 & -108.50 $\pm$ 18.70 & -200.00 $\pm$ 0.00 & -133.50 $\pm$ 3.14 \\ 
+20 & 200 & -105.40 $\pm$ 14.71 & -200.00 $\pm$ 0.00 & -121.90 $\pm$ 37.87 \\ 
+50 & 200 & -112.60 $\pm$ 14.99 & -200.00 $\pm$ 0.00 & -132.00 $\pm$ 23.00 \\ 
+100 & 200 & -105.30 $\pm$ 14.16 & -200.00 $\pm$ 0.00 & -162.90 $\pm$ 32.98 \\ \hline
+\end{tabular}
+\label{tab:table5}
+\end{table}
+
+\subsection{Additional Experiments and Details for the Acrobot Environment} \label{sec:expts-acrobot}
+
+The Acrobot Environment~(\cite{NIPS1995_8f1d4362}, \cite{Cartpole} MIT License) consists of two links connected linearly to form a chain, with one end of the chain fixed. The joint between the two links is actuated. The goal is to apply torques on the actuated joint to swing the free end of the linear chain above a given height while starting from the initial state of hanging downwards. The action space is discrete with three possible actions and the state space is continuous with $6$ dimensions. The goal is to have the free end reach a designated target height in as few steps as possible, and as such all steps that do not reach the goal incur a reward of $-1$. Achieving the target height results in termination with a reward of $0$. Episodes are artificially truncated after $500$ timesteps. 
+
+To generate the offline data, we sample $10000$ transitions through a uniformly random policy. We use the same learning rate search method and optimizers as mentioned in Appendix~\ref{sec:expts-cartpole} to get the synthetic data, partitioned into terminated and non-terminated samples. We use a neural network with two hidden layers with $64$ neurons and ReLU activations for the $q$-value predictor with the Fitted-Q iteration algorithm for training. Policies trained on the three datasets are evaluated in the environment and the average returns over $10$ trials are reported in Table~\ref{tab:table6}. We observe that polices trained on the synthetic data give higher returns on average than policies trained on the full offline dataset and a randomly subsampled smaller dataset. As in the Cartpole environment, increasing $N_{\sf syn}$ increases our performance, but increasing $k$ as no impact on performance.
+
+\begin{table}[h!]
+\centering
+\caption{Evaluation for Acrobot with $(64,64)$-layer NN.}
+\begin{tabular}{ccccc}
+\hline
+$k$ & $N_{\tn{syn}}$ & $D_{\tn{train}}$ & $D_{\tn{rand}}$ & $D_{\tn{syn}}$ \\ \hline
+5 & 10 & -84.20 $\pm$ 10.82 & -500.00 $\pm$ 0.00 & -74.10 $\pm$ 7.49 \\ 
+10 & 10 & -82.30 $\pm$ 12.04 & -500.00 $\pm$ 0.00 & -74.60 $\pm$ 9.65 \\ 
+20 & 10 & -81.30 $\pm$ 4.86 & -500.00 $\pm$ 0.00 & -77.50 $\pm$ 5.39 \\ 
+50 & 10 & -84.60 $\pm$ 11.88 & -500.00 $\pm$ 0.00 & -72.70 $\pm$ 6.99 \\ 
+100 & 10 & -84.20 $\pm$ 16.61 & -500.00 $\pm$ 0.00 & -74.40 $\pm$ 9.97 \\ \hline
+% 5 & 20 & -83.40 $\pm$ 8.55 & -69.30 $\pm$ 5.55 & -78.30 $\pm$ 6.26 \\ 
+% 10 & 20 & -81.50 $\pm$ 8.03 & -71.40 $\pm$ 8.09 & -77.70 $\pm$ 14.42 \\ 
+% 20 & 20 & -83.40 $\pm$ 8.25 & -69.40 $\pm$ 8.94 & -75.60 $\pm$ 7.02 \\ 
+% 50 & 20 & -83.60 $\pm$ 8.90 & -69.80 $\pm$ 7.48 & -74.70 $\pm$ 8.91 \\ 
+% 100 & 20 & -85.40 $\pm$ 10.18 & -70.20 $\pm$ 7.91 & -73.50 $\pm$ 13.18 \\ \hline
+5 & 50 & -85.10 $\pm$ 10.97 & -479.20 $\pm$ 41.97 & -75.00 $\pm$ 10.92 \\ 
+10 & 50 & -83.40 $\pm$ 11.24 & -481.30 $\pm$ 38.43 & -77.40 $\pm$ 7.42 \\ 
+20 & 50 & -82.60 $\pm$ 8.85 & -481.50 $\pm$ 37.49 & -75.80 $\pm$ 9.40 \\ 
+50 & 50 & -85.50 $\pm$ 9.45 & -480.90 $\pm$ 38.23 & -78.00 $\pm$ 8.80 \\ 
+100 & 50 & -83.30 $\pm$ 13.24 & -484.70 $\pm$ 30.60 & -75.00 $\pm$ 10.24 \\ \hline
+% 5 & 100 & -81.00 $\pm$ 5.95 & -225.50 $\pm$ 40.52 & -72.00 $\pm$ 8.98 \\ 
+% 10 & 100 & -84.70 $\pm$ 9.36 & -218.30 $\pm$ 37.26 & -71.60 $\pm$ 3.80 \\ 
+% 20 & 100 & -85.30 $\pm$ 9.71 & -212.00 $\pm$ 46.63 & -72.10 $\pm$ 6.70 \\ 
+% 50 & 100 & -85.50 $\pm$ 11.86 & -225.00 $\pm$ 61.17 & -73.50 $\pm$ 3.93 \\ 
+% 100 & 100 & -82.60 $\pm$ 8.90 & -218.80 $\pm$ 25.30 & -72.80 $\pm$ 8.23 \\ \hline
+5 & 200 & -85.60 $\pm$ 7.23 & -103.30 $\pm$ 13.99 & -89.10 $\pm$ 6.61 \\ 
+10 & 200 & -83.10 $\pm$ 11.07 & -99.00 $\pm$ 10.74 & -86.90 $\pm$ 20.87 \\ 
+20 & 200 & -82.40 $\pm$ 8.97 & -99.20 $\pm$ 8.40 & -88.20 $\pm$ 9.94 \\ 
+50 & 200 & -86.90 $\pm$ 5.26 & -102.50 $\pm$ 4.20 & -85.70 $\pm$ 11.71 \\
+100 & 200 & -85.10 $\pm$ 8.58 & -102.30 $\pm$ 9.96 & -84.50 $\pm$ 13.40 \\ \hline
+\end{tabular}
+\label{tab:table6}
+\end{table}
+
+
+
+
+
+% \begin{table}[h!]
+% \centering
+% \caption{Cartpole Rewards nn size = (10,10)}
+% \begin{tabular}{|c|c|c|c|c|}
+% \hline
+% $N_{\text{sampled}}$ & $N_{\text{synthetic}}$ & Real Data (MaxRet $\pm$ Std) & Random Data (MaxRet $\pm$ Std) & Synthetic Data (MaxRet $\pm$ Std) \\ \hline \hline
+% 5 & 10 & 339.10 $\pm$ 132.07 & 13.50 $\pm$ 0.67 & 500.00 $\pm$ 0.00 \\ \hline
+% 10 & 10 & 332.70 $\pm$ 129.18 & 13.90 $\pm$ 0.54 & 500.00 $\pm$ 0.00 \\ \hline
+% 20 & 10 & 416.30 $\pm$ 133.73 & 13.50 $\pm$ 0.50 & 455.40 $\pm$ 133.80 \\ \hline
+% 50 & 10 & 343.10 $\pm$ 129.38 & 13.40 $\pm$ 0.66 & 181.00 $\pm$ 21.87 \\ \hline
+% 100 & 10 & 368.20 $\pm$ 116.77 & 13.30 $\pm$ 1.19 & 464.00 $\pm$ 108.00 \\ \hline
+% 5 & 20 & 332.10 $\pm$ 117.26 & 135.20 $\pm$ 41.38 & 500.00 $\pm$ 0.00 \\ \hline
+% 10 & 20 & 377.20 $\pm$ 122.43 & 148.20 $\pm$ 43.15 & 240.50 $\pm$ 212.56 \\ \hline
+% 20 & 20 & 348.50 $\pm$ 144.20 & 141.30 $\pm$ 70.23 & 500.00 $\pm$ 0.00 \\ \hline
+% 50 & 20 & 325.80 $\pm$ 139.27 & 146.60 $\pm$ 36.67 & 500.00 $\pm$ 0.00 \\ \hline
+% 100 & 20 & 324.60 $\pm$ 124.09 & 145.30 $\pm$ 48.06 & 450.00 $\pm$ 130.99 \\ \hline
+% 5 & 50 & 339.80 $\pm$ 139.34 & 174.60 $\pm$ 11.71 & 500.00 $\pm$ 0.00 \\ \hline
+% 10 & 50 & 346.70 $\pm$ 128.98 & 174.50 $\pm$ 12.89 & 500.00 $\pm$ 0.00 \\ \hline
+% 20 & 50 & 341.80 $\pm$ 123.77 & 172.40 $\pm$ 19.69 & 500.00 $\pm$ 0.00 \\ \hline
+% 50 & 50 & 330.10 $\pm$ 120.47 & 177.80 $\pm$ 10.39 & 500.00 $\pm$ 0.00 \\ \hline
+% 100 & 50 & 326.00 $\pm$ 151.14 & 178.10 $\pm$ 17.01 & 500.00 $\pm$ 0.00 \\ \hline
+% 5 & 100 & 337.70 $\pm$ 115.30 & 135.90 $\pm$ 76.44 & 500.00 $\pm$ 0.00 \\ \hline
+% 10 & 100 & 329.00 $\pm$ 122.08 & 148.40 $\pm$ 104.72 & 500.00 $\pm$ 0.00 \\ \hline
+% 20 & 100 & 328.90 $\pm$ 124.00 & 124.10 $\pm$ 47.61 & 500.00 $\pm$ 0.00 \\ \hline
+% 50 & 100 & 332.20 $\pm$ 123.10 & 129.50 $\pm$ 61.10 & 500.00 $\pm$ 0.00 \\ \hline
+% 100 & 100 & 386.40 $\pm$ 132.20 & 136.30 $\pm$ 93.81 & 500.00 $\pm$ 0.00 \\ \hline
+% 5 & 200 & 354.00 $\pm$ 126.69 & 158.40 $\pm$ 53.20 & 500.00 $\pm$ 0.00 \\ \hline
+% 10 & 200 & 331.90 $\pm$ 130.53 & 169.90 $\pm$ 93.20 & 500.00 $\pm$ 0.00 \\ \hline
+% 20 & 200 & 371.20 $\pm$ 133.87 & 176.60 $\pm$ 81.36 & 500.00 $\pm$ 0.00 \\ \hline
+% 50 & 200 & 332.80 $\pm$ 125.28 & 175.60 $\pm$ 62.60 & 500.00 $\pm$ 0.00 \\ \hline
+% 100 & 200 & 340.60 $\pm$ 144.32 & 199.20 $\pm$ 97.88 & 500.00 $\pm$ 0.00 \\ \hline
+% \end{tabular}
+% \label{tab:combined_eval_results_pm_sorted}
+% \end{table}
+
+% \begin{table}[h!]
+% \centering
+% \caption{Rewards on Mountaincar with (64,64)}
+% \begin{tabular}{|c|c|c|c|c|}
+% \hline
+% $N_{\text{sampled}}$ & $N_{\text{synthetic}}$ & Real Data (MaxRet $\pm$ Std) & Random Data (MaxRet $\pm$ Std) & Synthetic Data (MaxRet $\pm$ Std) \\ \hline \hline
+% 5 & 10 & -111.40 $\pm$ 13.16 & -200.00 $\pm$ 0.00 & -200.00 $\pm$ 0.00 \\ \hline
+% 10 & 10 & -109.80 $\pm$ 27.92 & -200.00 $\pm$ 0.00 & -200.00 $\pm$ 0.00 \\ \hline
+% 20 & 10 & -111.60 $\pm$ 15.10 & -200.00 $\pm$ 0.00 & -157.70 $\pm$ 2.28 \\ \hline
+% 50 & 10 & -110.10 $\pm$ 22.39 & -200.00 $\pm$ 0.00 & -200.00 $\pm$ 0.00 \\ \hline
+% 100 & 10 & -106.50 $\pm$ 15.23 & -200.00 $\pm$ 0.00 & -195.90 $\pm$ 8.28 \\ \hline
+% 5 & 20 & -110.40 $\pm$ 21.91 & -200.00 $\pm$ 0.00 & -200.00 $\pm$ 0.00 \\ \hline
+% 10 & 20 & -109.50 $\pm$ 15.34 & -200.00 $\pm$ 0.00 & -200.00 $\pm$ 0.00 \\ \hline
+% 20 & 20 & -108.80 $\pm$ 14.93 & -200.00 $\pm$ 0.00 & -191.60 $\pm$ 6.10 \\ \hline
+% 50 & 20 & -105.80 $\pm$ 14.57 & -200.00 $\pm$ 0.00 & -200.00 $\pm$ 0.00 \\ \hline
+% 100 & 20 & -110.50 $\pm$ 14.51 & -200.00 $\pm$ 0.00 & -199.20 $\pm$ 2.09 \\ \hline
+% 5 & 50 & -106.30 $\pm$ 15.49 & -200.00 $\pm$ 0.00 & -183.90 $\pm$ 24.61 \\ \hline
+% 10 & 50 & -104.80 $\pm$ 15.14 & -200.00 $\pm$ 0.00 & -200.00 $\pm$ 0.00 \\ \hline
+% 20 & 50 & -104.50 $\pm$ 13.97 & -200.00 $\pm$ 0.00 & -129.50 $\pm$ 30.31 \\ \hline
+% 50 & 50 & -108.90 $\pm$ 16.26 & -200.00 $\pm$ 0.00 & -162.60 $\pm$ 17.24 \\ \hline
+% 100 & 50 & -106.90 $\pm$ 14.45 & -200.00 $\pm$ 0.00 & -159.00 $\pm$ 25.60 \\ \hline
+% 5 & 100 & -106.40 $\pm$ 12.40 & -200.00 $\pm$ 0.00 & -162.20 $\pm$ 4.14 \\ \hline
+% 10 & 100 & -106.50 $\pm$ 14.60 & -200.00 $\pm$ 0.00 & -189.30 $\pm$ 11.44 \\ \hline
+% 20 & 100 & -112.40 $\pm$ 22.23 & -200.00 $\pm$ 0.00 & -151.00 $\pm$ 25.66 \\ \hline
+% 50 & 100 & -109.30 $\pm$ 16.14 & -200.00 $\pm$ 0.00 & -158.30 $\pm$ 1.19 \\ \hline
+% 100 & 100 & -104.60 $\pm$ 13.86 & -200.00 $\pm$ 0.00 & -156.40 $\pm$ 44.65 \\ \hline
+% 5 & 200 & -109.80 $\pm$ 16.02 & -200.00 $\pm$ 0.00 & -149.60 $\pm$ 25.39 \\ \hline
+% 10 & 200 & -108.50 $\pm$ 18.70 & -200.00 $\pm$ 0.00 & -133.50 $\pm$ 3.14 \\ \hline
+% 20 & 200 & -105.40 $\pm$ 14.71 & -200.00 $\pm$ 0.00 & -121.90 $\pm$ 37.87 \\ \hline
+% 50 & 200 & -112.60 $\pm$ 14.99 & -200.00 $\pm$ 0.00 & -132.00 $\pm$ 23.00 \\ \hline
+% 100 & 200 & -105.30 $\pm$ 14.16 & -200.00 $\pm$ 0.00 & -162.90 $\pm$ 32.98 \\ \hline
+% \end{tabular}
+% \label{tab:combined_eval_results_pm_sorted}
+% \end{table}
+
+% \begin{table}[h!]
+% \centering
+% \caption{Acrobot with (64,64) network}
+% \begin{tabular}{|c|c|c|c|c|}
+% \hline
+% $N_{\text{sampled}}$ & $N_{\text{synthetic}}$ & Real Data (MaxRet $\pm$ Std) & Random Data (MaxRet $\pm$ Std) & Synthetic Data (MaxRet $\pm$ Std) \\ \hline \hline
+% 5 & 10 & -84.20 $\pm$ 10.82 & -500.00 $\pm$ 0.00 & -74.10 $\pm$ 7.49 \\ \hline
+% 10 & 10 & -82.30 $\pm$ 12.04 & -500.00 $\pm$ 0.00 & -74.60 $\pm$ 9.65 \\ \hline
+% 20 & 10 & -81.30 $\pm$ 4.86 & -500.00 $\pm$ 0.00 & -77.50 $\pm$ 5.39 \\ \hline
+% 50 & 10 & -84.60 $\pm$ 11.88 & -500.00 $\pm$ 0.00 & -72.70 $\pm$ 6.99 \\ \hline
+% 100 & 10 & -84.20 $\pm$ 16.61 & -500.00 $\pm$ 0.00 & -74.40 $\pm$ 9.97 \\ \hline
+% 5 & 20 & -83.40 $\pm$ 8.55 & -69.30 $\pm$ 5.55 & -78.30 $\pm$ 6.26 \\ \hline
+% 10 & 20 & -81.50 $\pm$ 8.03 & -71.40 $\pm$ 8.09 & -77.70 $\pm$ 14.42 \\ \hline
+% 20 & 20 & -83.40 $\pm$ 8.25 & -69.40 $\pm$ 8.94 & -75.60 $\pm$ 7.02 \\ \hline
+% 50 & 20 & -83.60 $\pm$ 8.90 & -69.80 $\pm$ 7.48 & -74.70 $\pm$ 8.91 \\ \hline
+% 100 & 20 & -85.40 $\pm$ 10.18 & -70.20 $\pm$ 7.91 & -73.50 $\pm$ 13.18 \\ \hline
+% 5 & 50 & -85.10 $\pm$ 10.97 & -479.20 $\pm$ 41.97 & -75.00 $\pm$ 10.92 \\ \hline
+% 10 & 50 & -83.40 $\pm$ 11.24 & -481.30 $\pm$ 38.43 & -77.40 $\pm$ 7.42 \\ \hline
+% 20 & 50 & -82.60 $\pm$ 8.85 & -481.50 $\pm$ 37.49 & -75.80 $\pm$ 9.40 \\ \hline
+% 50 & 50 & -85.50 $\pm$ 9.45 & -480.90 $\pm$ 38.23 & -78.00 $\pm$ 8.80 \\ \hline
+% 100 & 50 & -83.30 $\pm$ 13.24 & -484.70 $\pm$ 30.60 & -75.00 $\pm$ 10.24 \\ \hline
+% 5 & 100 & -81.00 $\pm$ 5.95 & -225.50 $\pm$ 40.52 & -72.00 $\pm$ 8.98 \\ \hline
+% 10 & 100 & -84.70 $\pm$ 9.36 & -218.30 $\pm$ 37.26 & -71.60 $\pm$ 3.80 \\ \hline
+% 20 & 100 & -85.30 $\pm$ 9.71 & -212.00 $\pm$ 46.63 & -72.10 $\pm$ 6.70 \\ \hline
+% 50 & 100 & -85.50 $\pm$ 11.86 & -225.00 $\pm$ 61.17 & -73.50 $\pm$ 3.93 \\ \hline
+% 100 & 100 & -82.60 $\pm$ 8.90 & -218.80 $\pm$ 25.30 & -72.80 $\pm$ 8.23 \\ \hline
+% 5 & 200 & -85.60 $\pm$ 7.23 & -103.30 $\pm$ 13.99 & -89.10 $\pm$ 6.61 \\ \hline
+% 10 & 200 & -83.10 $\pm$ 11.07 & -99.00 $\pm$ 10.74 & -86.90 $\pm$ 20.87 \\ \hline
+% 20 & 200 & -82.40 $\pm$ 8.97 & -99.20 $\pm$ 8.40 & -88.20 $\pm$ 9.94 \\ \hline
+% 50 & 200 & -86.90 $\pm$ 5.26 & -102.50 $\pm$ 4.20 & -85.70 $\pm$ 11.71 \\ \hline
+% 100 & 200 & -85.10 $\pm$ 8.58 & -102.30 $\pm$ 9.96 & -84.50 $\pm$ 13.40 \\ \hline
+% \end{tabular}
+% \label{tab:combined_eval_results_pm_sorted}
+% \end{table}

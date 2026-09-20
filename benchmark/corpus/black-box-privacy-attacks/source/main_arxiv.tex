@@ -1,0 +1,105 @@
+\documentclass{article} 
+% \usepackage{algorithm}
+% \usepackage{algorithmic} % already loaded
+\usepackage{sty/preamble_arxiv}
+
+\usepackage{outlines}
+\usepackage{tcolorbox}
+\usepackage{graphicx}
+\usepackage{subcaption}
+% \usepackage{pgfplots}
+
+\usepackage[utf8]{inputenc}
+\usepackage[style=alphabetic, sortcites, maxbibnames=99]{biblatex}
+
+\definecolor{darkgreen}{RGB}{0, 100, 0} % RGB values for dark green
+\definecolor{darkred}{RGB}{139, 0, 0} % RGB values for dark red
+
+
+\title{Black-Box Privacy Attacks on Shared Representations in Multitask Learning}
+
+
+\author[1]{John~Abascal}
+\author[1]{Nicol\'as~Berrios}
+\author[1]{Alina~Oprea}
+\author[1]{Jonathan~Ullman}
+\author[2,3]{Adam~Smith}
+\author[3]{Matthew~Jagielski}
+\affil[1]{Khoury College of Computer Sciences, Northeastern University}
+\affil[2]{Department of Computer Science, Boston University}
+\affil[3]{Google DeepMind, Advisor Only}
+
+\date{}
+\addbibresource{refs.bib}
+
+
+\begin{document}
+
+\maketitle
+
+
+% 1. Intro
+%     1. Research Questions
+%         1. How much do representation models leak about the tasks they were trained on?
+%         2. What kind of assumptions must the adversary make? How are these assumptions similar to those of existing, well-studied inference attacks?
+% 2. Multitask Learning/Meta-learning Background
+%     1. General background
+%     2. Privacy semantics for our attack
+%         1. Tasks are Different Objectives  
+%         2. Tasks are Users (Sparse data/Personalization)
+%     3. Related Works
+%         1. User Inference Attacks
+%         2. EncoderMI
+%         3. Property Inference Attacks
+%         4. MIA on Federated Learning
+%         5. Private Multitask Learning
+% 3. Threat Model
+%     1. Strong Model
+%         1. Adversary has real member data
+%     2. Weak Model
+%         1. Adversary can sample fresh data from same task distribution as the target
+%     3. Generalization of membership inference to multiple samples and specific instance of property/distribution inference 
+% 4. Multitask Mean Estimation
+%     1. Gap between strong and weak model
+% 5. Methodology
+%     1. Multiple test statistics
+%         1. Logistic Regression Attack
+%         2. Variance Attack
+%         3. Pairwise inner product
+% 6. Evaluation
+%     1. Image Dataset (CelebA)
+%     2. NLP Dataset (StackOverflow, Reddit)
+%     3. Recommender System (MovieLens)
+%     4. Synthetic Dataset (Data generating process from mean estimation adapted for classification)
+%         1. Ablation experiments for embedding dimension, number of samples, number of tasks, etc.
+% 7. Discussion/Conclusion
+
+
+\begin{abstract}
+% The proliferation of diverse data across users and organizations has driven the development of machine learning methods that enable multiple entities to jointly train models while minimizing data sharing. 
+\emph{Multitask learning} (MTL) has emerged as a powerful paradigm that leverages similarities among multiple learning tasks, each with insufficient samples to train a standalone model, to solve them simultaneously while minimizing data sharing across users and organizations. MTL typically accomplishes this goal by learning a \emph{shared representation} that captures common structure among the tasks by embedding data from all tasks into a common feature space. Despite being designed to be the smallest unit of shared information necessary to effectively learn patterns across multiple tasks, these shared representations can inadvertently leak sensitive information about the particular tasks they were trained on.
+
+In this work, we investigate what information is revealed by the shared representations through the lens of inference attacks. Towards this, we propose a novel, \emph{black-box task-inference} threat model where the adversary, given the embedding vectors  produced by querying the shared representation on samples from a particular task, aims to determine whether that task was present when training the shared representation. We develop efficient, purely black-box attacks on machine learning models that exploit the dependencies between embeddings from the same task without requiring shadow models or labeled reference data. We evaluate our attacks across vision and language domains for multiple use cases of MTL and demonstrate that even with access only to fresh task samples rather than training data, a black-box adversary can successfully infer a task's inclusion in training. To complement our experiments, we provide theoretical analysis of a simplified learning setting and show a strict separation between adversaries with training samples and fresh samples from the target task's distribution.
+\end{abstract}
+
+\input{arxiv_content/intro}
+\input{arxiv_content/background_related_work}
+\input{arxiv_content/threat_model}
+\input{arxiv_content/methodology}
+\input{arxiv_content/evaluation}
+\input{arxiv_content/discussion}
+
+\section*{Acknowledgments}
+
+This research was supported by NSF awards CNS-2247484 and CNS-2232692. A.S.'s work at BU was funded in part by NSF award CNS-2232694. In their work at Google, both M.J. and A.S. contributed only in an advisory capacity and did not train models or access datasets; all data was processed at Northeastern University.
+
+\printbibliography
+
+
+\appendix
+
+\input{arxiv_content/appendix}
+
+
+
+\end{document}

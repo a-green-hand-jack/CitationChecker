@@ -1,0 +1,85 @@
+\input{tables/evaluations}
+
+% \vspace{-1mm}
+\section{Adaptive Scaling Laws for Monolingual \& Multilingual Settings}
+\label{sec:multilingual-scaling}
+% \vspace{-1mm}
+
+
+
+
+\noindent\textbf{Challenges with existing scaling laws for multilingual modeling.} In this section, we discuss our attempts to precisely model different monolingual and multilingual pretraining experiments.
+Scaling laws for English are typically based on Chinchilla \citep{hoffmann2022training}---which we refer to as the \basicscl{} (\basicsclabb).
+\citet{hoffmann2022training}'s two power-law terms (\Cref{eq:scl-base}), allows us to separate how loss scales model size $N$ and data size $D$.
+$E$ is the irreducible loss (representing the entropy of natural text), ($A$, $B$) are learned coefficients and and ($\alpha$, $\beta$) are scaling exponents for for model size and data size respectively.
+Beyond English, languages may have different scaling laws \citep{arnett2025language}, and language resources are often limited, requiring a \dcsl{} (\dcslabb) \citep{muennighoff2024scaling} to account for diminishing returns after multiple epochs.
+However, \dcslabb{} requires ample data both before and after one epoch to accommodate its two-stage fitting process.
+For high-resource languages (English, French, Chinese), it is costly to collect ample data beyond one epoch, and for low/mid-resource languages (even Hindi, Hebrew, and Swahili) it can be very difficult to collect sufficient observations below one epoch.\footnote{In MADLAD-400 these languages have $<0.3\%$ English tokens. At standard batch sizes, even frequently evaluating (every $1k$) isn't enough to collect many (sometimes any) observations before 1 epoch is reached.}
+As such, even for monolingual modeling, we require a scaling law that is data repetition-aware, and robust to different collection allowances for $(N,D)$.
+
+For modeling multilingual mixtures, monolingual scaling laws can be used (either with $D$ representing the total or target language data), or \citet{he2024scaling} introduce \mscl{} (\msclabb), which expresses the loss for target language $t$ using $N,D$ and the sampling ratio for the target languages' language family in the training mixture.
+However, each of these solutions only accounts for one of: the sampled target language data $D_{t}$, the total data altogether $D_{t} + D_{\mathrm{other}}$, or a set of the target and likely positive transfer languages $D_t+\sum_{i} D_i$.
+We posit that a better model would separate and learn to weight these independent contributions.
+In summary, none of the existing multilingual solutions account for (a) multi-epoch data repetition, or (b) the cross-lingual transfer effects beyond the target's language family.
+
+% \clearpage
+
+\begin{equation}
+\mathcal{L}(N,\mathcal{D}_{\mathrm{eff}})
+  = E \;+\; \frac{A}{N^{\alpha}} \;+\; \frac{B}{\mathcal{D}_{\mathrm{eff}}^{\beta}}
+  \label{eq:scl-base}
+\end{equation}
+% \\[4pt]
+\begin{equation}
+\mathcal{D}_{\mathrm{eff}}
+  = \underbrace{\textcolor{d_target}{\mathcal{S}_{\lambda_t}\!\left(D_t;U_t\right)}}_{\text{Monolingual}}
+   \;+\; \underbrace{\textcolor{d_transfer}{\sum_{i\in\mathcal{K}} \tau_i \,\mathcal{S}_{\lambda_i}\!\left(D_i;U_i\right)}}_{\text{Transfer Languages}}
+   \;+\; \underbrace{\textcolor{d_other}{\tau_{\mathrm{other}}\, \mathcal{S}_{\lambda_{\mathrm{other}}}\!\left(D_{\mathrm{other}};U_{\mathrm{other}}\right)}}_{\text{Other Languages}}
+  % \qquad \tau_j,\tau_{\mathrm{other}}\ge 0
+  \label{eq:scl-deff}
+\end{equation}
+
+\begin{equation}
+\mathcal{S}_{\lambda}(D;U) = 
+\begin{cases}
+D, & D \le U \,\,\,\,\,\, (\le1\,\text{epoch}) \\
+U\left[1 + \frac{1-\exp(-\lambda(D/U-1))}{\lambda}\right], & D > U \,\,\,\,\,\,(>1\,\text{epoch})
+\end{cases}
+\label{eq:scl-sat-piecewise}
+\end{equation}
+
+\noindent\textbf{The \ourscl{}.}
+To resolve these challenges, we introduce the \ourscl{} (\oursclabb), a simpler variant of \dcslabb{} that is repetition-aware, introduces fewer additional parameters (for the monolingual variant), is fit in one stage, and is adaptable to an open-ended number of languages that would benefit from an explicit cross-lingual term.
+In \Cref{eq:scl-base} the core scaling law formula includes the standard parameters governing the irreducible loss and $N,D$ scaling: $E,A,B,\alpha,\beta$.
+Its effective data exposure term $D_{\mathrm{eff}}$ (\Cref{eq:scl-deff}) unpacks data sources into three terms: a $\textcolor{d_target}{\text{Monolingual}}$ term for the target language data $D_t$, an optional $\textcolor{d_transfer}{\text{Transfer Language}}$ term for up to $|\mathcal{K}_{t}|$ languages we wish to learn independent transfer coefficients for $\tau_{i}$, and an $\textcolor{d_other}{\text{Other Languages}}$ remainder term that sums all training tokens not already accounted for in the first two terms $D_{\mathrm{other}}=D_{\mathrm{tot}}-D_t-\sum_{\mathcal{K}_{t}}D_i$.
+The latter two terms are optionally added for multilingual modeling, and $\mathcal{K}_{t}$ can be adapted as any combination of the languages with presumed highest positive transfer to the target language, or languages with the greatest representation in the experiment training mixture.
+We found the latter was most effective and selected the $|\mathcal{K}_{t}|=3$ most highly co-sampled languages along target language $t$ across mixtures.
+For each term, we apply a saturation function (\Cref{eq:scl-sat-piecewise}), ensuring a smooth decay on the effective data for each subsequent epoch where the training tokens have surpassed that languages' unique tokens $U$.
+The new parameters introduced over standard scaling laws are: the repetition parameter $\lambda$, which is shared across each data source, the transfer weights $\tau_i$ for each language in $\mathcal{K}_{t}$ (which are initialized from language transfer scores derived in \Cref{sec:lang-transfer}), and the transfer weight $\tau_{\mathrm{other}}$ for the remainder of language tokens.
+
+
+\noindent\textbf{Research Question:} \emph{How do scaling laws differ by language, and by monolingual vs multilingual training mixtures?}
+
+% \sayna{ok - this first question seems to be the most important question in the paper (hence teaser figure is also about this) - however based on my limited prior knowledge about this topic I think the following text answers the question at surface and doesn't get into the "why" - so it talks about compute tax (the curves shift up) but maybe we should decompose this tax by looking at the parameters? does the tax come from a worse scaling exponent (alpha/beta) or a higher E? i think the latter for the multilingual setting rather than a degradation of the scaling exponent - example for that is the irreducible loss for Chinese which increases from 1.08 in the mono setting to 1.25 in the regular setting which suggests that while a multilingual vocabulary introduces a higher error due to capacity competition, the actual rate of improvement with more data and parameters remains robust - although the unimax setting uses positive transfer to lower both the exponent and the loss for most languages - this is turning tax into a net benefit }
+\noindent\textbf{Monolingual scaling behavior is consistent in form, and multilingual variants exhibit a variable-sized compute-efficiency tax.}
+\Cref{fig:monolingual-scaling} compares optimal scaling trajectories across six-variable resourced languages, under three regimes: \emph{monolingual vocabulary + monolingual training}, \emph{multilingual vocabulary + monolingual training}, and \emph{multilingual vocabulary + unimax training}.
+Across languages, the monolingual curves are nearly parallel, indicating similar exponents and comparable returns to additional data and parameters (see full law parameters in \Cref{tab:mono-scaling-laws}).
+Both multilingual vocabulary and \unimax{} training shift the frontier upwards, evidencing a \emph{compute-efficiency tax} relative to the monolingual-vocabulary/monolingual-training setting.
+This is most pronounced for English, indicating it benefits less from language transfer than other languages do from English.
+For Hindi and Swahili, the right tail bends upward, consistent with diminishing returns from severe data repetition after many epochs.
+These qualitative trends motivate a single functional form that remains stable across languages while accounting for vocabulary/training-regime effects.
+
+\noindent\textbf{Research Question:} \emph{How well can our scaling laws capture unique monolingual constraints, and complex multilingual cross-lingual transfer dynamics?}
+
+\noindent\textbf{\oursclabb{} outperforms prior scaling laws, with a more robust fit across held-out axes in monolingual and multilingual settings.}
+\Cref{tab:evaluations} evaluates fitted laws by holding out the largest model sizes \(N\), token ranges \(D\), compute \(C=6ND\), and held-out language mixtures $M$, reporting \(R^2\) averaged over available languages.
+In the monolingual setting, all scaling laws perform comparably across most dimensions of generalization.
+However, when generalizing to the largest size of model, laws that model data repetition outperform those that don't.
+\oursclabb{} provides the strongest generalization to greater model sizes: \(R^2(N)=\mathbf{0.88}\) versus \(0.68\) (\basicsclabb{}) and \(0.78\) (\dcslabb{}), respectively.
+
+In the multilingual setting, monolingual scaling laws can only observe their target data tokens, and as such perform adequately, but not well.
+In particular, they are unable to generalize to the largest models $R^2(N)$ at all.
+This is also the case for \msclabb{}, although it obtains better generalization to unseen language mixture in $R^2(M)=0.69>0.64$ by virtue of modeling the whole language family.
+By separating the sources of data, \oursclabb{} is able to significantly outperform the other laws across all dimensions, frequently achieving $>0.9$ fit.
+However, our ablation of the data terms shows that only by adding the $\textcolor{d_transfer}{\text{Transfer Language}}$ term is the model able to outperform \msclabb{} and achieve a better multilingual mixture generalization $R^2(M)=0.82$.
+In summary, \oursclabb{} offers a simple framework to adaptively model cross-lingual transfer, and enables reliable extrapolation across out-of-sample dimensions in both monolingual and multilingual settings---addressing a critical gap where existing approaches fall short.

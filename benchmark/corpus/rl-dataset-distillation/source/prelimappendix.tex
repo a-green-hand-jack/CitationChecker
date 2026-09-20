@@ -1,0 +1,60 @@
+\section{Preliminaries for Appendix}
+
+
+\subsection{Function Classes and Pseudo-Dimension} \label{sec:pdim}
+ We will consider a class $\mc{F}$ of real-valued functions (regressors) mapping $\R^d$ to  $[-1, 1]$. The pseudo-dimension of the function class ${\sf Pdim}(\mc{F})$ is defined as the minimum cardinality subset of $\R^{d}$ which is \emph{pseudo-shattered}.  It is formally defined in Definition 11.2 of \citep{anthonybartlett}.
+
+ For $\mbc{X} \subseteq \R^d$ where $|\mbc{X}| = N$, set $\mc{C}_p(\xi, \mc{F}, \mbc{X})$ to be a minimum sized $\ell_p$-metric $\xi$-cover of $\mc{F}$ over $\mbc{X}$, i.e. $\mc{C}_p(\xi, \mc{F}, \mbc{X})$ is a smallest subset of $\mc{F}$ such that for any $f^* \in \mc{F}$, there exists $f \in \mc{C}_p(\xi, \mc{F}, \mbc{X})$ s.t. $\left(\E_{\bx \in \mbc{X}}\left[\left|f^*(\bx) - f(\bx)\right|^p\right]\right)^{1/p} \leq \xi$ for $p \in [1,\infty)$, and $\max_{\bx\in \mbc{X}}\left|f^*(\bx) - f(\bx)\right| \leq \xi$ for $p =\infty$.
+ 
+
+ The largest size of such a cover over all choices of $\mbc{X} \subseteq \R^d$ s.t. $|\mbc{X}| = N$ is defined to be  $N_p(\xi, \mc{F}, N)$.
+ 
+The \emph{pseudo-dimension} of $\mc{F}$, ${\sf Pdim}(\mc{F})$ (see Sec. 10.4 and 12.3 of [Anthony-Bartlett, 2009]) can be used to bound the size of covers for $\mc{F}$ as follows: 
+\begin{equation}
+    N_1(\xi, \mc{F}, N) \leq N_\infty(\xi, \mc{F}, N) \leq (eN/\xi p)^p \label{eqn:coversize}
+\end{equation}
+where $p = {\sf Pdim}(\mc{F})$ and $N \geq d$.
+By normalizing, the above bounds can be adapted to functions which map to $[-B, B]$ for $B > 0$. 
+
+The following theorem follows from Theorem 11.4 from [Anthony-Bartlett, 2009]
+\begin{theorem}\label{thm:Pdim-linear}
+The class of linear regressors over $\R^d$ given by $\br^{\sf T}\bx$ for $\br \in \R$ has pseudo-dimension $d$.
+\end{theorem}
+
+\subsection{Cover over $\mc{B}(d, r)$} \label{sec:nets}
+Let $\mc{T}(d, r, \eps)$ be the smallest subset of the Euclidean ball of radius $r$ in $d$-dimensions $\mc{B}(d, r)$ such that  for all $\br \in \mc{B}(d, r)$ there exists $\hat{\br} \in \mc{T}(d, r, \eps)$ s.t. $\|\br - \hat{\br}\|_2 \leq \eps$. The following lemma follows from  Corollary 4.2.13 of~\citep{HDPbook}.
+\begin{lemma}\label{lem:covering_no_ball}
+$\mc{T}(d, r, \eps) \leq \left(1 + \tfrac{2r}{\eps}\right)^d$.
+\end{lemma}
+
+
+
+\subsection{Carbery-Wright anti-concentration bound}\label{sec:carbery}
+The following non-trivial anti-concentration of polynomials over Gaussian variables was proved by~\citep{carberywright}.
+\begin{theorem}[Theorem 8 from~\citep{carberywright} ]\label{them:Carbery-Wright} There is an absolute constant $C > 0$ such that if $f$ is any degree-$d$ polynomial over iid $N(0,1)$ variables, then $\Pr\left[|f| \leq \eps \E[|f|]\right] \leq Cd\eps^{1/d}$ for all $\eps > 0$.
+\end{theorem}
+
+
+\subsection{Lipschitzness of feature-map $\phi$}
+For the our results on offline RL dataset distillation, as mentioned in Sec. \ref{sec:our_results}, we assume that the feature-map $\phi$ is $L$-Lipschitz, specifically w.r.t. the $\ell_2$-metric. In other words, for any $(s_1, a_1), (s_2, a_2) \in \mc{B}(d_0, B_0)\times \mc{B}(d_0, B_0)$,
+\begin{align}
+    \|\phi(s_1, a_1) - \phi(s_2, a_2)\|_2 \leq L\|(s_1,a_1) - (s_2,a_2)\|_2 =  & L\sqrt{\|s_1 - s_2\|_2^2 + \|a_1 - a_2\|_2^2} \nonumber \\ \leq & L\left( \|s_1 - s_2\|_2 + \|a_1 - a_2\|_2 \right) \nonumber 
+\end{align}
+
+
+
+\subsection{Low Rank Approximation}
+
+A key ingredient in our lower bound is the classical Eckart--Young--Mirsky theorem \citep{eckart1936approximation,stewart1993eckart}, which states that for any symmetric positive semidefinite matrix $\bA \in \mathbb{R}^{d \times d}$ with eigenvalues $\lambda_1 \ge \lambda_2 \ge \cdots \ge \lambda_d$, the best rank-$m$ approximation $\bB$ in spectral norm is obtained by truncating the eigendecomposition of $\bA$, and the approximation error is exactly 
+\begin{equation}\label{eqn:lora}
+  \min_{\operatorname{rank}(\bB)\le m} \|\bA-\bB\|_2 \;=\; \lambda_{m+1}.
+\end{equation}
+This immediately implies that if $\lambda_{m+1} \ge \varepsilon$, then any 
+rank-$m$ factorization $\bB=\bZ\bZ^\top$ with $\bZ \in \mathbb{R}^{d \times m}$ must incur spectral error at least $\varepsilon$.
+
+\subsection{Chernoff Bound}
+We also use the following well known concentration bound.
+\begin{theorem}[Chernoff Bound]\label{thm:Chernoff}
+    Let $X_1, \dots, X_n$ be iid $\{0,1\}$-valued random variables and let $\mu = \E\left[\sum_{i=1}^nX_i\right]$. Then for any $\delta > 0$,
+    $$\Pr\left[\sum_i^nX_i \leq (1-\delta)\mu\right] \leq \tn{exp}\left(-\delta^2\mu/2\right).$$
+\end{theorem} 

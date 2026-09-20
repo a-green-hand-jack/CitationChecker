@@ -1,0 +1,74 @@
+\documentclass{article} %
+\usepackage{iclr2026_conference,times}
+
+\input{math_commands.tex}
+\input{header.tex}
+
+\usepackage[colorlinks,allcolors=gdmblue700]{hyperref}
+
+
+\usepackage{url}
+
+\title{Bridging Kolmogorov Complexity and Deep Learning: Asymptotically Optimal Description Length Objectives for Transformers}
+
+\author{
+Peter Shaw \\
+Google DeepMind \\
+\And
+James Cohan \\
+Google Research \\
+\And
+Jacob Eisenstein \\
+Google DeepMind \\
+\And 
+Kristina Toutanova \\
+Google DeepMind \\
+}
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+
+\iclrfinalcopy %
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+The Minimum Description Length (MDL) principle offers a formal framework for applying Occam's razor in machine learning. However, its application to neural networks such as Transformers is challenging due to the lack of a principled, universal measure for model complexity.
+This paper introduces the theoretical notion of asymptotically optimal description length objectives, grounded in the theory of Kolmogorov complexity. We establish that a minimizer of such an objective achieves optimal compression, for any dataset, up to an additive constant, in the limit as model resource bounds increase.
+We prove that asymptotically optimal objectives exist for Transformers, building on a new demonstration of their computational universality. We further show that such objectives can be tractable and differentiable by constructing and analyzing a variational objective based on an adaptive Gaussian mixture prior.
+Our empirical analysis shows that this variational objective selects for a low-complexity solution with strong generalization on an algorithmic task, but standard optimizers fail to find such solutions from a random initialization, highlighting key optimization challenges. More broadly, by providing a theoretical framework for identifying description length objectives with strong asymptotic guarantees, we outline a potential path towards training neural networks that achieve greater compression and generalization.
+\end{abstract}
+
+\input{sections/intro}
+\input{sections/background}
+\input{sections/theory}
+\input{sections/experiments}
+\input{sections/related_work_discussion}
+
+
+
+
+\clearpage
+
+\eat{
+\section*{Reproducibility Statement} Detailed proofs and theoretical analysis are included in Appendix~\ref{sec:appendix-theory}. Details needed to reproduce the experiments are included in Appendix~\ref{sec:appendix-experiments}.
+
+\section*{Use of Large Language Models (LLMs)}
+
+We used LLMs to help revise the paper, e.g., to draft suggestions for improving clarity and concision. We also used LLMs to try to identify typos or other issues with our proofs and technical analysis. LLMs did not play a significant role in research ideation.
+}
+
+\section*{Acknowledgements} We thank Jonathan Berant, Kenton Lee, and Tim Genewein
+for useful discussions and feedback, and the anonymous reviewers for their helpful comments.
+
+\bibliography{main}
+\bibliographystyle{iclr2026_conference}
+
+\clearpage
+\appendix
+
+\input{sections/appendix}
+
+\end{document}

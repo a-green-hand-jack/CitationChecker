@@ -1,0 +1,277 @@
+\newpage
+\section{Omitted Details in \pref{sec: compare DEC}}\label{app:compare DEC}
+
+
+\subsection{Proof of \pref{thm:lower bound}}
+In this section, we will use $\text{Ber}(p)$ to denote Bernoulli distribution with success probability $p$. We consider parameters $\epsilon$ and $\Delta$ with $\epsilon < \Delta = \frac{1}{16\sqrt{T}} \leq \frac{1}{16}$. Define $p^+ = \frac{1}{2} + \Delta$ and $p^- = \frac{1}{2} - \Delta$. Let $\mathbb{H}(\nu)$ denote the entropy of distribution $\nu$. We assume learning rate $\eta \leq 1$.  
+
+Consider a three-arm bandit environment with model class $\mathcal{M} = \{M_1, M_2\}$ where
+\begin{itemize}
+    \item $M_1 = \left(\text{Ber}\left(p^-\right), \text{Ber}\left(p^+\right), \epsilon\text{Ber}(0.5)\right)$. The reward distribution is $\text{Ber}\left(p^-\right)$ for arm $a_1$ and   $\text{Ber}\left(p^+\right)$ for arm $a_2$. Arm $a_3$'s reward is $0$ and $\epsilon$ with equal probability. 
+    \item $M_2 = \left(\text{Ber}\left(p^+\right), \text{Ber}\left(p^-\right), 0.5\epsilon\right)$. The reward distribution is $\text{Ber}\left(p^+\right)$ for arm $a_1$ and  $\text{Ber}\left(p^-\right)$ for arm $a_2$. Arm $a_3$'s reward is $0.5\epsilon$ deterministically. 
+\end{itemize}
+In this setting, $\Phi$ contains two infosets (based on \pref{assum: function approximation stochastic}): 
+\begin{align*}
+    \phi_1 = \left\{\left(M_1, \pi_{M_1}\right)\right\},\quad \phi_2=\left\{\left(M_2, \pi_{M_2}\right)\right\}. 
+\end{align*}
+%We denote the two infoset as $\phi_1$ and $\phi_2$. 
+In the rest of this proof, we compare the optimistic E2D algorithm \citep{foster2024model} and our algorithm in this environment. 
+
+\paragraph{Optimistic DEC algorithm \citep{foster2024model}}
+Given $\rho_t \in \Delta(\Phi)$, the algorithm chooses action distribution via
+\begin{align}
+    p_t = \argmin_{p \in \Delta(\Pi)} \max_{\nu \in \Delta(\Psi)} \E_{a\sim p} \E_{\phi\sim \rho_t} \E_{M\sim \nu} \left\{V_{\phi}(a_{\phi}) - V_M(a) - \frac{1}{\eta} D^{a}(\phi \| M) \right\}
+\label{eq:dec-three}
+\end{align}
+where $a_{\phi}$ is the optimal action of infoset $\phi$. In this simple bandit setting, the bilinear divergence and the squared Bellman error coincide with
+\begin{align*} 
+ D^a(\phi\| M) = \left(\E^{a, M} [V_\phi(a) - r]\right)^2 = (V_\phi(a) - V_M(a))^2. 
+\end{align*}
+We first consider the divergence term, for action $a \in \{a_1, a_2\}$, we have
+\begin{align}
+    \E_{\phi \sim \rho_t}\E_{M \sim \nu}\left[D^a(\phi \| M)\right] &= \rho_t(\phi_1)\nu(M_2)(V_{\phi_1}(a) - V_{M_2}(a))^2 +  \rho_t(\phi_2)\nu(M_1)(V_{\phi_2}(a) - V_{M_1}(a))^2 \nonumber
+    \\&= 4\left(\rho_t(\phi_1)\nu(M_2) + \rho_t(\phi_2)\nu(M_1)\right)\Delta^2 \label{eq:D12}
+\end{align}
+For action $a = a_3$, we have
+\begin{align}
+    \E_{\phi \sim \rho_t}\E_{M \sim \nu}\left[D^a(\phi\| M)\right] &= \rho_t(\phi_1)\nu(M_2)(V_{\phi_1}(a) - V_{M_2}(a))^2 +  \rho_t(\phi_2)\nu(M_1)(V_{\phi_2}(a) - V_{M_1}(a))^2 \nonumber
+    \\&= 0 
+    \label{eq:D3}
+\end{align}
+Thus, for any $\rho_t$ and $\nu$, we have
+\begin{align*}
+\E_{a \sim p}\E_{\phi\sim \rho_t} \E_{M\sim \nu}\left[ - \frac{1}{\eta} D^{a}(\phi\|M)\right]  &= -\frac{4(1-p(a_3))\Delta^2}{\eta}\left(\rho_t(\phi_1)\nu(M_2) + \rho_t(\phi_2)\nu(M_1)\right) 
+%\\&= -\frac{1}{\eta}\left(\rho_t(\phi_1)\nu(M_2) + \rho_t(\phi_2)\nu(M_1)\right)\left(4\Delta^2  + p(a_3)(\epsilon^2 - 4\Delta^2)\right),
+\end{align*}
+which is monotonically increasing in $p(a_3)$. 
+
+We then consider the regret term. For any $p \in \Delta\left(\Pi\right)$, define $\Tilde{p} = \left(\frac{p(a_1)}{1-p(a_3)}, \frac{p(a_2)}{1-p(a_3)}, 0\right)$ if $p(a_3)<1$, and $\Tilde{p}=(\frac{1}{2}, \frac{1}{2}, 0)$ otherwise. For any $M \in \mathcal{M}$, when $p(a_3)<1$ we have 
+\begin{align*}
+    \E_{a \sim p}\left[V_{M}(a)\right] - \E_{a \sim \Tilde{p}}\left[V_M(a)\right] &=  \sum_{a \in \{a_1, a_2\}}\left(p(a) - \Tilde{p}(a)\right)V_{M}(a) + p(a_3)V_M(a_3) 
+    \\&= \frac{-p(a_3)}{1-p(a_3)}\sum_{a \in \{a_1, a_2\}} p(a) V_M(a)  + p(a_3)V_M(a_3) 
+    \\&\le \frac{-p(a_3)}{1-p(a_3)}\left(p(a_1) + p(a_2)\right)p^-  + p(a_3)V_M(a_3) \tag{$V_M(a) \ge p^-$ for any $M$ and $a \in \{a_1, a_2\}$, and $p(a_3) < 1$}
+    \\&= p(a_3)\left(V_M(a_3) - \frac{1}{2} + \Delta\right)
+    \\&\le p(a_3)\left(0.5\epsilon + \Delta -\frac{1}{2}\right) \le 0 \tag{$\epsilon < \Delta \leq \frac{1}{16}$}, 
+\end{align*}
+and when $p(a_3)=1$ we also have $\E_{a \sim p}\left[V_{M}(a)\right] - \E_{a \sim \Tilde{p}}\left[V_M(a)\right]\leq 0$.  
+Thus, for any $\rho_t$, $\nu$, and $p$, 
+\begin{align*}
+    \E_{a\sim \Tilde{p}} \E_{\phi\sim \rho_t} \E_{M\sim \nu} \left\{V_\phi(a_\phi) - V_M (a)\right\} \le  \E_{a\sim p} \E_{\phi\sim \rho_t} \E_{M\sim \nu} \left\{V_\phi(a_\phi) - V_M(a)\right\}.
+\end{align*}
+Combining the discussion of the above two terms, for any $\rho_t, \nu$ and $p$, we have
+\begin{align}
+    \E_{a\sim \Tilde{p}} \E_{\phi\sim \rho_t} \E_{M\sim \nu} \left\{V_\phi(a_\phi) - V_M (a) - \frac{1}{\eta} D^{a}(\phi\|M) \right\} \le \E_{a\sim p} \E_{\phi\sim \rho_t} \E_{M\sim \nu} \left\{V_\phi(a_\phi) - V_M (a) - \frac{1}{\eta} D^{a}(\phi\| M) \right\}. 
+\label{eq:minmax_start}
+\end{align}
+%Note that it is sufficient to consider $p$ with $p(a_3) < 1$ because $p(a_3) = 1$ is suboptimal.
+% \begin{align*}
+%     \E_{a\sim \delta_{a_2}} \E_{\phi\sim \rho_t} \E_{M\sim \nu} \left\{f_\phi(a_\phi) - f_M (a) - \frac{1}{\eta} D^{a}(\phi, M) \right\} \le \E_{a\sim \delta_{a_3}} \E_{\phi\sim \rho_t} \E_{M\sim \nu} \left\{f_\phi(a_\phi) - f_M (a) - \frac{1}{\eta} D^{a}(\phi, M) \right\} 
+% \end{align*}
+% where $\delta_{a_2}$ is the action distribution with $p(a_2) = 1$ and $\delta_{a_3}$ is the action distribution with $p(a_3) = 1$.
+
+
+% Given that $f_{\phi}(a_{\phi}) = \frac{1}{2} + \Delta$ for both $\phi_1, \phi_2$, we have
+% \begin{align*}
+%     &\E_{a\sim p} \E_{\phi\sim \rho_t} \E_{M\sim \nu} \left\{f_\phi(a_\phi) - f_M (a)\right\}
+%      \\&= p^+- \nu(M_1)p(a_1)f_{M_1}(a_1) - \nu(M_1)p(a_2)f_{M_1}(a_2) - \nu(M_1)p(a_3)f_{M_1}(a_3) 
+%      \\& \qquad - \nu(M_2)p(a_1)f_{M_2}(a_1) - \nu(M_2)p(a_2)f_{M_2}(a_2) - \nu(M_2)p(a_3)f_{M_2}(a_3) 
+%      \\&=  p^+- \nu(M_1)p(a_1)f_{M_1}(a_1) - \nu(M_1)p(a_2)f_{M_1}(a_2) - \nu(M_1)p(a_3)f_{M_1}(a_3) 
+%      \\& \qquad - \nu(M_2)p(a_1)f_{M_2}(a_1) - \nu(M_2)p(a_2)f_{M_2}(a_2) - \nu(M_2)p(a_3)f_{M_2}(a_3) 
+% \end{align*}
+
+
+Given \pref{eq:minmax_start}, the minimax solution of \pref{eq:dec-three} must have $p_t(3) = 0$ for any $\rho_t$ and any $t$. This implies that the optimistic DEC algorithm will never choose $a_3$ and the problem degenerate to standard two-arm bandit, so the policy derived from optimistic DEC objective \pref{eq:dec-three} must suffer standard regret lower bound $\E\left[\Reg(\pi_{M^\star})\right] \ge \Omega(\sqrt{T})$ given $\Delta = \Theta\left(\frac{1}{\sqrt{T}}\right)$.
+
+\paragraph{Our algorithm}
+%\cw{Let $\rho_1$ be a uniform distribution. 
+
+%If $a=a_3$, the learner can tell which environment it is in after seeing the observation, it holds that $\nu_{\bo{\phi}}(\cdot|a_3,o) = \delta_{\phi_1}$ or $\delta_{\phi_2}$. Therefore, 
+%\begin{align*}
+%    \E_{o\sim M(a_3)}\left[\KL(\nu_{\bo{\phi}}(\cdot|a_3,o) , \rho_1)\right] = \ln \frac{1}{1/2} = \ln 2. 
+%\end{align*}
+%On the other hand, if $a=a_1$ or $a=a_2$, 
+%\begin{align*}
+%    \E_{o\sim M(a)}\left[\KL(\nu_{\bo{\phi}}(\cdot|a,o) , \rho_1)\right] &=  \E_{o\sim M(a)}\left[\KL(\nu_{\bo{\phi}}(\cdot|a,o) , \nu_{\bo{\phi}})\right] + \KL(\nu_{\bo{\phi}}, \rho_1) \\
+%    &= \E_{\phi\sim \nu}\left[\KL(\nu_{\bo{o}}(\cdot|a,\phi) , \nu_{\bo{o}}(\cdot|a))\right] + \KL(\nu_{\bo{\phi}}, \rho_1) \\
+%    &\leq \KL\left(\text{Ber}(p^+, p^-)\right) + \KL(\nu_{\bo{\phi}}, \rho_1) \\
+%    &\leq \Delta^2 + \KL(\nu_{\bo{\phi}}, \rho_1). 
+%\end{align*}
+%}
+
+
+
+Given $\rho_1$ is a uniform distribution, we consider our first step optimization where
+\begin{align}
+    p_1 = \argmin_{p \in \Delta(\Pi)} \max_{\nu \in \Delta(\Psi)} \E_{a\sim p} \E_{\phi\sim \rho_1} \E_{M\sim \nu} \left\{V_M(a_M) - V_M (a) -\frac{1}{\eta} \E_{o\sim M(\cdot|a)}\left[\KL(\nu_{\bo{\phi}}(\cdot|a, o), \rho_1)\right] - \frac{1}{\eta} D^{a}(\phi\| M) \right\}. 
+\label{eq:dec-our}
+\end{align}
+% where $\rho_1$ is a uniform distribution over $\Phi$.  For arm $a\in\{1,2,3\}$. Define
+% \begin{align*}
+%     J(a):=\max_{\nu \in \Delta(\Psi)} \E_{\phi\sim\rho_1}\E_{M\sim\nu}\left[
+% f_\phi(a_\phi) - f_M(a) - \frac{1}{\eta} \E_{o\sim M(a)}\left[\KL(\nu_\phi(\cdot|a, o), \rho_1)\right] - \frac{1}{\eta}\,D^a(\phi,M)
+% \right].
+% \end{align*}
+%
+% Since $\rho_1$ is a uniform distribution, since observation $o \in \{0,1\}$, we have
+%
+% We have
+% \begin{align*}
+%     \nu(\phi_1|a_1, 1) &= \frac{\mathbb{P}(1|a_1, \phi_1)\mathbb{P}(a_1|\phi_1)\nu(\phi_1)}{\mathbb{P}(a_1)\sum_{\phi}\mathbb{P}(1|a_1, \phi)\nu(\phi)}
+%     \\&= \frac{\mathbb{P}(1|a_1, \phi_1)\nu(\phi_1)}{\sum_{\phi}\mathbb{P}(1|a_1, \phi)\nu(\phi)} \tag{$\mathbb{P}(a_1|\phi) = \mathbb{P}(a_1)$}
+%     \\&= \frac{\left(p^-\right)\nu(\phi_1)}{\left(p^-\right)\nu(\phi_1) + \left(\frac{1}{2} + \Delta\right)\nu(\phi_2)}
+% \end{align*}
+% Similarly, we have
+% \begin{align*}
+%     &\nu(\phi_2|a_1, 1) = \frac{\left(\frac{1}{2} + \Delta\right)\nu(\phi_2)}{\left(p^-\right)\nu(\phi_1) + \left(\frac{1}{2} + \Delta\right)\nu(\phi_2)}
+%     \\&\nu(\phi_1|a_1, 0) = \frac{\left(\frac{1}{2} + \Delta\right)\nu(\phi_1)}{\left(\frac{1}{2} + \Delta\right)\nu(\phi_1) + \left(p^-\right)\nu(\phi_2)} \qquad \nu(\phi_2|a_1, 0) = \frac{\left(p^-\right)\nu(\phi_2)}{\left(\frac{1}{2} + \Delta\right)\nu(\phi_1) + \left(p^-\right)\nu(\phi_2)}
+%     \\& \nu(\phi_1|a_2, 1) = \frac{\left(\frac{1}{2} + \Delta\right)\nu(\phi_1)}{\left(\frac{1}{2} + \Delta\right)\nu(\phi_1) + \left(p^-\right)\nu(\phi_2)}  \qquad   \nu(\phi_2|a_2, 1) = \frac{\left(p^-\right)\nu(\phi_2)}{\left(\frac{1}{2} + \Delta\right)\nu(\phi_1) + \left(p^-\right)\nu(\phi_2)}
+%     \\& \nu(\phi_1|a_2, 0) = \frac{\left(p^-\right)\nu(\phi_1)}{\left(p^-\right)\nu(\phi_1) + \left(\frac{1}{2} + \Delta\right)\nu(\phi_2)}  \qquad   \nu(\phi_2|a_2, 0) = \frac{\left(\frac{1}{2} + \Delta\right)\nu(\phi_2)}{\left(p^-\right)\nu(\phi_1) + \left(\frac{1}{2} + \Delta\right)\nu(\phi_2)}
+% \end{align*}
+% For any binary distribution $(x, 1-x)$ where $0 \le x \le 1$, we have
+% \begin{align*}
+%     \KL\left(\left(x, 1-x\right), \left(\frac{1}{2}, \frac{1}{2}\right)\right) = x\ln\left(2x\right) + (1-x)\ln\left(2(1-x)\right) = \ln\left(2\right) - H(x)
+% \end{align*}
+% where $H(x)$ is the entropy of distribution $(x, 1-x)$. Thus,
+%
+%
+% \begin{align*}
+% &\E_{o\sim M_1(a_1)}\left[\KL(\nu_\phi(\cdot|a_1, o), \rho_1)\right] = \left(p^-\right)\left(\ln(2) - H(\nu_\phi(\cdot|a_1, 1))\right) + \left(\frac{1}{2} +\Delta\right)\left(\ln(2) - H(\nu_\phi(\cdot|a_1, 0))\right)
+% \\&\E_{o\sim M_2(a_1)}\left[\KL(\nu_\phi(\cdot|a_1, o), \rho_1)\right] = \left(\frac{1}{2} + \Delta\right)\left(\ln(2) - H(\nu_\phi(\cdot|a_1, 1))\right) + \left(\frac{1}{2} -\Delta\right)\left(\ln(2) - H(\nu_\phi(\cdot|a_1, 0))\right)
+% \\&\E_{o\sim M_1(a_2)}\left[\KL(\nu_\phi(\cdot|a_2, o), \rho_1)\right] = \left(\frac{1}{2} + \Delta\right)\left(\ln(2) - H(\nu_\phi(\cdot|a_2, 1))\right) + \left(p^-\right)\left(\ln(2) - H(\nu_\phi(\cdot|a_2, 0))\right)
+% \\&\E_{o\sim M_2(a_2)}\left[\KL(\nu_\phi(\cdot|a_2, o), \rho_1)\right] = \left(p^-\right)\left(\ln(2) - H(\nu_\phi(\cdot|a_2, 1))\right) + \left(\frac{1}{2} +\Delta\right)\left(\ln(2) - H(\nu_\phi(\cdot|a_2, 0))\right)
+% \\&\E_{o\sim M_1(a_3)}\left[\KL(\nu_\phi(\cdot|a_3, o), \rho_1)\right] =  \KL(\nu_\phi(\cdot|a_3, 0), \rho_1) = \ln(2) - H(\nu_\phi(\cdot|a_3, 0)) = \ln(2)
+% \\&\E_{o\sim M_2(a_3)}\left[\KL(\nu_\phi(\cdot|a_3, o), \rho_1)\right] =  \KL(\nu_\phi(\cdot|a_3, \epsilon), \rho_1)  =  \ln(2) - H(\nu_\phi(\cdot|a_3, \epsilon)) = \ln(2)
+% \end{align*}
+% where the last two equalities comes from the deterministic reward of $a_3$ in both environments.
+%%
+%
+% We also have
+% \begin{align*}
+%     \KL\left(\right)
+% \end{align*}
+%
+Below, we discuss the four terms in \pref{eq:dec-our}. \\
+
+\noindent\underline{The $V_M(a_M)$ term}\ \ \ For any $\nu$, we have $\E_{M\sim \nu}[V_M(a_M)] = p^+$, which is a constant. Therefore, this term can be ignored in the objective. \\
+
+
+\noindent\underline{The $V_M(a)$ term}\ \ \ 
+By direct calculation, we have 
+\begin{align}
+    &\E_{a\sim p} \E_{M\sim \nu} \left[V_M (a) \right]= \frac{p(a_1) + p(a_2)}{2} + \left(p(a_1) - p(a_2)\right)\left(\nu(M_2) - \nu(M_1)\right)\Delta + 0.5p(a_3)\epsilon. \label{eq: temp 111} 
+\end{align}
+For any $p = (p(a_1), p(a_2), p(a_3))$, consider $\hat{p} = (\frac{p(a_1) + p(a_2)}{2}, \frac{p(a_1) + p(a_2)}{2}, p(a_3))$. By \pref{eq: temp 111} we have
+\begin{align}
+    \max_{\nu \in \Delta(\Psi)}\E_{a\sim \hat{p}} \E_{M\sim \nu} \left[-V_M (a)\right] \leq \max_{\nu \in \Delta(\Psi)}\E_{a\sim p} \E_{M\sim \nu} \left[-V_M (a)\right]. 
+\label{eq:modify_p}
+\end{align}
+
+\noindent\underline{The $D^a(\phi\|M)$ term} \ \ \ Given $\rho_1$ is a uniform distribution, for action $a \in \{1,2\}$, from \pref{eq:D12}, for any $\nu$  we have $\E_{\phi \sim \rho_1}\E_{M \sim \nu}\left[D^a(\phi\|M)\right] = 2\Delta^2$. For action $a = 3$, from \pref{eq:D3}, for any $\nu$,  we have $\E_{\phi \sim \rho_1}\E_{M \sim \nu}\left[D^a(\phi\|M)\right] = 0$. Hence, $\E_{a\sim p}\E_{\phi \sim \rho_1}\E_{M \sim \nu}\left[D^a(\phi\|M)\right] = 2(1-p(a_3))\Delta^2$.  Note that now this is independent of  $\nu$, and only related to $p(a_3)$ or $p(a_1) + p(a_2)$ but not $p(a_1)$ or $p(a_2)$ individually. \\
+
+
+
+\noindent\underline{The $\KL$ term}\ \ \ Notice that 
+\begin{align*}
+    &\nu_{\bo{o}}(\cdot|a_1, \phi_1) = \text{Ber}\left(p^-\right),  \quad  \nu_{\bo{o}}(\cdot|a_2, \phi_1) = \text{Ber}\left(p^+\right), \quad \nu_{\bo{o}}(\cdot|a_1, \phi_2) = \text{Ber}\left(p^+\right),  \quad \nu_{\bo{o}}(\cdot|a_2, \phi_2) = \text{Ber}\left(p^-\right),
+    \\&\nu_{\bo{o}}(\cdot|a_1) =\text{Ber}\left(m_1\right),  \qquad \nu_{\bo{o}}(\cdot|a_2) =\text{Ber}\left(m_2\right),
+\end{align*}
+where $m_1 = \nu(\phi_1)p^- +  \nu(\phi_2)p^+$ and $m_2 =\nu(\phi_1)p^+ +  \nu(\phi_2)p^-$ and it holds that $m_1 + m_2 = 1$.  Given that $\KL\left(\text{Ber}\left(p\right), \text{Ber}\left(q\right)\right) = \KL\left(\text{Ber}\left(1-p\right), \text{Ber}\left(1-q\right)\right)$, we have
+\begin{align*}
+&\E_{a\sim p} \E_{M\sim \nu} \left[\E_{o\sim M(a)}\left[\KL(\nu_{\pmb{\phi}}(\cdot|a, o), \rho_1)\right]\right]
+\\&= \E_{a\sim p} \E_{\phi \sim \nu}\left[\KL(\nu_{\pmb{o}}(\cdot|a, \phi), \nu_{\pmb{o}}(\cdot|a))\right]+ \KL(\nu_{\pmb{\phi}}, \rho_1)
+\\&= p(a_1)\nu(\phi_1)\KL\left(\text{Ber}\left(p^-\right),  \text{Ber}\left(m_1\right)\right) +  p(a_2)\nu(\phi_1)\KL\left(\text{Ber}\left(p^+\right),  \text{Ber}\left(m_2\right)\right) + \KL(\nu_{\pmb{\phi}}, \rho_1)
+    \\&\qquad + p(a_1)\nu(\phi_2)\KL\left(\text{Ber}\left(p^+\right),  \text{Ber}\left(m_1\right)\right) +  p(a_2)\nu(\phi_2)\KL\left(\text{Ber}\left(p^-\right),  \text{Ber}\left(m_2\right)\right) 
+    \\&\qquad + p(a_3)\E_{\phi \sim \nu}\left[\KL(\nu_{\pmb{o}}(\cdot|a_3, \phi), \nu_{\pmb{o}}(\cdot|a_3))\right]
+    \\&=  \left(p(a_1) + p(a_2)\right)\left(\nu(\phi_1)\KL\left(\text{Ber}\left(p^-\right),  \text{Ber}\left(m_1\right)\right) + \nu(\phi_2)\KL\left(\text{Ber}\left(p^+\right),  \text{Ber}\left(m_1\right)\right)\right)
+    \\&\qquad + p(a_3)\mathbb{H}(\nu) + \KL(\nu_{\pmb{\phi}}, \rho_1)
+    \\&= \left(1-p(a_3)\right)\left(\mathbb{H}\left(\text{Ber}(m_1)\right) - \mathbb{H}\left(\text{Ber}\left(p^+\right)\right)\right) + p(a_3)\mathbb{H}(\nu) +  \KL(\nu_{\pmb{\phi}}, \rho_1). 
+\end{align*}
+
+% \begin{align*}
+%     &\E_{a\sim p} \E_{\phi \sim \nu}\left[\KL(\nu_{o}(\cdot|a, \phi), \nu_{o}(\cdot|a))\right]
+%     \\&= p(a_1)\nu(\phi_1)\KL\left(\text{Ber}\left(p^-\right),  \text{Ber}\left(m_1\right)\right) +  p(a_2)\nu(\phi_1)\KL\left(\text{Ber}\left(p^+\right),  \text{Ber}\left(m_2\right)\right)
+%     \\&\quad + p(a_1)\nu(\phi_2)\KL\left(\text{Ber}\left(p^+\right),  \text{Ber}\left(m_1\right)\right) +  p(a_2)\nu(\phi_2)\KL\left(\text{Ber}\left(p^-\right),  \text{Ber}\left(m_2\right)\right) 
+%     \\&\qquad + p(a_3)\E_{\phi \sim \nu}\left[\KL(\nu_{o}(\cdot|a_3, \phi), \nu_{o}(\cdot|a_3))\right]
+%     \\&= p(a_1)\nu(\phi_1)\KL\left(\text{Ber}\left(p^-\right),  \text{Ber}\left(m_1\right)\right) +  p(a_2)\nu(\phi_1)\KL\left(\text{Ber}\left(p^-\right),  \text{Ber}\left(m_1\right)\right)
+%     \\&\quad + p(a_1)\nu(\phi_2)\KL\left(\text{Ber}\left(p^+\right),  \text{Ber}\left(m_1\right)\right) +  p(a_2)\nu(\phi_2)\KL\left(\text{Ber}\left(\frac{1}{2} + \Delta\right),  \text{Ber}\left(m_1\right)\right)
+%      \\&\qquad + p(a_3)\left(\nu(\phi_1)\log\left(\frac{1}{\nu(\phi_1)}\right) + \nu(\phi_2)\log\left(\frac{1}{\nu(\phi_2)}\right)\right)
+%     \\&= \left(p(a_1) + p(a_2)\right)\left(\nu(\phi_1)\KL\left(\text{Ber}\left(p^-\right),  \text{Ber}\left(m_1\right)\right) + \nu(\phi_2)\KL\left(\text{Ber}\left(\frac{1}{2} + \Delta\right),  \text{Ber}\left(m_1\right)\right)\right) + p(a_3)H(\nu)
+%     \\&=  \left(p(a_1) + p(a_2)\right)\left(\nu(\phi_1)\left(\left(p^-\right)\log\left(\frac{p^-}{m_1}\right) + \left(\frac{1}{2} + \Delta\right)\log\left(\frac{\frac{1}{2} + \Delta}{1-m_1}\right) \right) + \right. 
+%     \\&\qquad \left. \nu(\phi_2)\left(\left(\frac{1}{2} + \Delta\right)\log\left(\frac{\frac{1}{2} + \Delta}{m_1}\right) + \left(p^-\right)\log\left(\frac{\frac{1}{2} -\Delta}{1-m_1}\right) \right) \right) + p(a_3)H(\nu)
+%     \\&= \left(p(a_1) + p(a_2)\right)\left(H\left(\text{Ber}(m_1)\right) - H\left(\text{Ber}\left(\frac{1}{2} + \Delta\right)\right)\right) + p(a_3)H(\nu)
+% \end{align*}
+% Thus
+% \begin{align*}
+%     &\min_{\nu}\E_{a\sim p} \E_{M\sim \nu} \left[\E_{o\sim M(a)}\left[\KL(\nu_\phi(\cdot|a, o), \rho_1)\right]\right]
+%     \\&= \left(1-p(a_3)\right)\left(H\left(\text{Ber}(m_1)\right) - H\left(\text{Ber}\left(\frac{1}{2} + \Delta\right)\right)\right) + \KL\left(\nu_{\phi}, \rho_1\right) + p(a_3)H(\nu)
+% \end{align*}
+
+
+Note that this term is only related to $p(a_3)$ or $p(a_1)+p(a_2)$, but not $p(a_1)$ or $p(a_2)$ individually. \\
+
+\noindent\underline{Combining terms} \ \ \ 
+Combining the case discussions above, for any $p = (p(a_1), p(a_2), p(a_3))$, with $\hat{p} = (\frac{p(a_1) + p(a_2)}{2}, \frac{p(a_1) + p(a_2)}{2}, p(a_3))$, we have
+\begin{align*}
+    &\max_{\nu \in \Delta(\Psi)}\left\{\E_{a\sim \hat{p}} \E_{M\sim \nu} \left[-V_M (a) - \frac{1}{\eta}\E_{o\sim M(a)}\left[\KL(\nu_{\pmb{\phi}}(\cdot|a, o), \rho_1)\right]-\frac{1}{\eta}\E_{\phi\sim \rho_1}[D^a(\phi\|M)]\right]\right\}  
+    \\&\le \max_{\nu \in \Delta(\Psi)}\left\{\E_{a\sim p} \E_{M\sim \nu} \left[-V_M (a)- \frac{1}{\eta}\E_{o\sim M(a)}\left[\KL(\nu_{\pmb{\phi}}(\cdot|a, o), \rho_1)\right]-\frac{1}{\eta}\E_{\phi\sim \rho_1}[D^a(\phi\|M)]\right]\right\}. 
+\end{align*}
+To calculate the max value of the left-hand-side,  consider policy distribution $p_s = (\frac{1-s}{2}, \frac{1-s}{2}, s)$. We have
+\begin{align}
+    &\E_{a\sim p_s} \E_{M\sim \nu} \left[-V_M (a) - \frac{1}{\eta}\E_{o\sim M(a)}\left[\KL(\nu_{\pmb{\phi}}(\cdot|a, o), \rho_1)\right]-\frac{1}{\eta}\E_{\phi\sim \rho_1}[D^a(\phi\|M)]\right] \nonumber
+    \\&= \frac{s-1}{2}-\frac{s\epsilon}{2} -\frac{1}{\eta}\left( \left(1-s\right)\left(\mathbb{H}\left(\text{Ber}(m_1)\right) - \mathbb{H}\left(\text{Ber}(p^+)\right) + 2\Delta^2\right) +  \KL\left(\nu_{\pmb{\phi}}, \rho_1\right) + s\mathbb{H}(\nu) \right) \label{eq: G_init}
+\end{align}
+where $m_1 = \nu(\phi_1)p^{-} +  \nu(\phi_2)p^{+}$. Define
+\begin{align*}
+    G(\nu) = (1-s)\mathbb{H}(\text{Ber}(m_1)) + \KL\left(\nu_{\pmb{\phi}}, \rho_1\right) + s\mathbb{H}(\nu). 
+\end{align*}
+
+
+To calculate $\max_{\nu}$ of \pref{eq: G_init}, we only need to consider $ \min_{\nu}\left\{G(\nu)\right\}$. By setting $\nu(\phi_2) = 1 - \nu(\phi_1)$,  function $G$ is only related to $\nu(\phi_1)$ and we denote it as $G(\nu(\phi_1))$, after taking derivative, we have
+\begin{align*}
+    G'(\nu(\phi_1))&=(1-s)\ln\left(\frac{1-m_1}{m_1}\right)\left(p^{-} - p^+\right) + \log\left(\frac{\nu(\phi_1)}{1-\nu(\phi_1)}\right) + s\log\left(\frac{1-\nu(\phi_1)}{\nu(\phi_1)}\right)
+    \\&= -\Delta(1-s)\ln\left(\frac{1-m_1}{m_1}\right) + \log\left(\frac{\nu(\phi_1)}{1-\nu(\phi_1)}\right) + s\log\left(\frac{1-\nu(\phi_1)}{\nu(\phi_1)}\right)
+\end{align*}
+where $m_1 = \nu(\phi_1)p^{-} +  (1- \nu(\phi_1))p^{+}$ and we use the fact that $\frac{\mathrm{d}\mathbb{H}(\text{Ber}(p))}{\mathrm{d}p} = \ln\left(\frac{1-p}{p}\right)$. Note that when $\nu(\phi_1) = \frac{1}{2}$ we have $m_1 = \frac{1}{2}$ and $G'(\frac{1}{2}) = 0$. Thus, $\frac{1}{2}$ is a stationary point. On the other hand, we have $G''(\frac{1}{2}) = 4(1-s - 2(1-s)\Delta^2) \geq 0$ and $G(\nu(\phi_1)) = G(1- \nu(\phi_1))$. This implies $\nu(\phi_1) = \frac{1}{2}$ is the unique minimizer and the minimal value is $G(\frac{1}{2}) = \ln(2)$.
+
+Thus, 
+\begin{align*}
+  &\max_{\nu \in \Delta(\Psi)}\left\{\E_{a\sim p_s} \E_{M\sim \nu} \left[-V_M (a) - \frac{1}{\eta}\E_{o\sim M(a)}\left[\KL(\nu_{\pmb{\phi}}(\cdot|a, o), \rho_1)\right]-\frac{1}{\eta}\E_{\phi\sim \rho_1}[D^a(\phi\|M)]\right]\right\} \\
+  &= \frac{s-1}{2} - \frac{s\epsilon}{2} -\frac{1}{\eta} \left(1-s\right) \left(-\mathbb{H}\left(\text{Ber}(p^+)\right) + 2\Delta^2\right) - \frac{1}{\eta}  \ln(2)
+  \\&= (1-s) \left(-\frac{1-\epsilon}{2} + \frac{\mathbb{H}(\text{Ber}(p^+)) - 2\Delta^2}{\eta}\right) - \frac{\ln 2}{\eta} -\frac{\epsilon}{2}.   \numberthis \label{eq: tmp334}
+\end{align*}
+%Thus, the maximum value of the whole objective is %$\cw{the last term you added to the objective also involve $\nu$ --- why can you add this part after you already find the maximizer $\nu$ for the previous part?  }
+%\begin{align*}
+%    &\max_{\nu \in \Delta(\Psi)}\left\{\E_{a\sim p_s}\E_{\phi \sim \rho_1}\E_{M\sim \nu} \left[V_{M}(a_{M}) - V_M (a) - \frac{1}{\eta}\E_{o\sim M(a)}\left[\KL(\nu_{\pmb{\phi}}(\cdot|a, o), \rho_1)\right] -\frac{1}{\eta}D^a(\phi, M)\right]\right\}  
+%    \\&=  p^++ \frac{s-1}{2} -\frac{1}{\eta} \left(s-1\right) \mathbb{H}\left(\text{Ber}\left(p^+\right)\right) - \frac{1}{\eta}  \ln(2) - \frac{2(1-s)\Delta^2}{\eta} - \frac{s\epsilon^2}{2\eta}
+%\end{align*}
+Note that 
+\begin{align*}
+    &\mathbb{H}(\text{Ber}(p^+)) - 2\Delta^2 \\
+    &= -\KL(\text{Ber}(p^+), \text{Ber}(\tfrac{1}{2})) + \ln 2 - 2D_{\textrm{TV}}^2(\text{Ber}(p^+), \text{Ber}(\tfrac{1}{2})) 
+    \\&\geq \ln 2 - 5\KL(\text{Ber}(p^+), \text{Ber}(\tfrac{1}{2}))  \tag{Pinsker's inequality}
+    \\&\geq \ln 2 - 15\Delta^2  \tag{$\KL(\text{Ber}(\frac{1}{2}+\Delta), \text{Ber}(\frac{1}{2}))\leq 3\Delta^2$ for $\Delta\leq \frac{1}{2}$}
+    \\&\geq \frac{1}{2}.   \tag{by the assumption $\Delta = \frac{1}{16\sqrt{T}}\leq \frac{1}{16}$}
+\end{align*}
+
+Hence, the minimum value of \pref{eq: tmp334} is achieved at $s=1$ when $\frac{1}{2\eta} - \frac{1-\epsilon}{2}\geq 0$.  By the condition $\eta\leq 1$, this indeed holds. This means that 
+%When $s = 1$, this equation is equal to $   - \frac{1}{\eta}  \ln(2) $, and when $s = 0$, the equation is equal to $ \Delta + \frac{1}{\eta}\mathbb{H}\left(\text{Ber}\left(p^+\right)\right) - \frac{1}{\eta}  \ln(2) - \frac{2\Delta^2}{\eta} $. Given that $\eta   <   2\mathbb{H}\left(\text{Ber}\left(p^+\right)\right)  - 4\Delta^2 + \epsilon^2$, the minimal value is achieved when $s = 1$, which means 
+our algorithm always picks the third arm in the first round. After picking arm $a_3$, the belief of $\phi$ will be deterministic, since $\nu_1(\phi|a_3, o)=0$ for any $\phi\neq \phi^\star$. 
+%and $\nu_1(\phi|a_3, o)$ is deterministic on the ground-truth environment, 
+This means the algorithm will always choose the optimal action in the following rounds, ensuring that $\E\left[\Reg(\pi_{M^\star})\right] \leq p^+ < 1$.
+
+
+
+
+
+% Write $m_1 = \nu(\phi_1)p^{-} +  (1-\nu(\phi_1))p^{+}$, take gradient of above equation, we get
+% \begin{align*}
+%     (1-s)\ln\left(\frac{1-m_1}{m_1}\right)\left(p^{-} - p^+\right)
+% \end{align*}
+
+
+% For any $p$, we have $\frac{dH(\text{Ber}(p))}{dp} = \ln\left(\frac{1-p}{p}\right)$
+
+
+
+
+% Then $p_1(a_3) = 1$ and afterwards the model will always choose the optimal action based on the update rule of $\rho$, which ensures $\max_{M \in \calM}\E\left[\Reg(M)\right] = 1$.

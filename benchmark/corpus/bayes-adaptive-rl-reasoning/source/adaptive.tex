@@ -1,0 +1,41 @@
+\section{The Necessity of Bayesian RL for Reflective Exploration}\label{eq_nece}
+\paragraph{Conventional RL.} The RL objective for policy $\pi$ is $\mathcal{J}_{\mathcal{M}^*}(\pi)$ in \eqref{eq_org_obj}. It is widely known that the optimal policy and value satisfy the Markov property by depending on $h_t$ only through the state $s_t$.
+
+\begin{theorem}[RL Admits Markovian Optimal Policy]\label{remark_1}
+For any MDP, there exists a Markovian policy $\pi^*$, i.e., a policy that is not strictly uncertainty-adaptive, that maximizes the RL objective. Every policy that exhibits reflective exploration is not Markovian.
+\end{theorem}
+
+The result indicates that the RL objective admits Markovian policies to be optimal. Optimizing a Markovian policy, however, does not induce reflective exploration behaviors. Intuitively, action sequences whose effect is only to enrich the history $h_t$ (e.g., incorrect attempts followed by revisiting the same state) do not change the sufficient state representation $s_t$ and therefore cannot improve the value of an optimal Markovian policy.
+
+Instead, in RL, exploration is only useful during training, in a trial-and-error manner with repeated episodes, to discover a return-maximizing action sequence. The learned policy is fully exploited at deployment time with no incentive for further exploration since no policy updates occur, which is why $\epsilon$-greedy often sets $\epsilon\approx0$ when deployed \citep{mnih2015human,hessel2018rainbow}.
+
+\vspace{-0.15cm}
+\paragraph{Bayesian RL.} In Bayesian RL, the agent maintains uncertainty over the underlying MDP, which is gradually reduced through interactions. Due to this epistemic partial observability \citep{duff2001monte,ghosh2021generalization}, the policy and value depend on the full history $h_t$, instead of only the state $s_t$, to capture the agent’s evolving belief about the MDP parameters through cumulative observations. The objective encourages the agent to not only maximize immediate rewards based on the current belief but also to explore to gather more context about the uncertain MDP.
+
+\begin{theorem}[Bayesian RL Admits Adaptive Optimal Policy]
+\label{thm_ada}
+For the Bayesian RL objective in \eqref{eq_org_obj} associated with any $(\mathcal{D}, p(\mathcal{M}))$, there exists an optimal policy $\pi^*$ that is uncertainty-adaptive.
+\end{theorem}
+\vspace{-0.07cm}
+
+
+The above result shows that optimizing the Bayesian RL objective in \eqref{eq_org_obj} attains an uncertainty-adaptive policy and thus naturally induces reflective exploration. While reflective actions may be suboptimal relative to the (unknown) ground-truth MDP, the gathered context, especially rewards, reduces the MDP uncertainty. Future policies can thus leverage the updated belief to act optimally. 
+
+Theorem \ref{thm_ada} should be read as a structural result: for any $(\mathcal{D},p(\mathcal{M}))$, one can always represent a Bayes-optimal policy to be uncertainty-adaptive. It is possible that the dependence on the belief can be vacuous and the policy degenerates to Markovian. However, we will show in the following that there exist instances where any Bayes-optimal policy must be strictly uncertainty-adaptive, and the best Markovian policy can far underperform the optimal adaptive policy.
+
+\begin{theorem}[Gap Between Markovian and Adaptive Policies]\label{thm_exp}
+There exist instances $(\mathcal{D}, p(\mathcal{M}))$ for which the objective in \eqref{eq_org_obj} is maximized by a strictly uncertainty-adaptive policy. Moreover, the performance gap between Markovian and strictly adaptive policies can be arbitrarily large.
+\end{theorem}
+\vspace{-0.2cm}
+\begin{proof}[Sketch of proof]
+Consider the binary decision structure in Fig. \ref{fig_binary_tree}. Let the prior $p(\mathcal{M}_1) = p(\mathcal{M}_2)= p(\mathcal{M}_3) = p(\mathcal{M}_4) = 1/4$, where $r_{\mathcal{M}_1}(s_2) = r_{\mathcal{M}_2}(s_3) = r_{\mathcal{M}_3}(s_5) = r_{\mathcal{M}_4}(s_6) = 1$ all other rewards are zero, and $\mathcal{D}=\emptyset$ is empty. Here, $r(s)$ represents the reward of reaching $s$.
+For any Markovian policy, the maximal return is $1/4$ (or $1/2^{d-1}$ for a depth-$d$ structure). In contrast, the optimal uncertainty-adaptive policy has a return of $1$. This is achieved by maintaining a hypothesis set $\mathcal{C} = \{\mathcal{M}_1,\mathcal{M}_2,\mathcal{M}_3,\mathcal{M}_4\}$. After visiting a leaf state and observing reward $r \in \{0,1\}$, update $\mathcal{C} \leftarrow \{\mathcal{M} \in \mathcal{C}: r_{\mathcal{M}}(s) = r\}$. Then each $r=0$ removes one hypothesis from $\mathcal{C}$, and $r=1$ identifies the true MDP. After at most four leaf visits, we have found the rewarding leaf and the return is $1$. We can increase $d$ to make the performance gap ($1$ versus $1/2^{d-1}$) arbitrarily large.
+\end{proof}
+\vspace{-0.1cm}
+
+\begin{AIbox}{\text{Comparison Between Conventional RL and Bayesian RL}}
+Conventional RL does not admit strictly uncertainty-adaptive policies, which do not give rise to reflective exploration. Instead, exploration is trial-and-error during training and only serves to fit a fixed policy. In contrast, Bayesian RL yields uncertainty-adaptive policies whose actions depend on the evolving belief over MDPs, thereby incentivizing information gathering and inducing reflective behaviors through belief updates at deployment time.
+\end{AIbox}
+
+\vspace{-0.15cm}
+\paragraph{Connection with Meta-RL and Continual Learning.} Although our Bayesian RL framework is orthogonal to meta-RL, we discuss the connections between them here. The goal of meta-RL is to learn a fast adaptation procedure across tasks, e.g., by optimizing deployment performance after only a few iterations of updates. From this perspective, uncertainty-adaptive policy in Definition \ref{def_uapi} can be viewed as performing in-context learning (instead of parameter updates), and our framework can be interpreted as learning to do in-context exploration. Likewise, it is related to continual learning, in which the evolving belief over MDPs serves as an explicit, non-parametric memory that accumulates and reuses knowledge across tasks. However, our analysis focuses more on properties of policies that optimize the Bayesian RL objective, which enforce the Bayes-optimal solution to the exploration-exploitation trade-off. In other words, our framework explicitly maintains a belief over MDP and uses a belief-driven exploration strategy that rewards under the posterior.

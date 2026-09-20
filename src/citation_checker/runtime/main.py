@@ -7,6 +7,7 @@ from pathlib import Path
 from citation_checker import __version__
 from .doctor import run_doctor
 from .runner import run_check
+from .config import DEFAULT_MODEL, DEFAULT_PROVIDER
 from .staging import inspect_manuscript
 from .verify import verify_report
 
@@ -26,8 +27,8 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("check", help="Run a citation audit in Pi")
     p.add_argument("manuscript", type=Path)
     p.add_argument("--out", type=Path)
-    p.add_argument("--provider")
-    p.add_argument("--model")
+    p.add_argument("--provider", default=DEFAULT_PROVIDER, help=f"Pi provider (default: {DEFAULT_PROVIDER})")
+    p.add_argument("--model", default=DEFAULT_MODEL, help=f"Pi model (default: {DEFAULT_MODEL})")
     p.add_argument("--thinking")
     p.add_argument("--timeout", type=int, default=1800)
     p.add_argument("--dry-run", action="store_true")

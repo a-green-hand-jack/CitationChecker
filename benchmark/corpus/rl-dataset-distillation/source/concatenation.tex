@@ -1,0 +1,42 @@
+\section{Proof of Theorem \ref{thm:offline-rl-decomposable}}
+\label{sec:orl}
+
+We can use elementary manipulation of $L_{\textnormal{Bell}}^{\textnormal{err}}$ based on (\ref{eqn:meancondition}) and the additive state-action embedding to essentially remove the max term and the subsequent proof is along the same lines as that of Theorem~\ref{thm:supervised-distill-1}.
+
+We have $f(s,a):=\mathbf{v}^{\sf{T}}\phi(s,a) = \mathbf{v}^{\sf{T}}\phi_1(s) + \mathbf{v}^{\sf{T}}\phi_2(a)$ as defined, so notice that
+\begin{align}
+\max_{a' \in \mathcal{A}} f(s',a') &= \mathbf{v}^{\sf{T}}\phi_1(s') + \max_{a' \in \mathcal{A}} \mathbf{v}^{\sf{T}}\phi_2(a') \label{eqn:orlmax}
+\end{align}
+
+In (\ref{eqn:orlmax}), $\max_{a' \in \mathcal{A}} \mathbf{v}^{\sf{T}}\phi_2(a')$ is a constant independent of the training and synthetic dataset and depends only on $\bv$, so we define $\alpha(\bv) = \max_{a' \in \mathcal{A}} \mathbf{v}^{\sf{T}}\phi_2(a')$. Expanding within the outer square, canceling and zeroing out using mild linear condition (\ref{eqn:meancondition}) and equation (\ref{eqn:orlmax}), we obtain
+\begin{align}
+L&_{\textnormal{Bell}}^{\textnormal{err}}(D_{\textnormal{train}}^{\textnormal{orl}}, D_{\textnormal{syn}}^{\textnormal{orl}}, f, \lambda) \nonumber \\
+=& (\E_{(s,a, r,s') \leftarrow D_{\textnormal{train}}^{\textnormal{orl}}}[(f(s,a) - \lambda r - \gamma \max_{a' \in \mathcal{A}} f(s',a'))^2] \nonumber \\
+&- \E_{(s, a, r, s') \leftarrow D_{\textnormal{syn}}^{\textnormal{orl}}}[(f(s, a) - \lambda r - \gamma \max_{a' \in \mathcal{A}} f(s',a'))^2])^2 \nonumber \\
+=& (\E_{(s,a, r,s') \leftarrow D_{\textnormal{train}}^{\textnormal{orl}}}[(\bv^\top \phi_1(s) + \bv^\top \phi_2(a) - \lambda r - \gamma \mathbf{v}^{\sf{T}}\phi_1(s') -\gamma \alpha(\bv) )^2] \nonumber \\
+&- \E_{(s,a, r,s') \leftarrow D_{\textnormal{syn}}^{\textnormal{orl}}}[(\bv^\top \phi_1(s) + \bv^\top \phi_2(a) - \lambda r - \gamma \mathbf{v}^{\sf{T}}\phi_1(s') -\gamma \alpha(\bv) )^2])^2 \nonumber \\
+=& (\E_{(s,a, r,s') \leftarrow D_{\textnormal{train}}^{\textnormal{orl}}}[(\bv^\top (\phi_1(s)- \gamma \phi_1(s') + \phi_2(a)) - \lambda r  -\gamma \alpha(\bv) )^2] \nonumber \\
+&- \E_{(s,a, r,s') \leftarrow D_{\textnormal{syn}}^{\textnormal{orl}}}[(\bv^\top (\phi_1(s)- \gamma \phi_1(s') + \phi_2(a)) - \lambda r  -\gamma \alpha(\bv) )^2])^2 \nonumber \\
+=& (
+\E_{(s,a, r,s') \leftarrow D_{\textnormal{train}}^{\textnormal{orl}}}[(\bv^\top (\phi_1(s)- \gamma \phi_1(s') + \phi_2(a)) - \lambda r)^2 ]\nonumber \\
+&- \E_{(s,a, r,s') \leftarrow D_{\textnormal{train}}^{\textnormal{syn}}}[(\bv^\top (\phi_1(s)- \gamma \phi_1(s') + \phi_2(a)) - \lambda r)^2]  \nonumber \\
+& +\E_{(s,a, r,s') \leftarrow D_{\textnormal{train}}^{\textnormal{orl}}}[\gamma^2 \alpha^2(\bv)]
+-\E_{(s,a, r,s') \leftarrow D_{\textnormal{train}}^{\textnormal{syn}}}[\gamma^2 \alpha^2(\bv)]\nonumber \\
+&- 2\E_{(s,a, r,s') \leftarrow D_{\textnormal{train}}^{\textnormal{orl}}}[\gamma\alpha(\bv)(\bv^\top (\phi_1(s)- \gamma \phi_1(s') + \phi_2(a)) - \lambda r) ]\nonumber\\
+&+ 2\E_{(s,a, r,s') \leftarrow D_{\textnormal{train}}^{\textnormal{syn}}}[\gamma\alpha(\bv)(\bv^\top (\phi_1(s)- \gamma \phi_1(s') + \phi_2(a)) - \lambda r)]
+)^2\nonumber \\
+=& (\E_{(s, a, r, s')
+ \leftarrow D_{\textnormal{train}}^{\textnormal{orl}}}[(\mathbf{v}^{\sf{T}}(\phi_1(s) - \gamma \phi_1(s') + \phi_2(a)) - \lambda r)^2] \nonumber \\
+ &- \E_{(s, a, r, s')
+ \leftarrow D_{\textnormal{syn}}^{\textnormal{orl}}}[(\mathbf{v}^{\sf{T}}(\phi_1(s) - \gamma \phi_1(s') + \phi_2(a)) - \lambda r)^2])^2 \label{eqn:maxcancelled}
+\end{align}
+
+Now notice that the loss term (\ref{eqn:maxcancelled}) looks exactly like the linear supervised regression loss $L_{\textnormal{mse}}^{\textnormal{err}}$. We can concatenate $\bv$ and $\lambda$ to get a regression vector $\br$. In addition, we take the feature vectors $\bx$ to be simply $\phi_1(s) - \gamma \phi_1(s') + \phi_2(a)$ and the regression label $y$ to be $r$. Note that $\bx \leq O(B)$ and $|y| \leq R_{\textnormal{max}}$.
+
+We can sample regressors $\br \sim N(0,1/(d+1))^{d+1}$ u.a.r. and use the concatenation trick as before. The nets will be taken over the embeddings of states and actions instead of the states and actions themselves. Thus, via analysis similar to the linear regression case (Theorem~\ref{thm:supervised-distill-1}), we obtain a $O\left({d^2}\log({d}(B+R_{\max})/{\Delta})\log(1/\delta)\right)$ upper bound on the number of sampled predictors, given that the synthetic dataset satisfies the mild linear condition above.
+
+\subsection{Convexity of the objective}
+As seen above, $\hat{L}^{\tn{err}}_{\tn{Bell}}$ reduces to the supervised regression case with $\phi_1(s) - \gamma\phi_1(s') + \phi_2(a)$ as the regression point with regression label $r$, corresponding to $(s,a,r,s')$. From Appendix \ref{app:misc2}, the optimization objective in the supervised regression case is convex in the synthetic data regression points and labels. 
+
+Therefore, if $\phi_1$ and $\phi_2$ are linear in $(s,a,r,s')$ then the $\hat{L}^{\tn{err}}_{\tn{Bell}}$ is also convex in the points of $D^{\sf orl}_{\tn{syn}}$.
+Further, the condition in \eqref{eqn:meancondition} is also an affine linear constraint on the points of $D^{\sf orl}_{\tn{syn}}$, and therefore the optimization is convex.

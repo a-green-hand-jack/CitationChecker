@@ -1,0 +1,62 @@
+
+\documentclass{article} % For LaTeX2e
+\usepackage{iclr2026_conference,times}
+
+% Optional math commands from https://github.com/goodfeli/dlbook_notation.
+\input{math_commands.tex}
+
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[T1]{fontenc}
+\usepackage[pdftex]{graphicx}
+
+\renewcommand{\cite}{\citep}
+
+% \title{Predictability Shapes Adaptation: An Evolutionary Perspective on Modes of Learning in Transformers}
+% \title{An evolutionary perspective on strategy \\ preference in Transformers}
+\title{An evolutionary perspective on modes of \\ learning in Transformers}
+
+% Authors must not appear in the submitted version. They should be hidden
+% as long as the \iclrfinalcopy macro remains commented out below.
+% Non-anonymous submissions will be rejected without review.
+
+\author{Alexander Y. Ku$^{1,2}$, Thomas L. Griffiths$^2$, Stephanie C.Y. Chan$^1$ \\
+$^1$Google DeepMind\\
+$^2$Department of Psychology, Princeton University\\
+\texttt{\{alexku, scychan\}@google.com, tomg@princeton.edu}
+}
+
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to \LaTeX{} to determine where to break
+% the lines. Using \AND forces a linebreak at that point. So, if \LaTeX{}
+% puts 3 of 4 authors names on the first line, and the last on the second
+% line, try using \AND instead of \And before the third author name.
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+
+\iclrfinalcopy % Uncomment for camera-ready version, but NOT for submission.
+\begin{document}
+
+\maketitle
+
+\input{sections/00_abstract}
+\input{sections/01_introduction}
+\input{sections/02_background_approach}
+\input{sections/03_experiment_design}
+\input{sections/04_analysis_results}
+\input{sections/05_discussion_conclusion}
+\input{sections/06_statement}
+
+\bibliography{references}
+\bibliographystyle{iclr2026_conference}
+
+\appendix
+\input{sections/99_appendix}
+
+\end{document}

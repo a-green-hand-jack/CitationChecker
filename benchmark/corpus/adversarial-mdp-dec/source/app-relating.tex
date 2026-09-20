@@ -1,0 +1,317 @@
+\newpage
+
+\section{Relating $\mfdec$ to Existing Complexities in the Stochastic Setting}
+%In stochastic MDPs where $M_t=M^\star=(P^\star, R^\star)$, Bellman-completeness is defined as the following: 
+%\begin{assumption}[Bellman-completeness under $M^\star$]\label{assum: sto bc} A $\Phi$ satisfying \pref{assum: function approximation stochastic} is Bellman-complete under model $M^\star=(P^\star, R^\star)$ if for any $\phi\in\Phi$, there exists an $\phi'\in\Phi$ such that for any $s,a$, 
+%\begin{align*}
+%    f_{\phi'}(s,a) = R^\star(s,a) + \E_{s'\sim P^\star(\cdot|s,a)}[f_\phi(s')]. 
+%\end{align*}
+%\end{assumption}
+
+%For problems satisfying Bellman completeness, existing work established Bellman eluder dimension \cite{jin2021bellman} and coverability \cite{xie2022role} (definitions provided in \pref{app:BC}) to characterize the decision-making complexity. We can recover these complexities by letting $\tilD$ in \pref{eq: our divergence} be 
+%\begin{align*}
+%    \tilD^\pi(\phi\|M) = D^\pi_{\sbe}(\phi\|M) \triangleq \sum_{h=1}^H\E^{ \pi, M}\left[\left(f_\phi(s_h, a_h) - R(s_h, a_h) - \E_{s' \sim P(\cdot|s_h, a_h)}\left[f_\phi(s')\right]\right)^2\right]
+%\end{align*}
+%where $M=(P,R)$. This is similarly used by \cite{foster2024model}. 
+
+\subsection{Supporting lemmas}
+\iffalse
+\begin{lemma}\label{lem: bellman com}
+   Let $(\calM, \Phi)$ be Bellman complete. Then \pref{assum: squared est err} is satisfied with 
+   \begin{align*}
+       \err_h(\phi', \phi; o_h) = (f_{\phi'}(s_h,a_h) - r_h - f_{\phi}(s_{h+1}))^2. 
+   \end{align*}
+\end{lemma}
+
+\begin{proof}
+    For any $\phi',\phi\in\Phi$, we have 
+    \begin{align*}
+    &\E^{\pi, M}\left[(\err_h(\phi', \phi; o_h) - \err_h(\calT_M\phi, \phi; o_h))^2\right]
+    \\&=\E^{\pi, M}\left[\Big((f_{\phi'}(s_h,a_h) - r_h - f_{\phi}(s_{h+1}))^2 - (f_{\calT_{M}\phi'}(s_h,a_h) - r_h - f_{\phi}(s_{h+1}))^2\Big)^2\right] 
+    \\&=\scalebox{0.95}{$\displaystyle\E^{\pi, M}\left[\Big(\left(f_{\phi'}(s_{h}, a_{h}) -f_{\calT_M\phi}(s_{h}, a_{h}) \right)\left(f_{\phi'}(s_{h}, a_{h}) + f_{\calT_M\phi}(s_{h}, a_{h})  - 2r_{h} - 2f_{\phi}(s_{h+1})\right) \Big)^2\right]$}
+    \\&\leq 4\E^{\pi,M}\left[ \left(f_{\phi'}(s_{h}, a_{h}) -f_{\calT_M\phi}(s_{h}, a_{h}) \right)^2\right],  
+    \numberthis \label{eq: second order term}
+\end{align*}
+and 
+\begin{align*}
+        &\E^{\pi, M}\left[\err_h(\phi', \phi; o_h) - \err_h(\calT_M\phi, \phi; o_h)\right] \\
+        &= \E_t\left[\left(f_{\phi'}(s_{h}, a_{h}) - r_{h} - f_{\phi}(s_{h+1})\right)^2 -  \left(f_{\calT_M\phi}(s_{h}, a_{h}) - r_{h} - f_{\phi}(s_{h+1})\right)^2\right] 
+    \\&= \E^{\pi, M}\left[\left(f_{\phi'}(s_{h}, a_{h}) - f_{\calT_M\phi}(s_{h}, a_{h})\right)^2\right]
+    \\&\qquad + 2\E^{\pi, M}\Bigg[ \underbrace{\left(f_{\calT_M\phi}(s_{h}, a_{h}) - r_{h} - f_{\phi}(s_{h+1})\right)}_{\triangleq \epsilon_{h}} \left(f_{\phi'}(s_{h}, a_{h}) - f_{\calT_M\phi}(s_{h}, a_{h})\right)\Bigg],  \numberthis \label{eq: first order term}
+    \end{align*}
+    where we use $a^2 - b^2 = (a-b)^2 + 2b(a-b)$ in the second equality.  
+    By the definition of $\calT_M\phi$, the $\epsilon_{h}$ in the last expression has zero mean under model $M$  conditioned on $(s_{h}, a_{h})$. 
+
+    Combining the two inequalities above, we have shown that for any $\phi', \phi\in\Phi$ and $M\in\calM$,  
+    \begin{align*}
+        \E^{\pi, M}\left[(\err_h(\phi', \phi; o_h) - \err_h(\calT_M\phi, \phi; o_h))^2\right] \leq 4 \E^{\pi, M}\left[\err_h(\phi', \phi; o_h) - \err_h(\calT_M\phi, \phi; o_h)\right]. 
+    \end{align*}
+    This verifies the first condition in \pref{assum: bilevel}. The other condition $\phi = \calT_M\phi$ for $M\in\phi$ is simply by following: as $M\in\phi$, $f_{\phi}$ is the value function induced by $M$, which implies $f_{\phi}(s,a) = R(s,a) + \E_{s'\sim P(\cdot|s,a)}[f_{\phi}(s')] = f_{\calT_M\phi}(s,a)$.  
+\end{proof}
+\fi
+
+\begin{lemma}\label{lem: connecting two digdec}
+    Suppose that $(\calM,\Phi)$ satisfy \pref{assum: avg err} with estimation function $\ellest_h(\phi; o_h) = f_\phi(s_h,a_h) - r_h - f_\phi(s_{h+1})$. Furthermore, assume that $(\calM, \Phi)$ is Bellman complete (\pref{def: sto bc}). Then \pref{assum: squared est err} holds with $\err_h(\phi', \phi; o_h) = (f_{\phi'}(s_h,a_h) - r_h - f_{\phi}(s_{h+1}))^2$ and 
+    \begin{align*} 
+        \mfdec_\eta^{\Phi, \tilD_{\sbe}} \leq \mfdec_\eta^{\Phi, \tilD_{\bi}}. 
+    \end{align*}
+\end{lemma}
+\begin{proof}
+   It suffices to show that $\tilD_\bi^\pi(\phi\|M)\leq \tilD^\pi_\sbe(\phi\|M)$ for any $\pi, \phi, M$:  
+   \begin{align*}
+       \tilD_\sbe^\pi(\phi\|M) &= \frac{1}{B^2H}\sum_{h=1}^H  \E^{\pi, M}\left[\err_h(\phi, \phi; o_h) - \err_h(\calT_M\phi, \phi; o_h)\right] \\
+       &= \frac{1}{B^2H}\sum_{h=1}^H  \E^{\pi, M}\left[\left(f_{\phi}(s_{h}, a_{h}) - f_{\calT_M\phi}(s_{h}, a_{h})\right)^2\right] \tag{by the same calculation as \pref{eq: second calcul}}\\
+       &\geq \frac{1}{B^2H}\sum_{h=1}^H  \left(\E^{\pi, M}\left[f_{\phi}(s_{h}, a_{h}) - f_{\calT_M\phi}(s_{h}, a_{h})\right]\right)^2  \tag{Jensen's inequality} \\
+       &= \frac{1}{B^2H}\sum_{h=1}^H  \left(\E^{\pi, M}\left[f_{\phi}(s_{h}, a_{h}) - r_h - f_\phi(s_{h+1})\right]\right)^2 \\
+       &= \tilD_{\bi}(\phi\|M). 
+   \end{align*}
+\end{proof}
+
+
+\subsection{Relating $\mfdec$ to $\odec$}
+\begin{proof}[Proof of \pref{thm: improvement}]
+%Here, we consider the stochastic setting where the learner is equipped with a function class $\calF$ and $\Phi = \{\phi_f:~ f\in\calF\}$ where $\phi_f = \{(M, \pi_M):~M \text{~induces~} f\}\subset \calM\times \Pi$. Since $(M,\pi^\star)$ is always of the form $(M,\pi_M)$, we simplify the notation by letting $\Phi=\{\phi_f: f\in\calF\}$ where $\phi_f = \{M:~ M\text{~induces~} f\}\subset \calM$.  
+In the stochastic setting, by definition, 
+\begin{align*}
+    &\mfdec_\eta^{\Phi,\tilD}
+    =\max_{\rho\in\Delta(\Phi)} \min_{p\in\Delta(\Pi)} \max_{\nu\in \Delta(\calM)} \\
+    &\qquad \E_{\pi\sim p}\E_{M\sim \nu} \left[ V_M(\pi_M) - V_M(\pi) - \frac{1}{\eta}\E_{o\sim M(\cdot|\pi)}\left[\KL(\nu_{\bo{\phi}}(\cdot|\pi, o), \rho)\right] - \frac{1}{\eta} \E_{\phi\sim \rho}\left[\tilD^\pi(\phi\|M)\right]  \right]
+    \end{align*}
+    and 
+    \begin{align*}
+    \odec_\eta^{\Phi,\tilD} &= \max_{\rho\in\Delta(\Phi)} \min_{p\in\Delta(\Pi)} \max_{\nu\in \Delta(\calM)} \E_{\pi\sim p}\E_{M\sim \nu}\E_{\phi \sim \rho}\left[ V_\phi(\pi_\phi) - V_M(\pi) - \frac{1}{\eta} \tilD^\pi(\phi\|M)\right].   
+\end{align*}
+For any $\rho, p, \nu$, we have
+\begin{align*}
+&\E_{\pi\sim p}\E_{M\sim \nu}\left[ V_M(\pi_M) - V_M(\pi) - \frac{1}{\eta}\E_{o\sim M(\cdot|\pi)}\left[\KL(\nu_{\bo{\phi}}(\cdot|\pi, o), \rho)\right] - \frac{1}{\eta} \E_{\phi\sim \rho}\left[\tilD^\pi(\phi\|M)\right]  \right]   
+\\&= \underbrace{\E_{M\sim \nu}\E_{\phi \sim \rho}\left[ V_M(\pi_M) - V_{\phi}(\pi_{\phi})   \right]- \frac{1}{\eta}\KL(\nu_{\bo{\phi}}, \rho) }_{\textbf{term1}} - \frac{1}{\eta} \E_{\pi\sim p} \E_{M\sim \nu} \E_{o\sim M(\cdot|\pi)} [\KL(\nu_{\bo{\phi}}(\cdot|\pi, o), \nu_{\bo{\phi}})]  
+\\&\quad + \E_{\pi\sim p}\E_{M\sim \nu}\E_{\phi \sim \rho}\left[ V_{\phi}(\pi_\phi) - V_M(\pi)- \frac{1}{\eta} \tilD^\pi(\phi\|M)  \right].   
+\end{align*}
+To bound \textbf{term1}, observe that
+\begin{align*}
+    \E_{M\sim \nu}\left[ V_M(\pi_M)\right] &= \E_{\phi \sim \nu}\left[ V_{\phi}(\pi_{\phi})\right].  
+    %\\&= \E_{\pi \sim p}\E_{\phi \sim \nu(\cdot|\pi)}\left[ V_{\phi}(\pi_{\phi})\right] \tag{$p$ and $\nu$ are independent}
+    %\\&= \E_{\pi \sim p}\E_{M \sim \nu}\E_{o \sim M(\cdot|\pi)}\E_{\phi \sim \nu(\cdot|\pi, o)}\left[V_{\phi}(\pi_\phi)\right]
+\end{align*}
+%where the last equality is because for any $\pi$,  
+%\begin{align*}
+%     \E_{M\sim \nu} \E_{o\sim M(\cdot|\pi)} \E_{\phi\sim \nu(\cdot|\pi, o)}[V_\phi(\pi_\phi)] 
+%     &= \sum_{M,o,\phi} \nu(M) M(o|\pi) \nu(\phi|\pi, o) V_\phi(\pi_\phi) \\
+%     &= \sum_{M,o,\phi} \nu(M) M(o|\pi) \frac{\sum_{M'\in \phi} \nu(M') M'(o|\pi) }{\sum_{M'}  \nu(M')M'(o|\pi)} V_\phi(\pi_\phi) \\
+%     &= \sum_{o} \sum_M \nu(M) M(o|\pi) \frac{\sum_\phi \sum_{M'\in \phi} \nu(M') M'(o|\pi) V_\phi(\pi_\phi)}{\sum_{M'}  \nu(M')M'(o|\pi)}  \\
+%     &= \sum_o \sum_\phi \sum_{M'\in \phi} \nu(M') M'(o|\pi) V_\phi(\pi_\phi) \\
+%     &= \sum_\phi \sum_{M'\in \phi} \nu(M') V_\phi(\pi_\phi) = \E_{\phi\sim \nu}[V_\phi(\pi_\phi)]. 
+%\end{align*}
+
+
+Thus, 
+\begin{align*}
+    &\textbf{term1}
+    = \E_{\phi\sim \nu}[V_\phi(\pi_\phi)] - \E_{\phi\sim \rho}[V_\phi(\pi_\phi)] - \frac{1}{\eta} \KL(\nu_{\bo{\phi}}, \rho)\leq \eta.  \tag{\pref{lem:stability}}
+    %\\&= \E_{M \sim \nu}\left[\E_{\phi \sim \nu(\cdot|\pi, o)}\left[V_{\phi}(\pi_\phi)\right] - \E_{\rho \sim \phi}\left[V_{\phi}(\pi_{\phi})\right] - \frac{1}{\eta}\KL(\nu_{\bo{\phi}}(\cdot|\pi, o), \rho)\right]
+    %\\&\le \eta. \tag{\pref{lem:stability}}
+\end{align*}
+This implies
+\begin{align*}
+    &\mfdec_\eta^{\Phi,\tilD} \\
+    &\le \eta + \max_{\rho\in\Delta(\Phi)} \min_{p\in\Delta(\Pi)} \max_{\nu\in \Delta(\calM)} \E_{\pi\sim p}\E_{M\sim \nu}\E_{\phi \sim \rho}\left[ V_{\phi}(\pi_\phi) - V_M(\pi)- \frac{1}{\eta} \tilD^\pi(\phi\|M) - \frac{1}{\eta} \E_{o\sim M(\cdot|\pi)} [\KL(\nu_{\bo{\phi}}(\cdot|\pi, o), \nu_{\bo{\phi}})] \right] \\
+    &\leq \eta +\max_{\rho\in\Delta(\Phi)} \min_{p\in\Delta(\Pi)} \max_{\nu\in \Delta(\calM)} \E_{\pi\sim p}\E_{M\sim \nu}\E_{\phi \sim \rho}\left[ V_{\phi}(\pi_\phi) - V_M(\pi)- \frac{1}{\eta} \tilD^\pi(\phi\|M) \right] \\
+    &= \eta + \odec^{\Phi,\tilD}_\eta. 
+\end{align*}
+\end{proof}
+
+
+
+
+\subsection{Relating $\mfdec$ to bilinear rank}\label{app: relate sto to bilinear}
+Bilinear rank is a complexity measure proposed in \cite{du2021bilinear}. It is defined as the following. 
+
+
+\begin{assumption}[Bilinear class \citep{du2021bilinear}]
+\label{assum:sto bilinear}
+A model class $\calM$ and its associated $\Phi$ satisfying \pref{assum: function approximation stochastic} is a bilinear class with rank $d$ if there exists functions $X_h: \Phi \times \mathcal{M} \rightarrow \mathbb{R}^d$ and  $W_h: \Phi \times \mathcal{M} \rightarrow \mathbb{R}^d$ for all $h\in[H]$ such that 
+\begin{enumerate}[leftmargin=1.5em, nosep]
+ \setlength{\itemsep}{0pt} % Adjust item spacing
+    \setlength{\parskip}{0pt} 
+    \setlength{\topsep}{0pt}
+    \item For $M\in\phi$, it holds that $W_h(\phi; M)=0$. 
+    \item For any $\phi \in \Phi$ and any $M \in \calM$, 
+    \begin{align*}
+        \left|V_\phi(\pi_\phi) - V_{M}(\pi_\phi)\right| \leq \sum_{h=1}^H \left|\langle X_h(\phi; M), W_h(\phi; M)\rangle\right|.
+    \end{align*}
+    \item For every policy $\pi$, there exists an estimation policy $\pi^{\esttt}$. Also, there exists a discrepancy function $\ellest_h: \Phi \times \calO  \rightarrow \mathbb{R}$ such that for any $\phi', \phi \in \Phi$ and any $M\in\calM$,  
+    \begin{align*}
+        \left|\langle X_h(\phi'; M), W_h(\phi; M) \rangle\right| = \left|\E^{\pi_{\phi'} \,\circ_h\, \pi_{\phi'}^{\esttt},\, M} \left[\ellest_h(\phi; o_h)\right]\right|
+    \end{align*}
+    where $o_h = (s_h,a_h, r_h, s_{h+1})$ and $\pi \circ_h \pi^{\esttt}$ denotes a policy that plays $\pi$ for the first $h-1$ steps and plays policy $\pi^{\esttt}$\, at the $h$-th step. 
+\end{enumerate}
+We call it an on-policy bilinear class if $\pi^{\esttt}=\pi$ for all $\pi\in\Pi$, and otherwise an off-policy bilinear class. As in prior work \citep{du2021bilinear, foster2021statistical}, for the off-policy case, we assume $|\calA|$ is finite, and $\pi^{\esttt}$ is always $\unif(\calA)$. We denote by $\pi^\alpha$ the policy that in every step $h=1,\ldots, H$ chooses $\pi$ with probability $1-\frac{\alpha}{H}$ and chooses $\pi^{\esttt}$ with probability $\frac{\alpha}{H}$. 
+\end{assumption}
+
+\begin{lemma}\label{lem: bilinear satisfy M* property}
+   Bilinear classes (\pref{assum:sto bilinear}) satisfy \pref{assum: avg err}. 
+\end{lemma}
+\begin{proof}[Proof of \pref{lem: bilinear satisfy M* property}]
+For any $\phi'\in\Phi$ and any $(M,\phi)$ such that $M\in\phi$, 
+\begin{align*}
+    \left|\E^{\pi_{\phi'}\circ_h \pi_{\phi'}^{\esttt}, M} \left[  \ellest_h(\phi; o_h) \right] \right| 
+    &= \left| \inner{X_h(\phi'; M),  W_h(\phi, M)}\right|   \tag{by \pref{assum:sto bilinear}.3} \\
+    &= 0.   \tag{by \pref{assum:sto bilinear}.1 and that $M\in\phi$}
+\end{align*}
+\end{proof}
+
+\begin{lemma}\label{lem: digdec < d bi}
+    Let $(\calM, \Phi)$ be a bilinear class (\pref{assum:sto bilinear}). Then 
+    \begin{itemize}[leftmargin=1em, nosep]
+ \setlength{\itemsep}{0pt} % Adjust item spacing
+    \setlength{\parskip}{0pt} 
+    \setlength{\topsep}{0pt}
+    \item $\mfdec_\eta^{\Phi,\tilD_{\bi}}  \le O(B^2H^2 d\eta)$ in the on-policy case. 
+    \item $\mfdec_\eta^{\Phi,\tilD_{\bi}}  \le O(\sqrt{B^2 H^3 d \eta})$ in the off-policy case.
+\end{itemize}
+\end{lemma}
+\begin{proof}[Proof of \pref{lem: digdec < d bi}]
+    We first use \pref{thm: improvement} to bound $\mfdec_\eta^{\Phi, \tilD_\bi}$ by $\odec_\eta^{\Phi, \tilD_\bi}+\eta$, and then use \pref{lem: bilinear complexity sto} to relate $\odec_\eta^{\Phi, \tilD_\bi}$ to bilinear rank. 
+\end{proof}
+
+%As \pref{alg:MF-S} deals with bilinear classes and $\tilD=D_{\bi}$, we directly use the result from  \cite{foster2024model} to bound $\odec_\eta^{\Phi, D_{\bi}}$: 
+\begin{lemma}[Proposition~2.2 of \cite{foster2024model}] \label{lem: bilinear complexity sto}
+Let $(\calM, \Phi)$ be a bilinear class (\pref{assum:sto bilinear}). Then 
+\begin{itemize}[leftmargin=1em, nosep]
+ \setlength{\itemsep}{0pt} % Adjust item spacing
+    \setlength{\parskip}{0pt} 
+    \setlength{\topsep}{0pt}
+    \item $\odec_\eta^{\Phi,\tilD_{\bi}}  \le O(B^2H^2 d\eta)$ in the on-policy case; 
+    \item $\odec_\eta^{\Phi,\tilD_{\bi}}  \le O(\sqrt{B^2 H^3 d|\calA|\eta})$ in the off-policy case.\footnote{\label{foot: foot}In \cite{foster2024model}, the bounds on $\odec_\eta^{\Phi, \tilD_\bi}$ have different scaling of $B,H$ than ours. This is because their average estimation error does not involve the normalization factor $\frac{1}{B^2H}$ like ours (\pref{thm: avg est}). We normalize $\tilD_\bi$ to keep the two information gain terms in Dig-DEC of the same unit. Equivalently, one can view our $\eta$ as a scaled version of theirs.    % Their $|\calA|$ factor will reappear in the $B$ term in \pref{assum: avg err} as a scale of $|\ell_h|$. We instead put the $|\calA|$ factor in the complexity part while keeping $B$ unaffected by $|\calA|$ to reflect that $|\calA|$ is part of the complexity. One can equivalently view our $\ell_h$ as theirs scaled by $\frac{1}{|\calA|}$, or our $\eta$ being theirs scaled by $|\calA|$. 
+    }
+\end{itemize}
+\end{lemma}
+
+
+
+
+
+\subsection{Relating $\mfdec$ to Bellman-eluder dimension}\label{app: sto Be}
+\begin{lemma}\label{lem: bound Q type BE} 
+    Let $\ellest_h(\phi; o_h) = f_\phi(s_h,a_h) - r_h - f_\phi(s_{h+1})$, and let $\tilD_\bi$ be defined with respect to this $\ellest_h$. Then 
+    \begin{itemize}[leftmargin=1em, nosep]
+ \setlength{\itemsep}{0pt} % Adjust item spacing
+    \setlength{\parskip}{0pt} 
+    \setlength{\topsep}{0pt}
+        \item If the $Q$-type Bellman-eluder dimension of $(\calM,\Phi)$ is bounded by $d$, then $\mfdec_\eta^{\Phi, \tilD_{\bi}}\leq O(Hd\eta)$. 
+        \item \mbox{If the $V$-type Bellman-eluder dimension of $(\calM,\Phi)$ is bounded by $d$, then $\mfdec_\eta^{\Phi, \tilD_{\bi}}\leq O(H\sqrt{d|\calA|\eta })$.} 
+    \end{itemize}
+     
+\end{lemma}
+\begin{proof}
+    We first consider the $Q$-type setting.  Define $g_h(\phi', \phi; M) = \E^{\pi_{\phi'}, M}[\ellest_h(\phi; o_h)]$. 
+    %\begin{align*}
+    %    g_{\phi}(s,a; M) &= f_{\phi}(s,a) - R(s,a) - \E_{s'\sim P(\cdot|s,a)}[f_{\phi}(s')], \\ 
+    %    g_{\phi}(\phi'; M) &= \E^{\pi_{\phi'}, P}\left[g_\phi(s,a; M)\right].   
+    %\end{align*} 
+    %Below, we also denote $\E^{\pi_\phi, P}[\cdot]$ as $\E^{\pi_\phi}[\cdot]$ as we consider a fixed $P$. 
+    For a fixed $M$, we have by the AM-GM inequality  
+    \begin{align*}
+        \E_{\phi\sim \rho} \left[g_h(\phi, \phi; M)\right] 
+        &\leq  \frac{\lambda}{4}\cdot \E_{\phi\sim \rho} \left[\frac{g_h(\phi, \phi; M)^2}{\E_{\phi'\sim \rho} \left[g_h(\phi', \phi; M)^2\right]}\right] + \frac{1}{\lambda}\E_{\phi\sim \rho}\E_{\phi'\sim \rho} \left[g_h(\phi', \phi; M)^2\right]  %\\
+        %&\leq  \frac{\eta}{4}\cdot \E_{\phi\sim \rho} \left[\frac{g_\phi(\phi; M)^2}{\E_{\phi'\sim \rho} \left[g_\phi(\phi'; M)^2\right]}\right] + \frac{1}{\eta}\E_{\phi\sim \rho}\E_{\phi'\sim \rho} \E^{\pi_{\phi'}, P}\left[g_\phi(s,a; M)^2\right], \tag{Jensen's inequality}
+    \end{align*}
+    for any $\lambda>0$, 
+    implying that 
+    \begin{align*}
+        &\odec_\eta^{\Phi, \tilD_\bi} \\
+        &=\max_\rho \min_p \max_\nu \E_{\pi\sim p}\E_{\phi\sim \rho} \E_{M\sim \nu} \left[V_\phi(\pi_\phi) - V_M(\pi) - \frac{1}{\eta B^2 H} \sum_{h=1}^H \left(\E^{\pi, M}\left[\ellest_h(\phi; o_h)\right]\right)^2\right]  \\ 
+        &\leq \max_\rho \max_\nu \E_{\phi'\sim \rho}\E_{\phi\sim \rho} \E_{M\sim \nu} \left[V_\phi(\pi_\phi) - V_M(\pi_\phi) - \frac{1}{\eta B^2 H} \sum_{h=1}^H \left(\E^{\pi_{\phi'}, M}\left[\ellest_h(\phi; o_h)\right]\right)^2\right]  \\
+        &=\max_\rho \max_\nu \E_{\phi'\sim \rho} \E_{\phi\sim \rho} \E_{M\sim \nu}\left[\sum_{h=1}^H g_h(\phi, \phi; M) - \frac{1}{\eta B^2 H} \sum_{h=1}^H  g_\phi(\phi', \phi, M)^2\right] \\
+        &\leq \frac{\eta B^2 H}{4} \max_{\rho}\max_\nu \sum_{h=1}^H  \E_{\phi\sim \rho} \left[\frac{g_h(\phi, \phi; M)^2}{\E_{\phi'\sim \rho} \left[g_h(\phi', \phi; M)^2\right]}\right]. 
+    \end{align*}
+    %Thus, by \pref{eq: tmp of bellman eluder}, 
+    %\begin{align*}
+    %    \odec^{\Phi, D_{\sbe}}_\eta \leq \frac{\eta}{4}\max_\rho \max_{\nu} \E_{M\sim \nu}\E_{\phi\sim \rho} \left[\frac{g_\phi(\phi; M)^2}{\E_{\phi'\sim \rho} \left[g_\phi(\phi'; M)^2\right]}\right]. 
+    %\end{align*}
+    The rest of the proof goes through standard steps. First, bound $\E_{\phi\sim \rho} \left[\frac{g_h(\phi, \phi; M)^2}{\E_{\phi'\sim \rho} \left[g_h(\phi', \phi; M)^2\right]}\right]$ by the \emph{disagreement coefficient} of the function class $\calF_M = \left\{f_\phi - \calT_M f_\phi: \phi\in\Phi \right\}$ where $(\calT_M f)(s,a) \triangleq R(s,a) + \E_{s'\sim P(\cdot|s,a)}[f(s')]$ under the probability measure $\E_{\phi\sim \rho}[d_h^{\pi_\phi, M}]$ (Lemma E.2 of \cite{foster2021statistical}). Taking a maximum over $\rho$, this can be further bounded by the \emph{distributional eluder dimension} of $\calF_M$ over the probability measure space $\calD_{\Phi, M} = \{d_h^{\pi_\phi, M}: \phi\in\Phi\}$ (Lemma 6.1 of \cite{foster2021statistical} and Theorem~2.10 of \cite{foster2021instance}), which is equivalent to the \emph{$Q$-type Bellman-eluder dimension} in $M$ defined in \cite{jin2021bellman}. This then allows us to bound $\odec_\eta^{\Phi, \tilD_{\bi}}\leq \eta dB^2H^2$, where $d$ is the maximum $Q$-type Bellman-eluder dimension over all possible~$M$. 
+    % \begin{align*}
+    %    \E_{\phi\sim \rho} \E^{\pi_\phi} \left[g_\phi(s,a)\right] 
+    %    &= \E_{\phi\sim \rho} \E_{\phi'\sim \rho} \E^{\pi_{\phi'}}\left[ \frac{d^{\pi_\phi}(s,a)}{d^{\pi_{\phi'}}(s,a)} g_\phi(s,a)\right] \\
+    %    &\leq  \E_{\phi\sim \rho} \E_{\phi'\sim \rho} \E^{\pi_{\phi'}}\left[ \frac{\eta}{4}\frac{d^{\pi_\phi}(s,a)^2}{d^{\pi_{\phi'}}(s,a)^2} + \frac{1}{\eta}g_\phi(s,a)^2\right] \\
+    %    &= \frac{\eta}{4} \E_{\phi\sim \rho} \E_{\phi'\sim \rho} \left[\sum_{s,a} \frac{d^{\pi_\phi}(s,a)^2}{4d^{\pi_{\phi'}}(s,a)}\right] + \frac{1}{\eta}\E_{\phi\sim \rho} \E_{\phi'\sim \rho}\E^{\pi_{\phi'}}\left[g_\phi(s,a)^2\right]. 
+    %\end{align*}
+
+    Next, we consider the $V$-type setting. Define $g_h(\phi', \phi; M)=\E^{\pi_{\phi'}\circ_h \pi_\phi, M}[\ellest_h(\phi; o_h)]$.  For a fixed $M$, we have by the AM-GM inequality  
+    \begin{align*}
+        \E_{\phi\sim \rho} \left[g_h(\phi, \phi; M)\right] 
+        &\leq  \frac{\lambda}{4}\cdot \E_{\phi\sim \rho} \left[\frac{g_h(\phi, \phi; M)^2}{\E_{\phi'\sim \rho} \left[g_h(\phi', \phi; M)^2\right]}\right] + \frac{1}{\lambda}\E_{\phi\sim \rho}\E_{\phi'\sim \rho} \left[g_h(\phi', \phi; M)^2\right]  
+    \end{align*}
+    for any $\lambda>0$. 
+    Below, let $\pi^\alpha$ be the policy that in every step $h$, with probability $1-\frac{\alpha}{H}$ executes policy $\pi$, and with probability $\frac{\alpha}{H}$ executes $\unif(\calA)$. Then we have 
+    \begin{align*}
+        &\odec_\eta^{\Phi, \tilD_\bi} \\
+        &=\max_\rho \min_p \max_\nu \E_{\pi\sim p}\E_{\phi\sim \rho} \E_{M\sim \nu} \left[V_\phi(\pi_\phi) - V_M(\pi) - \frac{1}{\eta B^2H} \sum_{h=1}^H \left(\E^{\pi, M}\left[\ellest_h(\phi; o_h)\right]\right)^2\right]  \\ 
+        &\leq \max_\rho \max_\nu \E_{\phi'\sim \rho}\E_{\phi\sim \rho} \E_{M\sim \nu} \left[V_\phi(\pi_\phi) - V_M(\pi_\phi^\alpha) - \frac{1}{\eta B^2H} \sum_{h=1}^H \left(\E^{\pi_{\phi'}^\alpha, M}\left[\ellest_h(\phi; o_h)\right]\right)^2\right]  \\
+        &\leq \alpha + \max_\rho \max_\nu \E_{\phi'\sim \rho}\E_{\phi\sim \rho} \E_{M\sim \nu} \left[V_\phi(\pi_\phi) - V_M(\pi_\phi) - \frac{1}{\eta B^2H}\cdot\frac{\alpha}{3 H|\calA|} \sum_{h=1}^H \left(\E^{\pi_{\phi'}\circ_h \pi_\phi, M}\left[\ellest_h(\phi; o_h)\right]\right)^2\right]  \\
+        &=\alpha + \max_\rho \max_\nu \E_{\phi'\sim \rho} \E_{\phi\sim \rho} \E_{M\sim \nu}\left[\sum_{h=1}^H g_h(\phi, \phi; M) - \frac{\alpha}{3\eta B^2 H^2|\calA|} \sum_{h=1}^H  g_\phi(\phi', \phi, M)^2\right] \\
+        &\leq \alpha + \frac{3\eta B^2H^2|\calA|}{4\alpha} \max_{\rho}\max_\nu \sum_{h=1}^H  \E_{\phi\sim \rho} \left[\frac{g_h(\phi, \phi; M)^2}{\E_{\phi'\sim \rho} \left[g_h(\phi', \phi; M)^2\right]}\right]. 
+    \end{align*}
+    where the second inequality is because with probability at least $\left(1-\frac{\alpha}{H}\right)^{h-1}\frac{\alpha}{H|\calA|}\geq \frac{\alpha}{3H|\calA|}$, the policy $\pi^\alpha_{\phi'}$ chooses the same actions in steps $1,\ldots, h$ as the policy $\pi_{\phi'}\circ_h \pi_\phi$. 
+    Similar to the $Q$-type analysis, the last expression can be related to $V$-type Bellman-eluder dimension (notice that the definition of $g_h$ is different for $Q$-type and $V$-type). This gives $\odec_\eta^{\Phi, \tilD_\bi}\lesssim \alpha + \frac{B^2 H^3 d|\calA|\eta }{\alpha}=O\big(\sqrt{B^2 H^3 d|\calA|\eta}\big)$ by choosing the optimal $\alpha$. 
+
+    Finally, using \pref{thm: improvement} finishes the proof. 
+\end{proof}
+
+
+\subsection{Relating $\mfdec$ to coverability under Bellman completeness}\label{app: related sto coverability}
+
+\begin{lemma}\label{lem: bound coverability bound}
+    Let $(\calM, \Phi)$ be Bellman complete (\pref{def: sto bc}), and suppose the coverability of every model in $\calM$ is bounded by $d$. Then it holds that $\odec_\eta^{\Phi, \tilD_{\sbe}}\leq \eta dH$ where $\tilD_\sbe$ is defined with 
+    \begin{align*}
+        \err_h(\phi', \phi; o_h) = (f_{\phi'}(s_h,a_h) - r_h - f_{\phi}(s_{h+1}))^2. 
+    \end{align*}
+\end{lemma}
+\begin{proof}
+    For $M=(P,R)$, define 
+    \begin{align*}
+        g_h(s,a, \phi; M)  &= f_{\phi}(s,a) - R(s,a) - \E_{s'\sim P(\cdot|s,a)}[f_{\phi}(s')] =  f_{\phi}(s,a) - f_{\calT_M\phi}(s,a), \\
+        d_h^{\rho, M}(s,a) &= \E_{\phi\sim \rho}\left[d_h^{\pi_\phi, M}(s,a) \right]. 
+    \end{align*}
+    %For fixed $M$, denoting $g_\phi(\cdot~;M)$, $d^{\pi_\phi, P}$ and $d^{\rho, P}$ as $g_\phi(\cdot)$, $d^{\pi_\phi}$ and $d^\rho$ for simplicity, we have 
+    By the AM-GM inequality, for any $\lambda>0$, 
+     \begin{align*}
+        &\E_{\phi\sim \rho} \E^{\pi_\phi, M} \left[g_h(s_h,a_h, \phi; M)\right] 
+        \\&= \E_{\phi\sim \rho} \E_{(s,a)\sim d_h^{\pi_\phi, M}} \left[g_h(s,a, \phi; M)\right] \\
+        &= \E_{\phi\sim \rho} \E_{(s,a)\sim d_h^{\rho, M}} \left[ \frac{d_h^{\pi_\phi, M}(s,a)}{d_h^{\rho, M}(s,a)} g_h(s,a, \phi; M)\right] \\
+        &\leq  \E_{\phi\sim \rho} \E_{(s,a)\sim d_h^{\rho, M}} \left[ \frac{\lambda}{4}\frac{d_h^{\pi_\phi, M}(s,a)^2}{d_h^{\rho, M}(s,a)^2} + \frac{1}{\lambda}g_h(s,a, \phi; M)^2\right] \\
+        &= \frac{\lambda}{4} \E_{\phi\sim \rho}  \left[\sum_{s,a} \frac{d_h^{\pi_\phi, M}(s,a)^2}{d_h^{\rho, M}(s,a)}\right] + \frac{1}{\lambda}\E_{\phi\sim \rho} \E_{\phi'\sim \rho}\E^{\pi_{\phi'}, M}\left[g_h(s_h,a_h, \phi, M)^2\right].  \numberthis \label{eq: tmptmptmp}
+    \end{align*}
+    Note that 
+    \begin{align*}
+        \sum_{h=1}^H \E_{\phi\sim \rho} \E^{\pi_\phi, M} [g_h(s_h,a_h, \phi; M)] = \E_{\phi\sim \rho} \left[ V_\phi(\pi_\phi) - V_M(\pi_\phi) \right],  
+    \end{align*}
+    and by the same calculation as \pref{eq: second calcul}, we have 
+    \begin{align*}
+        \frac{1}{B^2H}\sum_{h=1}^H \E^{\pi_{\phi'}, M}\left[g_h(s_h,a_h, \phi, M)^2\right] = \frac{1}{B^2H}\sum_{h=1}^H\E^{\pi_{\phi'}, M}\left[ \err_h(\phi', \phi; o_h) - \err_h(\calT_M \phi, \phi; o_h)\right] = \tilD_\sbe^{\pi_{\phi'}}(\phi\|M). 
+    \end{align*}
+ By the definition of $\odec$ and combining the inequalities above, 
+ \begin{align*}
+        &\odec_\eta^{\Phi, \tilD_\sbe} \\
+        &=\max_\rho \min_p \max_\nu \E_{\pi\sim p}\E_{\phi\sim \rho} \E_{M\sim \nu} \left[V_\phi(\pi_\phi) - V_M(\pi) - \frac{1}{\eta} \tilD_\sbe^{\pi}(\phi\|M)\right]  \\ 
+        &\leq \max_\rho \max_\nu \E_{\phi'\sim \rho}\E_{\phi\sim \rho} \E_{M\sim \nu} \left[V_\phi(\pi_\phi) - V_M(\pi_\phi) - \frac{1}{\eta} \tilD_\sbe^{\pi_{\phi'}}(\phi\|M)\right]  \\
+        &=\max_\rho \max_\nu \E_{\phi'\sim \rho} \E_{\phi\sim \rho} \E_{M\sim \nu}\left[\sum_{h=1}^H \E^{\pi_\phi, M}[g_h(s_h,a_h, \phi; M)] - \frac{1}{\eta B^2H} \sum_{h=1}^H \E^{\pi_{\phi'}, M}\left[g_h(s_h,a_h, \phi, M)^2\right]\right] \\
+        &\leq \frac{\eta B^2H}{4} \max_\rho \max_\nu \E_{M\sim \nu}\E_{\phi\sim \rho}  \left[\sum_{h=1}^H \sum_{s,a} \frac{d_h^{\pi_\phi, P}(s,a)^2}{d_h^{\rho, P}(s,a)}\right].  \tag{by \pref{eq: tmptmptmp}}
+    \end{align*}
+
+    
+    %\begin{align*}
+    %   \odec_\eta^{\Phi, D_{\sbe}} \leq \frac{\eta}{4} \max_\rho \max_\nu \E_{M\sim \nu}\E_{\phi\sim \rho}  \left[\sum_{s,a} \frac{d^{\pi_\phi, P}(s,a)^2}{d^{\rho, P}(s,a)}\right]. 
+    %\end{align*}
+    Let $\mu_h^P$ be any occupancy measure over layer $h$ that depends on $P$. Then 
+    \begin{align*}
+        \E_{\phi\sim \rho}  \left[\sum_{s,a} \frac{d_h^{\pi_\phi, P}(s,a)^2}{d_h^{\rho, P}(s,a)}\right] 
+        &= \E_{\phi\sim \rho}  \left[\sum_{s,a} \frac{d_h^{\pi_\phi, P}(s,a) \mu_h^P(s,a)}{d_h^{\rho, P}(s,a)}\cdot \frac{d^{\pi_\phi, P}(s,a)}{\mu_h^P(s,a)}\right] \\
+        &\leq \E_{\phi\sim \rho}  \left[\sum_{s,a} \frac{d_h^{\pi_\phi, P}(s,a) \mu_h^P(s,a)}{d_h^{\rho, P}(s,a)} \right] \cdot\max_{s,a, \pi}\frac{d_h^{\pi, P}(s,a)}{\mu_h^P(s,a)} \\
+        &= \sum_{s,a} \mu_h^P(s,a) \cdot \max_{s,a, \pi}\frac{d_h^{\pi, P}(s,a)}{\mu_h^P(s,a)} \\
+        &= \max_{s,a, \pi}\frac{d_h^{\pi, P}(s,a)}{\mu_h^P(s,a)}. 
+    \end{align*}
+    We let $\mu_h^P$ be the minimizer of $\max_{s,a, \pi}\frac{d_h^{\pi, P}(s,a)}{\mu_h^P(s,a)}$. The coverability in MDP $M$ is defined as $\min_\mu \max_{s,a, \pi, h}\frac{d_h^{\pi, P}(s,a)}{\mu_h^P(s,a)}$ \citep{xie2022role}. Combining the inequalities proves $\odec_\eta^{\Phi, \tilD_{\sbe}}\leq \eta dB^2H^2$. 
+\end{proof}
+
+

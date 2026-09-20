@@ -1,0 +1,17 @@
+\section{Related Work}
+\label{sec:related-work}
+
+Our work is closely related to the notion of \emph{universal induction}~\citep{solomonoff1964formal} and related theoretical frameworks~\citep{levin1973universal,hutter2000theory,lattimore2013no,achille2021information,nakkiran2021turing}. For neural networks, a notable early work is \citet{schmidhuber1997discovering}, which introduced a probabilistic search algorithm for discovering neural networks with low Kolmogorov complexity. However, none of these theoretically compelling approaches directly lead to practical and scalable training objectives for neural networks. On the other hand, various MDL-inspired complexity measures have been proposed and evaluated for neural networks, based on variational inference~\citep{hinton1993keeping,blundell2015weight,louizos2017bayesian,blier2018description} or other methods~\citep{li2018measuring,lotfi2022pac,lotfi2024non,demoss2025complexity,abudy2025minimum}, such as quantization and low-rank approximation.
+However, prior work has not demonstrated asymptotic compression guarantees for such methods. %
+Our main contribution is establishing asymptotic bounds by constructing a bridge between Transformer weights and prefix Turing machines. Our results extend prior work establishing the Turing completeness of Transformers~\citep{perez2021attention,nowak2024representational}.
+We provide an extended discussion of related work in Appendix \ref{sec:extended-related-work}.
+
+\section{Conclusion}
+
+In this paper, we introduced a framework for analyzing asymptotic bounds for description length objectives, grounded in the MDL principle and the universality of Kolmogorov complexity. We established that there exist asymptotically optimal description length objectives for Transformers, while also highlighting potential challenges related to effectively optimizing such objectives. %The asymptotic guarantees offered by such objectives are particularly compelling as the computational resources available for training models continue to increase. 
+Minimizing an asymptotically optimal description length objective achieves optimal compression for any dataset, up to an additive constant, in the limit as resource bounds increase. Such guarantees are particularly compelling as the computational resources available for training models continue to increase. 
+% Our framework can potentially help identify identify codes of practical interest, potentially leading to models offering greater compression and generalization.
+%This work opens up several avenues for future research. Theoretically, our analysis could be extended to other architectures and settings, such as Transformer decoders that leverage chain-of-thought, or models that interact with external tools. Future work could also consider families of codes that scale the capacity of Transformers along alternative dimensions, as opposed to increasing prompt length. Empirically, the most pressing challenge is to identify alternative (approximations of) asymptotically optimal codes, or novel optimization techniques, such that the proposed objectives can be efficiently optimized. This would be a significant step toward realizing the potential of the MDL principle, potentially leading to models offering greater compression and generalization.
+Our theoretical framework therefore highlights a potential path towards identifying description length objectives leading to greater compression, and potentially greater generalization.
+
+

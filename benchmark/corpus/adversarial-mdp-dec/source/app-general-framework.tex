@@ -1,0 +1,446 @@
+
+
+\newpage
+\section{Estimation Procedures}
+We present the choices of \postupdate as standalone online learning algorithms because they might be of independent interest.
+
+
+
+\subsection{Average estimation error minimization via batching}\label{app: batching improve}
+
+
+\begin{algorithm}[H]
+    \caption{Epoch-based learning algorithm for average estimation error}
+    \label{alg:MF-Epoch-final}
+    \textbf{Input}: An estimation function $\ell_h: \Phi\times \calO\to [-B, B]^N$ satisfying \pref{assum: avg err}. \\
+    \textbf{Parameter:} $\tau = T^{\frac{1}{3}}, \beta = 7\tau N\iota$, $\gamma = \frac{1}{2\beta}$, $\iota = \log(12NKH/\delta)$. \\
+    \For{$k=1, 2, \ldots, K$}{
+         Receive observations $o_t\sim M_t(\cdot|\pi_k)$ for all 
+         $t\in\calI_k = \{(k-1)\tau +1, \ldots, k\tau\}$. \\ Split $\calI_k$ into two sub-intervals of equal size: 
+         \begin{align*}
+             \calI_k^{\leftt} = \{(k-1)\tau +1, \ldots, (k-1)\tau +\tfrac{\tau}{2}\}  \quad \text{and} \quad \calI_k^{\rightt} = \{(k-1)\tau + \tfrac{\tau}{2} +1 , \ldots, k\tau\}. 
+         \end{align*}
+         %For all $h,\phi$ and all $t\in\calI_k$, receive $\ellest_h(\phi; o_{t,h}) \in[-B,B]^N$.\\ % of conditionally independent random variables with mean $\bar\ell_{k,h}(\phi)\in [-B,B]^N$. \\
+         Define for all $j\in[N]$,  
+         \begin{align*}
+             %&\Delta_t(\phi',\phi) = \frac{1}{H}\sum_{h=1}^H \left(f_{\phi'}(s_{t,h}, a_{t,h}) - r_{t,h} - f_\phi(s_{t,h+1})\right)^2, \\
+             L_k(\phi)_j &=\frac{\tau}{B^2 H}\sum_{h=1}^H \left(\frac{1}{|\calI_k^\leftt|}\sum_{t\in\calI_k^\leftt} \ell_{h}(\phi; o_{t,h})_j\right)\left(\frac{1}{|\calI_k^\rightt|}\sum_{t\in\calI_k^\rightt} \ell_h(\phi; o_{t,h})_j\right)\,,\quad L_k(\phi) = \sum_{j=1}^N L_k(\phi)_{j}. 
+         \end{align*}
+         
+         
+         Let $(F_t)_{t\in\calI_k}: \Delta(\Phi)\to \mathbb{R}$ be convex functions. Calculate % for $L_k(\phi)=L_{k}(\phi)_{j^k_\phi}$
+        \begin{align*}
+             &\rho_{k+1} = \argmin_{\rho\in \Delta(\Phi)}\left\{\inner{\rho,  L_k + (4\gamma+2\beta^{-1}) L_k^2} + \sum_{t\in\calI_k}F_t(\rho) + \frac{1}{\gamma}\KL(\rho, \rho_k) \right\}.   \label{eq: epoch level update} \numberthis   
+        \end{align*}
+    }
+\end{algorithm}
+\begin{lemma}\label{lem: est part1}
+With probability at least $1-\delta/3$,  
+\pref{alg:MF-Epoch-final} satisfies
+\begin{align*}
+    \frac{1}{B^2H}\sum_{k=1}^K \sum_\phi \rho_k(\phi) \sum_{t\in\calI_k} \max_{j\in[N]} \sum_{h=1}^H \left(\E^{\pi_k, M_t}[\ell_h(\phi; o_{h})_j]  \right)^2 \leq \sum_{k=1}^K\sum_{\phi}\rho_{k}(\phi)\left(L_k(\phi) + \frac{1}{\beta}L_k(\phi)^2\right)+4\beta\log(3/\delta)\,.
+\end{align*}
+\end{lemma}
+\begin{proof}
+By \pref{assum: avg err}, for any $t,t'\in\calI_k$ it holds that
+\begin{align*}
+    \E^{\pi_k, M_t}\left[ \ell_h(\phi; o_{h}) \right] = \E^{\pi_k, M_{t'}}\left[ \ell_h(\phi; o_{h}) \right]. 
+\end{align*}
+We denote $\bar\ell_{k,h}(\phi) = \E^{\pi_k, M_t}[\ell_h(\phi; o_{h})]$ for any $t\in\calI_k$. 
+
+Clearly, the left-hand side of the desired inequality is upper bounded by  
+\begin{align*}
+    \frac{1}{B^2H}\sum_{k=1}^K \sum_\phi \rho_k(\phi) \sum_{t\in\calI_k} \sum_{j=1}^N \sum_{h=1}^H \left(\E^{\pi_k, M_t}[\ell_h(\phi; o_{h})_j]  \right)^2 = \frac{\tau}{B^2H} \sum_{k=1}^K\sum_{\phi}\rho_{k}(\phi)\sum_{j=1}^N \sum_{h=1}^H\bar\ell_{k,h}(\phi)^2_j 
+\end{align*}
+By construction, $\E_{k}[L_k(\phi)]=\frac{\tau}{B^2H}\sum_{j=1 }^N\sum_{h=1}^H\bar\ell_{k,h}(\phi)^2_j$ due to the conditional independence of the observations. Furthermore, we have $L_k(\phi)\in[-\tau N,\tau N]$. Therefore, we can use \pref{lem: empirical freed} on the sequence $X_k=-\sum_{\phi}\rho_k(\phi)L_k(\phi)$ with $\beta \geq 7\tau N$: 
+    \begin{align*}
+        \frac{\tau}{B^2H}\sum_{k=1}^K\sum_{\phi}\rho_{k}(\phi)\sum_{j=1}^N\sum_{h=1}^H\bar\ell_{k,h}(\phi)^2_j\leq\sum_{k=1}^K\sum_{\phi}\rho_{k}(\phi)\left(L_k(\phi) + \frac{1}{\beta}L_k(\phi)^2\right)+4\beta\log(3/\delta)\,.
+    \end{align*}
+\end{proof}
+\begin{lemma}\label{lem: est part2}
+    With probability at least $1-\delta/3$,
+    \begin{align*}
+        \sum_{k=1}^KL_k(\phi^\star)^2 \leq KN^2\log^2(12NKH/\delta). 
+    \end{align*}
+\end{lemma}
+\begin{proof}
+By \pref{assum: avg err} and \pref{lem: strengthen freed}, for any $j,k,h$, we have with probability $1-\delta$, 
+\begin{align*}
+&\left|\sum_{t\in\calI_k^\leftt} \ell_{h}(\phi^\star, o_{t,h})_j\right| = \left|\sum_{t\in\calI_k^\leftt} \ell_{h}(\phi^\star, o_{t,h})_j - \sum_{t\in\calI_k^\leftt} \E^{\pi_k, M_t}[\ell_h(\phi^\star; o_h)] \right| \leq B\sqrt{\tau \log(12/\delta)}\\
+&\left|\sum_{t\in\calI_k^\rightt} \ell_{h}(\phi^\star, o_{t,h})_j\right| = \left|\sum_{t\in\calI_k^\rightt} \ell_{h}(\phi^\star, o_{t,h})_j - \sum_{t\in\calI_k^\rightt} \E^{\pi_k, M_t}[\ell_h(\phi^\star; o_h)] \right| \leq B\sqrt{\tau \log(12/\delta)}\,.
+\end{align*}
+Via a union bound over all these events, this holds simultaneously for all $j,k,h$. Hence with probability $1-\delta$, we have $|L_k(\phi^\star)_j|\leq \frac{\tau}{B^2H} H\left(\frac{1}{\tau}B\sqrt{\tau \log(12NKH/\delta)}\right)^2=\log(12NKH/\delta) $ for all $j,k$ simultaneously.
+Summing over $j$ and $k$ finishes the proof.
+\end{proof}
+\begin{lemma}\label{lem: est part3}
+    With probability at least $1-\delta/3$, we have
+    \begin{align*}
+        \sum_{k=1}^KL_k(\phi^\star) \leq 
+            \frac{1}{\beta}\sum_{k=1}^KL_k(\phi^\star)^2+4\beta \log(6/\delta)
+    \end{align*}
+\end{lemma}
+\begin{proof}
+    Define the random variable $X_k = \min\{L_k(\phi^\star),N\log(12NKH/\delta) \}$. 
+    By \pref{lem: empirical freed} we have with probability at least $1-\delta/6$, 
+    \begin{align*}
+        \sum_{k=1}^KX_t \leq \frac{1}{\beta}\sum_{k=1}^KL_k(\phi^\star)^2 + 4\beta\log(6/\delta)\,, 
+    \end{align*}
+    where we use that $\E_k[X_k]\leq \E_k[L_k(\phi^\star)]=0$.
+    Finally note that with probability $1-\delta/6$ we have $L_k(\phi^\star)=X_k$ for all $k$ by the proof of \pref{lem: est part2}. Combining both events finishes the proof.
+\end{proof}
+\begin{lemma}\label{lem: online esitmation epoch general}
+    With probability at least $1-\delta$, \pref{alg:MF-Epoch-final} satisfies
+    \begin{align*}
+        &\frac{1}{B^2H}\sum_{k=1}^K\sum_{\phi}\rho_{k}(\phi)\sum_{t\in\calI_k}\max_{j\in[N]}\sum_{h=1}^H \left(\E^{\pi_k, M_t}\left[\ell_h(\phi;o_{h})_j\right]\right)^2 \le O\left(NT^{\frac{1}{3}}\log|\Phi|\right) \\
+        &\quad +  \sum_{k=1}^K \sum_{t\in\calI_k}(  F_t(\delta_{\phi^\star}) - F_t(\rho_{k+1}) - \breg_{F_t}(\delta_{\phi^\star}, \rho_{k+1})).  
+    \end{align*}
+\end{lemma}
+
+\begin{proof}[Proof of \pref{lem: online esitmation epoch general}]
+By union bound, the events of \pref{lem: est part1}, \pref{lem: est part2}, and \pref{lem: est part3} hold simultaneously with probability $1-\delta$.
+Observe that the update of $\rho_k$ (\pref{eq: epoch level update}) is in the form specified in \pref{lem: mirror descent}. 
+Invoking \pref{lem: mirror descent} with $b_k=\frac{2}{\beta}L_k^2$, we get 
+\begin{align*}
+    &\sum_{k=1}^K  \inner{\rho_k, L_k+\frac{1}{\beta}L_k^2} 
+    \leq \frac{\log|\Phi|}{\gamma} \numberthis \label{eq: miror descent bound 33}\\
+    &\quad + \sum_{k=1}^K \left(L_k(\phi^\star) + \left(4\gamma+\frac{2}{\beta}\right) L_k(\phi^\star)^2 +\sum_{t\in\calI_k}(F_t(\delta_{\phi^\star}) - F_t(\rho_{k+1}) - \breg_{F_t}(\delta_{\phi^\star}, \rho_{k+1})) \right). \\
+\end{align*}
+    Chaining \pref{lem: est part2} and \pref{lem: est part3},  
+    \begin{align*}
+        &\sum_{k=1}^K \left(L_k(\phi^\star) + \left(4\gamma+\frac{2}{\beta}\right) L_k(\phi^\star)^2\right)
+        \\ &\leq 4\beta\log(6/\delta)+\left(4\gamma + \frac{3}{\beta}\right)KN^2\log^2(12NKH/\delta). 
+    \end{align*}
+Using \pref{lem: est part1} and substituting $\beta = 7\tau N\iota$, $\gamma =\frac{1}{2\beta}$ yields
+\begin{align*}
+     \frac{1}{B^2H}\sum_{k=1}^K \sum_\phi \rho_k(\phi) \sum_{t\in\calI_k} \max_{j\in[N]} \sum_{h=1}^H \left(\E^{\pi_k, M_t}[\ell_h(\phi; o_{h})_j]  \right)^2 \leq 35 \tau N\iota + 20\frac{K N\iota}{\tau}
+\end{align*}
+Using $K=T/\tau$ and tuning $\tau = T^\frac{1}{3}$ yields $O(T^\frac{1}{3}N\iota)$.
+\end{proof}
+
+
+\subsection{Squared estimation error minimization via bi-level learning}\label{app: bilevel}
+%In this section, we consider a general \emph{bi-level learning problem} and design a general algorithm to handle it. It will be used as a subroutine in algorithms for decouplable MDPs with Bellman completeness that achieves $\sqrt{T}$ regret.  
+
+
+
+%\begin{assumption}\label{assum: bilevel}
+%    Assume $\Delta_t: \Phi\times\Phi\to [0,B]$, and assume that for each $\phi\in\Phi$, there exists $\calT\phi\in\Phi$ such that for any $\phi'\in\Phi$, 
+%    \begin{align*}
+        %\E_t\left[\left(\Delta_t(\phi', \phi) - \Delta_t(\calT\phi, \phi)\right)^2\right]  \leq B\E_t\left[\Delta_t(\phi', \phi) - \Delta_t(\calT\phi, \phi)\right].    
+    %\end{align*}
+    %Also, assume there exists $\phi^\star\in\calR$ such that $\phi^\star=\calT\phi^\star$. 
+%\end{assumption}
+        
+%The goal of the bi-level problem is to sequentially generate $\rho_t\in \Delta(\Phi)$ such that 
+%\begin{align}
+%    \sum_{t=1}^T \E_{\phi\sim \rho_t} \left[\Delta_t(\phi, \phi) - \Delta_t(\calT\phi, \phi)\right] = o(T). \label{eq: goal of bilevel}
+%\end{align}
+%According to \pref{assum: bilevel}, as long the learner can identify $\phi^\star$ and make $\rho_t$ concentrate on $\phi^\star$ then \pref{eq: goal of bilevel} can be achieved because $\Delta_t(\phi^\star, \phi^\star) - \Delta_t(\calT\phi^\star, \phi^\star) = \Delta_t(\phi^\star, \phi^\star) - \Delta_t(\phi^\star, \phi^\star)=0$. The challenge lies in that neither the identity of $\phi^\star$ nor the identity of $\calT\phi$ for each $\phi$ are known by the learner. 
+
+
+\begin{algorithm}[H]
+    \caption{Bi-level learning algorithm for squared estimation error}
+    \label{alg:MF-BiLevel-final}
+    \textbf{Input:} An estimation function $\err_h: \Phi\times\Phi\times \calO\to [0, B^2]$ satisfying \pref{assum: squared est err}. \\
+    \textbf{Parameter:} $\iota = 64\log|\Phi|$, $\gamma=\frac{1}{4\iota}$. \\
+   $\rho_1(\phi) = 1/|\Phi|,\, \forall \phi \in \Phi$ and  $q_1(\phi'|\phi) = 1/|\Phi|$, $\forall \phi', \phi\in \Phi$. \\
+    \For{$t=1, 2, \ldots, T$}{
+         Receive observation $o_t\sim M_t(\cdot|\pi_t)$. \\
+         Define 
+         \begin{align*}
+             \Delta_t(\phi', \phi) &= \frac{1}{B^2H}\sum_{h=1}^H \err_h(\phi', \phi, o_{t,h}), \\
+             %&\Delta_t(\phi',\phi) = \frac{1}{H}\sum_{h=1}^H \left(f_{\phi'}(s_{t,h}, a_{t,h}) - r_{t,h} - f_\phi(s_{t,h+1})\right)^2, \\
+             L_t(\phi) &= \Delta_t(\phi, \phi) - \E_{\phi'\sim q_t(\cdot|\phi)}\left[\Delta_t(\phi', \phi)\right], 
+             \\ 
+             b_t(\phi) &= \frac{[\rho_t(\phi) - \max_{s<t}\rho_s(\phi)]_+}{\rho_t(\phi)} \iota. 
+         \end{align*}
+         Let $F_t: \Delta(\Phi)\to \mathbb{R}$ be a convex function. Calculate
+        \begin{align*}
+             &\rho_{t+1} = \argmin_{\rho\in \Delta(\Phi)}\left\{\inner{\rho,  L_t + 4\gamma L_t^2 +  b_t} + F_t(\rho) + \frac{1}{\gamma}\KL(\rho, \rho_t) \right\},  \label{eq: top level update} \numberthis \\
+              & q_{t+1}(\phi'|\phi) \propto \exp\left(- \alpha_{t}(\phi) \sum_{s=1}^t \rho_s(\phi)\Delta_s(\phi',\phi)\right) \quad \text{where \ \ }  \alpha_{t}(\phi) = \frac{1}{16 \max_{s \le t} \rho_s(\phi)}.  
+        \end{align*}
+    }
+\end{algorithm}
+
+
+\begin{lemma}\label{lem: online esitmation bilinear outer general}
+    With probability at least $1-\delta$, 
+    \begin{align*}
+        &\sum_{t=1}^T \inner{\rho_{t}, L_t} \le \frac{\log|\Phi|}{\gamma} \\
+        &\quad +  \sum_{t=1}^T \left(- \frac{1}{2} \inner{\rho_{t}, b_t} + b_t(\phi^\star) +  F_t(\delta_{\phi^\star}) - F_t(\rho_{t+1}) - \breg_{F_t}(\delta_{\phi^\star}, \rho_{t+1}) \right) + O\left(\log(1/\delta)\right).  
+    \end{align*}
+\end{lemma}
+
+\begin{proof}[Proof of \pref{lem: online esitmation bilinear outer general}]
+Observe that the update of $\rho_t$ (\pref{eq: top level update}) is in the form specified in \pref{lem: mirror descent}. 
+Invoking \pref{lem: mirror descent}, we get 
+\begin{align*}
+    &\sum_{t=1}^T  \inner{\rho_t, L_t} 
+    \leq \frac{\log|\Phi|}{\gamma} \numberthis \label{eq: miror descnet bound 33}\\
+    &\quad + \sum_{t=1}^T \left(L_t(\phi^\star) + 4\gamma L_t(\phi^\star)^2 +  b_t(\phi^\star)-\frac{1}{2}\inner{\rho_{t}, b_t}+F_t(\delta_{\phi^\star}) - F_t(\rho_{t+1}) - \breg_{F_t}(\delta_{\phi^\star}, \rho_{t+1}) \right). \\
+\end{align*}
+By \pref{assum: squared est err} we have %$\E_t[L_t(\phi^\star)]\leq 0$ 
+%and 
+\begin{align*}
+    0\leq \E_t[L_t(\phi^\star)^2] 
+    &= \E_t\left[\left(\Delta_t(\phi^\star, \phi^\star) - \E_{\phi'\sim q_t(\cdot|\phi^\star)}\left[\Delta_t(\phi', \phi^\star)\right]\right)^2\right] \\
+    &\leq \E_{\phi'\sim q_t(\cdot|\phi^\star)}\left[\E_t\left[\left(\Delta_t(\phi^\star, \phi^\star) - \Delta_t(\phi', \phi^\star)\right)^2\right] \right] \tag{Jensen's inequality} \\
+    &\leq \E_{\phi'\sim q_t(\cdot|\phi^\star)}\left[\E_t\left[\left(\Delta_t(\calT_{M_t}\phi^\star, \phi^\star) - \Delta_t(\phi', \phi^\star)\right)^2\right] \right] \tag{$M_t\in\phi^\star$ and thus $\calT_{M_t}\phi^\star=\phi^\star$} \\
+    &\leq 4\E_{\phi'\sim q_t(\cdot|\phi^\star)}\left[\E_t\left[\Delta_t(\phi', \phi^\star) - \Delta_t(\calT_{M_t}\phi^\star, \phi^\star) \right] \right]  \tag{by \pref{assum: squared est err}} \\
+    &= 4\E_{\phi'\sim q_t(\cdot|\phi^\star)}\left[\E_t\left[\Delta_t(\phi', \phi^\star) - \Delta_t(\phi^\star, \phi^\star) \right] \right] \\
+    &= - 4\E_t[L_t(\phi^\star)]. 
+\end{align*}
+This allows us to apply \pref{lem: useful inequali} with $X_t = -L_t(\phi^\star)$ and $Y_t=\frac{1}{4}X_t^2$, which gives
+\begin{align*}
+    \sum_{t=1}^T \left(L_t(\phi^\star) + 4\gamma L_t(\phi^\star)^2\right) 
+    &\leq \sum_{t=1}^T \left(L_t(\phi^\star) + \frac{1}{16} L_t(\phi^\star)^2\right) \\
+    &\leq \frac{1}{2}\sum_{t=1}^T \E_t[L_t(\phi^\star)] + 36 \log(1/\delta)\leq 36\log(1/\delta).  
+\end{align*}
+Combining this with \pref{eq: miror descnet bound 33} finishes the proof. 
+\end{proof}
+
+\begin{lemma}\label{lem: max rho lemma 33}
+    With probability at least $1-\delta$, 
+    \begin{align*}
+        \sum_{t=1}^T \E_{\phi\sim \rho_t} \E_{\phi'\sim q_t(\cdot|\phi)}[\Delta_t(\phi', \phi) - \Delta_t(\calT_{M_t}\phi, \phi)] \leq 32 \sum_\phi \max_{t\leq T} \rho_t(\phi) \log|\Phi| + 72\log(1/\delta). 
+    \end{align*}
+\end{lemma}
+\begin{proof}
+By \pref{assum: squared est err}, we have $\calT_{M_t}\phi = \calT_{M_{t'}}\phi$ for all $\phi$ and all $t,t'\in[T]$. We denote $\calT \phi = \calT_{M_{t}}\phi$ for any $t$. 
+By the exponential weight update, for any $\phi$, 
+\begin{align*}
+    &\sum_{t=1}^T \sum_{\phi'} q_t(\phi'|\phi)\rho_t(\phi)\left(\Delta_t(\phi', \phi) - \Delta_t(\calT_{M_t}\phi, \phi)\right) 
+ \\
+ &= \sum_{t=1}^T \sum_{\phi'} q_t(\phi'|\phi)\rho_t(\phi)\left(\Delta_t(\phi', \phi) - \Delta_t(\calT\phi, \phi)\right) \\ 
+    &\leq \frac{\log |\Phi|}{\alpha_T(\phi)} + \sum_{t=1}^T \sum_{\phi'}\alpha_t(\phi)q_t(\phi'|\phi)\rho_t(\phi)^2  \left(\Delta_t(\phi', \phi) - \Delta_t(\calT\phi, \phi)\right)^2 \\
+    &\leq 16\max_{t\leq T}\rho_t(\phi) \log |\Phi| + \frac{1}{16}\sum_{t=1}^T \sum_{\phi'}q_t(\phi'|\phi)\rho_t(\phi)  \left(\Delta_t(\phi', \phi) - \Delta_t(\calT\phi, \phi)\right)^2.  
+\end{align*}
+Rearranging and summing over $\phi$:  
+\begin{align*}
+   &\sum_{t=1}^T \E_{\phi\sim \rho_t} \E_{\phi'\sim q_t(\cdot|\phi)}\left[\Delta_t(\phi', \phi) - \Delta_t(\calT\phi, \phi) - \frac{1}{16}(\Delta_t(\phi', \phi) - \Delta_t(\calT\phi, \phi))^2\right] \\
+   &\qquad \qquad \leq 16 \sum_\phi \max_{t\leq T} \rho_t(\phi) \log|\Phi|.   \numberthis \label{eq: some bound 34}
+\end{align*}
+Define
+\begin{align*}
+    X_t &= \E_{\phi\sim \rho_t} \E_{\phi'\sim q_t(\cdot|\phi)}\left[\Delta_t(\phi', \phi) - \Delta_t(\calT\phi, \phi)\right], \\
+    Y_t &= \frac{1}{4}\E_{\phi\sim \rho_t} \E_{\phi'\sim q_t(\cdot|\phi)}\left[\left(\Delta_t(\phi', \phi) - \Delta_t(\calT\phi, \phi)\right)^2\right].
+\end{align*}
+By \pref{assum: squared est err} we have $\E_t[Y_t]\leq \E_t[X_t]$. By Jensen's inequality, $\E_t[X_t^2]\leq 4B^2 H\E_t[Y_t]\leq 4B^2 H\E_t[X_t]$. Invoking \pref{lem: useful inequali} and using \pref{eq: some bound 34} give
+\begin{align*}
+    \frac{1}{2}\sum_{t=1}^T X_t &\leq \sum_{t=1}^T \left(X_t - \frac{1}{4}Y_t\right) + 36\log(1/\delta) 
+    \leq 16 \sum_\phi \max_{t\leq T} \rho_t(\phi) \log|\Phi| + 36\log(1/\delta),  
+\end{align*}
+proving the desired inequality. 
+
+\end{proof}
+
+\begin{lemma}\label{lem: bilievel final bound}
+   With probability at least $1-\delta$, 
+  \begin{align*}
+    &\sum_{t=1}^T \E_{\phi\sim \rho_t} \left[\Delta_t(\phi, \phi) - \Delta_t(\calT_{M_t}\phi, \phi)\right] \\
+    &\leq \sum_{t=1}^T  \left(F_t(\delta_{\phi^\star}) - F_t(\rho_{t+1}) - \breg_{F_t}(\delta_{\phi^\star}, \rho_{t+1})\right) + O\left(\log^2(|\Phi|/\delta)\right). 
+\end{align*}
+\end{lemma}
+\begin{proof}
+By \pref{assum: squared est err}, we have $\calT_{M_t}\phi = \calT_{M_{t'}}\phi$ for all $\phi$ and all $t,t'\in[T]$. We denote $\calT \phi = \calT_{M_{t}}\phi$ for any $t$. 
+
+
+\begin{align*}
+    \E_{\phi\sim \rho_t}[L_t(\phi)] 
+    &= \E_{\phi\sim \rho_t}[\Delta_t(\phi, \phi) - \E_{\phi'\sim q_t(\cdot|\phi)}[\Delta_t(\phi', \phi)]] \\
+    &= \E_{\phi\sim \rho_t}\left[\Delta_t(\phi, \phi) - \Delta_t(\calT\phi, \phi) - \left(\E_{\phi'\sim q_t(\cdot|\phi)}[\Delta_t(\phi', \phi)] - \Delta_t(\calT\phi, \phi)\right)\right].
+\end{align*}
+Combining this with \pref{lem: online esitmation bilinear outer general}, we get 
+\begin{align*}
+   &\sum_{t=1}^T \E_{\phi\sim \rho_t} \left[\Delta_t(\phi, \phi) - \Delta_t(\calT\phi, \phi)\right] \\
+   &\leq \frac{\log|\Phi|}{\gamma} + \sum_{t=1}^T \left(- \frac{1}{2} \inner{\rho_{t}, b_t} + b_t(\phi^\star) +  F_t(\delta_{\phi^\star}) - F_t(\rho_{t+1}) - \breg_{F_t}(\delta_{\phi^\star}, \rho_{t+1}) \right) \\
+   &\qquad + O\left(\log(1/\delta)\right)   + \sum_{t=1}^T \E_{\phi\sim \rho_t}\E_{\phi'\sim q_t(\cdot|\phi)}\left[\Delta_t(\phi', \phi) - \Delta_t(\calT\phi, \phi)\right] \\
+   &\leq \sum_{t=1}^T \left(- \frac{1}{2} \inner{\rho_{t}, b_t} + b_t(\phi^\star) +  F_t(\delta_{\phi^\star}) - F_t(\rho_{t+1}) - \breg_{F_t}(\delta_{\phi^\star}, \rho_{t+1})\right) \\
+   &\qquad + O\left(\log^2(|\Phi|/\delta)\right)  + 32\sum_\phi \max_{t\leq T} \rho_t(\phi) \log|\Phi|.   \tag{by \pref{lem: max rho lemma 33} and the value of $\gamma$} %\\
+   %& \numberthis \label{eq: blug 33}
+\end{align*}
+
+Note that 
+\begin{align*}
+    32\log|\Phi|\sum_{\phi}\max_{t \le T} \rho_{t}(\phi)  
+    &= 32\log|\Phi|  \sum_{\phi}\left(\rho_1(\phi) +\sum_{t=2}^T [\rho_t(\phi)-\max_{s<t}\rho_s(\phi)]_+\right)
+    \\&= 32\log|\Phi|   \sum_{\phi}\left(\rho_1(\phi) +\sum_{t=2}^T \rho_t(\phi)\frac{[\rho_t(\phi)-\max_{s<t}\rho_s(\phi)]_+}{\rho_t(\phi)}\right)
+    \\&= \frac{1}{2} \sum_{t=1}^T \inner{\rho_t, b_t}  
+\end{align*}
+and 
+\begin{align*}
+    \sum_{t=1}^T b_t(\phi^\star) 
+    &= O(\log|\Phi|)\times \sum_{t=1}^T \frac{\max_{s\leq t}\rho_s(\phi^\star) - \max_{s\leq t-1}\rho_s(\phi^\star)}{\max_{s\leq t}\rho_s(\phi^\star)} \\
+    &\leq O(\log|\Phi|)\times \left(1+\sum_{t=2}^T  \ln \frac{\max_{s\leq t}\rho_s(\phi^\star)}{\max_{s\leq t-1} \rho_s(\phi^\star)}\right) \tag{$1-x\leq \ln \frac{1}{x}$}\\
+    &\leq O\left(\log^2|\Phi|\right). 
+\end{align*}
+Combining inequalities above proves the lemma. 
+
+\end{proof}
+
+
+
+
+%which implies 
+%\begin{align*}
+%    \sum_{t=1}^T \sum_{\phi'} q_t(\phi'|\phi)\rho_t(\phi)\left(\Delta_t(\phi', \phi) - \Delta_t(\calT\phi, \phi)\right) \leq 43\max_{t\leq T}\rho_t(\phi) \log\left(\frac{4T|\Phi|^2}{\delta}\right) + \frac{3}{|\Phi|}\log\left(\frac{4T|\Phi|^2}{\delta}\right). 
+%\end{align*}
+
+\newpage
+\section{Omitted Details in \pref{sec: general framework}}
+\label{app:model-free stoc}
+We define a batched version of \pref{alg:general} in \pref{alg:general batched}. When the batch size $\tau=1$, it is exactly \pref{alg:general}. One can also think of \pref{alg:general batched} as a special case of \pref{alg:general} where $\postupdate$ makes a real update only when $t=k\tau$ for $k=1,2,\ldots$, and keeps $\rho_{t+1}=\rho_t$ otherwise. 
+
+\begin{algorithm}[H]
+    \caption{General Batched Framework}
+     \label{alg:general batched}
+    \textbf{Input:} Partition set $\Phi$ and its union $\Psi$ (defined in \pref{sec: hybrid setting}). Batch size $\tau$. \\
+    $\rho_1(\phi) = 1/|\Phi|,\, \forall \phi \in \Phi$. \\
+    \For{$k=1, 2, \ldots, K$}{
+       Set $p_k, \nu_k$ as the solution of the following minimax optimization (defined in \pref{eq: new AIR}): 
+        \begin{align}
+            \min_{p \in \Delta(\Pi)}\max_{\nu \in \Delta(\Psi)} \air^{\Phi, D}_\eta(p,\nu; \rho_k). 
+            \label{eq:minmax batch}
+        \end{align}
+        Execute $\pi_k$ in rounds $t\in \{(k-1)\tau+1, \ldots, k\tau\}=\calI_k$ and receive observations $(o_t)_{t\in\calI_k}$. 
+        \vspace{-5pt}
+        \begin{flalign}
+        &\text{Update\ } \rho_{k+1}= \postupdate(\nu_k, \rho_k, \pi_k, (o_t)_{t\in \calI_k}). && \label{eq:rho batch}
+        \end{flalign}
+        
+        }
+        \vspace{-3pt}
+\end{algorithm}
+\subsection{Assumption reductions}
+\begin{proof}[Proof of \pref{lem: av assum reduction}]
+In the stochastic setting, by \pref{assum: function approximation stochastic} we have $f_{\phi}(s,a)=Q^{\star}(s,a;M)$ and $f_{\phi}(s)=V^{\star}(s;M)$ for any $M\in\phi$. Hence
+\begin{align*}
+        \E^{\pi, M}[\ellest_h(\phi; o_h)] &= \E^{\pi, M}[f_{\phi}(s_h,a_h)-r_h-f_{\phi}(s_{h+1})]\\
+        &=\E^{\pi, M}[Q^{\star}(s_h,a_h;M)-r_h-V^\star(s_{h+1};M)]=0.    
+    \end{align*}
+In the hybrid setting, we have by \pref{assum: function approximation hybrid} and \pref{assum: unique mapping} that 
+$f_{\phi}(s,a;R)=Q^{\pi_{\phi}}(s,a;(P,R))$ and $f_{\phi}(s;R)=V^{\pi_{\phi}}(s;(P,R))$ for any $P\in\phi$. Hence, for any $j\in[d]$, defining $R'$ such that $R'(s,a)=\varphi(s,a)_j$, we have for $(P,R)\in\phi$, 
+\begin{align*}
+    \E^{\pi, (P,R)}[\ellest_h(\phi; o_h)_j] &= \E^{\pi, P}[f_{\phi}(s_h,a_h;R')-R'(s_h,a_h)-f_{\phi}(s_{h+1};R')]\\
+        &=\E^{\pi, P}[Q^{\pi_{\phi}}(s_h,a_h;(P,R'))-R'(s,a)-V^{\pi_{\phi}}(s_{h+1};(P,R'))]=0. 
+\end{align*}
+Finally, note that in the stochastic setting $M_t=M^\star$, and in the hybrid setting $P_t=P^\star$, so the additional assumption always holds.
+\end{proof}
+\begin{proof}[Proof of \pref{lem: sq assum reduction}] 
+
+
+In the stochastic setting, %this is a vector of dimension 1. %We further use $R_h$ to denote $r_h$ in the stochastic setting or the vector $\varphi(s_h,a_h)$ in the hybrid setting.
+with \pref{assum: function approximation stochastic} and the Bellman completeness assumption (\pref{def: sto bc}), for any $M=(P,R)$, we define $\calT_M \phi\in\Phi$ as the $\phi'$ such that 
+\begin{align*}
+f_{\phi'}(s,a) = R(s,a) + \E_{s'\sim P(\cdot|s,a)}[f_\phi(s')]. 
+%E_{(r_{h},s_{h+1})\sim M(s,a)}[R_h+f_{\phi}(s_{h+1})]=f_{\calT_M\phi}(s_h,a_h)\,.
+\end{align*}
+By \pref{def: sto bc}, such $\phi'$ always exists. 
+
+In the hybrid setting, with \pref{assum: function approximation hybrid}, \pref{assum: unique mapping} and \pref{assum: known feature} and the Bellman completeness assumption (\pref{def: adv bc}), for any $M=(P,R)$, we define $\calT_M\phi\in\Phi$ to be the $\phi'$ such that $\pi_{\phi'}=\pi_\phi$ and for all $\tilde{R}$, 
+\begin{align*}
+    f_{\phi'}(s,a; \tilde{R}) = \tilde{R}(s,a) + \E_{s'\sim P(\cdot|s,a)}[f_\phi(s';\tilde{R})]. 
+\end{align*}
+By \pref{def: adv bc}, such $\phi'$ always exists. 
+%The range assumption holds by the assumption of bounded value functions.
+
+Below, with a slight overload of notation, we denote
+in the hybrid setting $f_{\phi}(s_h,a_h)\in\bbR^{d}$ as the vector $(f_{\phi}(s_h,a_h;\bm{e}_j))_{j\in[d]}$ and $f_{\phi}(s_{h+1})\in\bbR^{d}$ as the vector $\E_{a\sim\pi_{\phi}(\cdot|s_{h+1})}[(f_{\phi}(s_{h+1},a;\bm{e}_j))_{j\in[d]}]$. Furthermore, we use the notation $y_h$ to denote $r_h\in\mathbb{R}$ in the stochastic setting, and $\varphi(s_h,a_h)\in\mathbb{R}^d$ in the hybrid setting. 
+
+Then we have by our choice of $\err_h$: 
+\begin{align*}
+&\E^{\pi, M}\left[\err_h(\phi', \phi; o_h) - \err_h(\calT_{M}\phi, \phi; o_h)\right]
+\\&= \E^{\pi, M}\left[\|f_{\phi'}(s_h,a_h)-y_h-f_{\phi}(s_{h+1})\|^2 - \|f_{\calT_M\phi}(s_h,a_h)-y_h-f_{\phi}(s_{h+1})\|^2\right]
+\\&= \E^{\pi, M}\left[\left\|f_{\phi'}(s_h,a_h)-f_{\calT_M\phi}(s_h,a_h)\right\|^2\right]
+\\&\qquad +2\cdot \E^{\pi, M}\left[\inner{f_{\phi'}(s_h,a_h)-f_{\calT_M\phi}(s_h,a_h),f_{\calT_M\phi}(s_h,a_h)-y_h-f_{\phi}(s_{h+1})}\right]
+\\&= \E^{\pi, M}\left[\left\|f_{\phi'}(s_h,a_h)-f_{\calT_M\phi}(s_h,a_h)\right\|^2\right]\,, \numberthis \label{eq: second calcul}
+\end{align*}
+where the last line follows from $\E^{\pi, M}[y_h+f_{\phi}(s_{h+1})]=f_{\calT_M\phi}(s_h,a_h)$ by definition of $\calT_M\phi$.
+On the other hand, 
+\begin{align*}
+    &\E^{\pi, M}\left[\left(\err_h(\phi', \phi; o_h) - \err_h(\calT_{M}\phi, \phi; o_h)\right)^2\right]
+    \\&=\E^{\pi, M}\left[\left(\|f_{\phi'}(s_h,a_h)-y_h-f_{\phi}(s_{h+1})\|^2 - \|f_{\calT_M\phi}(s_h,a_h)-y_h-f_{\phi}(s_{h+1})\|^2\right)^2\right]
+    \\&=\E^{\pi, M}\left[\inner{f_{\phi'}(s_h,a_h)-f_{\calT_M\phi}(s_h,a_h), \ \ f_{\calT_M\phi}(s_h,a_h)+f_{\phi'}(s_h,a_h)-2y_h-2f_{\phi}(s_{h+1})}^2\right]
+    \\&\leq 4B^2 \E^{\pi, M}\left[\left\|f_{\phi'}(s_h,a_h)-f_{\calT_M\phi}(s_h,a_h)\right\|^2\right], 
+\end{align*}
+where $B^2=1$ in the stochastic setting and $B^2=d$ in the hybrid setting. Combining both finishes the proof. 
+%The same holds in hybrid settings with \pref{assum: function approximation hybrid}, \pref{assum: unique mapping}, \pref{assum: known feature}.  
+
+
+\end{proof}
+
+\subsection{Bounds on $\est$}
+With the specific form of divergence
+\begin{align}
+    &D^\pi(\nu\|\rho) = \E_{M \sim \nu}\E_{o \sim M(\cdot|\pi)}\left[\KL\left(\nu_{\bo{\phi}}(\cdot|\pi, o), \rho\right) + \E_{\phi\sim \rho}\left[\tilD^\pi(\phi\|M)\right]\right], \label{eq: div general}
+\end{align}
+the estimation term in \pref{eq:minimax-guarantee}
+for an epoch algorithm with epoch length $\tau'$ and $K$ epochs is given by 
+
+\begin{lemma}\label{lem: general est bound lemm}
+    %\pref{alg:MF-S} ensures 
+    %\begin{align*}
+    %    \Reg(\pi_{M^\star}) \leq T\max_{\rho\in\Delta(\Phi)}\min_{p\in\Delta(\Pi)}\max_{\nu\times \Delta(\calM)} \air^{\Phi, D}_\eta(p, \nu; \rho) + \frac{\est}{\eta}
+    %\end{align*}
+    %where 
+    %In the batched algorithm \pref{alg:general batched}, the 
+    $\est$ in \pref{eq:minimax-guarantee} can be written as 
+    \begin{align}
+        \est = \sum_{t=1}^T \E_{\pi \sim p_t}\E_{o \sim M_t(\cdot|\pi)}\left[\log\left(\frac{\nu_t(\phi^\star|\pi, o)}{\rho_t(\phi^\star)}\right)\right] +  \sum_{t=1}^T\E_{\pi \sim p_t}\E_{\phi\sim \rho_t}\left[\tilD^{\pi}(\phi\|M_t)\right].    \label{eq: est in batch}
+    \end{align}
+\end{lemma}
+\begin{proof}[Proof of \pref{lem: general est bound lemm}]
+%In \pref{alg:general batched}, we divide the $T$ episodes into $K=T/\tau'$ epochs. With abuse of notation, we use $p_t, \nu_t, \rho_t$ to denote the $p_k, \nu_k, \rho_k$ where $k$ is the epoch where episode $t$ lies. 
+
+
+
+From the definition of divergence in \pref{eq: div general} and \pref{eq: est in batch}, let $\delta_{\phi^\star}\in\Delta(\Phi)$ be the Kronecker delta function centered at  $\phi^\star$.  Then  
+\begin{align}
+   \est&= \sum_{t=1}^T \Bigg(\log\left(\frac{1}{\rho_t(\phi^\star)}\right) +  \E_{\pi \sim p_t}\E_{\phi\sim \rho_t}\left[\tilD^{\pi}(\phi\|M_t)  \right] \nonumber \\
+    &\qquad \qquad \qquad \qquad - \E_{\pi \sim p_t}\E_{o \sim M_t(\cdot|\pi)}\left[\KL\left(\delta_{\phi^\star}, (\nu_t)_{\bo{\phi}}(\cdot|\pi, o)\right) \right]\Bigg)\nonumber
+    \\&= \sum_{t=1}^T \E_{\pi \sim p_t}\E_{o \sim M_t(\cdot|\pi)}\left[\log\left(\frac{\nu_t(\phi^\star|\pi, o)}{\rho_t(\phi^\star)}\right)\right] +  \sum_{t=1}^T\E_{\pi \sim p_t}\E_{\phi\sim \rho_t}\left[\tilD^{\pi}(\phi\|M_t)\right] \label{eq:est_gen_fir}
+    %\\&= \sum_{k=1}^K \E_{\pi \sim p_k}\E_{o \sim M^\star(\cdot|\pi)}\left[\log\left(\frac{\nu_k(\phi^\star|\pi, o)}{\rho_k(\phi^\star)}\right)\right] +  \tau' \sum_{k=1}^K\E_{\pi \sim p_k}\E_{\phi\sim \rho_k}\left[\tilD^{\pi}(\phi\|M^\star)\right] 
+\end{align}
+where the first equality uses the fact that for any $\rho$, 
+\begin{align*}
+    \breg_{D^{\pi}(\cdot\|\rho)}(\nu, \nu') = \E_{M \sim \nu}\E_{o \sim M(\cdot|\pi)}\left[\KL\left(\nu_{\bo{\phi}}(\cdot|\pi, o), \nu_{\bo{\phi}}'(\cdot|\pi, o)\right)\right].
+\end{align*}
+%Taking expectation on both sides of \pref{eq:est_stoc_fir} and noticing that $\pi_k$ is drawn from $p_k$ and that $o_k$ is generated from $M^\star(\cdot|\pi_k)$, we get 
+%\begin{align*}
+%    \E[\est] = \tau\E\left[ \sum_{k=1}^K \log\frac{\nu_k(\phi^\star|\pi_k, o_k)}{\rho_k(\phi^\star)} +  \sum_{k=1}^K \E_{\phi\sim \rho_k} [D^{\pi_k}(\phi\| M^\star)]\right].   
+%\end{align*}
+\end{proof}
+
+\begin{proof}[Proof of \pref{thm: avg est}]
+With abuse of notation, we use $p_t, \nu_t, \rho_t$ to denote the $p_k, \nu_k, \rho_k$ where $k$ is the epoch where episode $t$ lies. We start from the estimation term in \pref{eq: est in batch} using the definition of $\tilD$:
+\begin{align*}
+    \est 
+    &= \sum_{t=1}^T \E_{\pi \sim p_t}\E_{o \sim M_t(\cdot|\pi)}\left[\log\left(\frac{\nu_t(\phi^\star|\pi, o)}{\rho_t(\phi^\star)}\right)\right] +  \frac{1}{B^2H}\sum_{t=1}^T\E_{\pi \sim p_t}\E_{\phi\sim \rho_t}\left[\max_{j\in[N]}\sum_{h=1}^H  \left(\E^{\pi, M_t}\left[\ellest_h(\phi; o_h)_j\right]\right)^2\right] \\
+    &= \sum_{k=1}^K \E_{\pi \sim p_k} \sum_{t\in\calI_k} \E_{o \sim M_t(\cdot|\pi)}\left[\log\left(\frac{\nu_k(\phi^\star|\pi, o)}{\rho_k(\phi^\star)}\right)\right] \\
+    &\qquad \qquad +  \frac{1}{B^2H}\sum_{k=1}^K\E_{\pi \sim p_k}\E_{\phi\sim \rho_k}\left[\sum_{t\in\calI_k} \max_{j\in[N]}\sum_{h=1}^H  \left(\E^{\pi, M_t}\left[\ellest_h(\phi; o_h)_j\right]\right)^2\right].  
+\end{align*}
+Applying \pref{lem: online esitmation epoch general} with $F_t(\rho) = \KL(\rho, (\nu_k)_{\bo{\phi}} (\cdot|\pi_k, o_t))$ for $t\in\calI_k$, we get 
+\begin{align*}
+   \E[\est] &\leq \E\left[\sum_{k=1}^K \E_{\pi \sim p_k} \sum_{t\in\calI_k} \E_{o \sim M_t(\cdot|\pi)}\left[\log\left(\frac{\nu_k(\phi^\star|\pi, o)}{\rho_k(\phi^\star)}\right)\right] \right] + O\left( N \log(|\Phi|)T^{\frac{1}{3}} \right) \\
+   &\qquad \quad + \E\left[\sum_{k=1}^K \sum_{t\in\calI_k} \left(\log\left(\frac{1}{\nu_k(\phi^\star|\pi_k, o_t)}\right) - \KL(\rho_{k+1}, (\nu_k)_{\bo{\phi}} (\pi_k, o_t)) - \log\left(\frac{1}{\rho_{k+1}(\phi^\star)}\right)\right)\right] \\
+   &\leq \E\left[\sum_{k=1}^K  \sum_{t\in\calI_k} \left(\log\left(\frac{\nu_k(\phi^\star|\pi_k, o_t)}{\rho_k(\phi^\star)}\right) + \log\left(\frac{\rho_{k+1}(\phi^\star)}{\nu_k(\phi^\star|\pi_k, o_t)}\right)\right) \right]  + O\left( N\log(|\Phi|)T^{\frac{1}{3}} \right) \\
+    &\leq \tau \log\left(\frac{1}{\rho_1(\phi^\star)}\right)  + O\left( N \log(|\Phi|)T^{\frac{1}{3}} \right) \\
+    &= O\left( N\log(|\Phi|)T^{\frac{1}{3}} \right). 
+\end{align*}
+\end{proof}
+\begin{proof}[Proof of \pref{thm: sq est}]
+We start from the estimation term in \pref{eq: est in batch}, using the definition of $\tilD$:   
+\begin{align*}
+    \est &= \sum_{t=1}^T \E_{\pi \sim p_t}\E_{o \sim M_t(\cdot|\pi)}\left[\log\left(\frac{\nu_t(\phi^\star|\pi, o)}{\rho_t(\phi^\star)}\right)\right] \\
+    &\qquad + \frac{1}{B^2H} \sum_{t=1}^T\E_{\pi \sim p_t}\E_{\phi\sim \rho_t}\left[\sum_{h=1}^H \E^{\pi, M_t}\left[\err_h(\phi, \phi; o_h) - \err_h(\calT_{M_t}\phi, \phi; o_h)\right]\right]. 
+\end{align*}
+Applying \pref{lem: bilievel final bound} with $F_t(\rho) = \KL(\rho, (\nu_t)_{\bo{\phi}} (\cdot|\pi_t, o_t) )$, we get 
+\begin{align*}
+   \E[\est] &\leq \E\left[\sum_{t=1}^T \E_{\pi \sim p_t}\E_{o \sim M_t(\cdot|\pi)}\left[\log\left(\frac{\nu_t(\phi^\star|\pi, o)}{\rho_t(\phi^\star)}\right)\right] \right]  + O\left(\log^2|\Phi|\right) \\
+   &\qquad \quad + \E\left[\sum_{t=1}^T \left(\log\left(\frac{1}{\nu_t(\phi^\star|\pi_t, o_t)}\right) - \KL(\rho_{t+1}, (\nu_t)_{\bo{\phi}} (\pi_t, o_t)) - \log\left(\frac{1}{\rho_{t+1}(\phi^\star)}\right)\right)\right] \\
+   &\leq \E\left[\sum_{t=1}^T \log\left(\frac{\rho_{t+1}(\phi^\star)}{\rho_t(\phi^\star)}\right) \right]  + O\left( \log^2|\Phi|\right) = O\left( \log^2|\Phi|\right). 
+\end{align*}
+\end{proof}
+
+
+

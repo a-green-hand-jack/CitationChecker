@@ -1,0 +1,106 @@
+% packages
+\usepackage{amsmath,amsthm}
+\usepackage{amssymb}
+% \usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+\usepackage{algorithm}
+% \usepackage{algorithmic}
+\usepackage{booktabs}
+\usepackage[noend]{algpseudocode}
+% In your preamble
+\usepackage{authblk}
+	\renewcommand{\Authsep}{\qquad}
+	\renewcommand{\Authand}{\qquad}
+	\renewcommand{\Authands}{\qquad}
+	\renewcommand\Affilfont{\itshape\small}
+\usepackage[margin=1.1in]{geometry}
+\usepackage[bookmarks=false]{hyperref}
+    \hypersetup{
+        linktocpage=true,
+        colorlinks=true,				
+        linkcolor=DarkBlue,				
+        citecolor=DarkBlue,				
+        urlcolor=DarkBlue,			
+    }
+
+\usepackage[tt=false]{libertine}
+   \usepackage[libertine]{newtxmath}
+   \usepackage[T1]{fontenc}
+\usepackage{lipsum}
+\usepackage{microtype}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage{nicefrac}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{bbm}
+\usepackage{tikz}
+	\usetikzlibrary{positioning}
+	\definecolor{DarkGreen}{rgb}{0.2,0.6,0.2}
+	\definecolor{DarkRed}{rgb}{0.6,0.2,0.2}
+	\definecolor{DarkBlue}{rgb}{0.2,0.2,0.6}
+	\definecolor{DarkPurple}{rgb}{0.4,0.2,0.4}   
+\usepackage{url}
+\usepackage{verbatim}
+\usepackage{wrapfig}
+
+\newcommand{\citet}{\cite}
+
+   
+% comments
+% \setlength\marginparwidth{80pt}
+% \setlength\marginparsep{5pt}
+
+
+% \ifnum\comments=1
+%     \newcommand{\mynote}[2]{{\marginpar{\color{#1}\sf \tiny #2}}}
+% \else
+%     \newcommand{\mynote}[2]{}
+% \fi
+
+\newcommand{\ju}[1]{\mynote{blue}{JU: #1}}
+\newcommand{\ja}[1]{\mynote{red}{JA: #1}}
+\newcommand{\sw}[1]{\mynote{green}{SW: #1}}
+\newcommand{\ao}[1]{\mynote{purple}{AO: #1}}
+\newcommand{\myparagraph}[1]{\smallskip \noindent \textbf{#1.}}
+\newcommand{\softmax}{\texttt{softmax}}
+% \newcommand{\ex}[2]{{\mathbb{E}_{\scriptscriptstyle #1} \left[#2\right]}}\newcommand{\pr}[2]{{\ifx\relax#1\relax \mathbb{P} \else \underset{#1}{\mathbb{P}} \fi \left(#2\right)}}
+\newcommand{\ex}[2]{{\ifx\relax#1\relax \mathbb{E} \else \underset{#1}{\mathbb{E}} \fi \left[#2\right]}}
+% \newcommand{\ex}[2]{\underset{#1}{\mathbb{E}\left[#2\right]}}
+\newcommand{\pr}[2]{{\ifx\relax#1\relax \mathbb{P} \else \underset{#1}{\mathbb{P}} \fi \left(#2\right)}}
+\newcommand{\var}[2]{{\ifx\relax#1\relax \mathrm{Var} \else \underset{#1}{\mathrm{Var}} \fi \left(#2\right)}}
+\newcommand{\cov}[2]{{\ifx\relax#1\relax \mathrm{Cov} \else \underset{#1}{\mathrm{Cov}} \fi \left(#2\right)}}
+\newcommand{\inn}[2]{\langle #1 \; , \; #2 \rangle}
+
+
+
+% \newcommand{\ju}[1]{\mynote{blue}{JU: #1}}
+% \newcommand{\ja}[1]{\mynote{red}{JA: #1}}
+% \newcommand{\sw}[1]{\mynote{green}{SW: #1}}
+% \newcommand{\ao}[1]{\mynote{purple}{AO: #1}}
+% \newcommand{\myparagraph}[1]{\smallskip \noindent \textbf{#1.}}
+% \newcommand{\softmax}{\texttt{softmax}}
+% \newcommand{\ex}[2]{{\mathbb{E}_{\scriptscriptstyle #1} \left[#2\right]}}\newcommand{\pr}[2]{{\ifx\relax#1\relax \mathbb{P} \else \underset{#1}{\mathbb{P}} \fi \left(#2\right)}}
+% \newcommand{\var}[2]{{\ifx&#1& \mathrm{Var} \else \underset{#1}{\mathrm{Var}} \fi \left(#2\right)}}
+% \newcommand{\cov}[2]{{\ifx&#1& \mathrm{Cov} \else \underset{#1}{\mathrm{Cov}} \fi \left(#2\right)}}
+% \newcommand{\inn}[2]{\langle #1 \; , \; #2 \rangle}
+
+% fixing left-right spacing
+% \let\originalleft\left
+% \let\originalright\right
+% \renewcommand{\left}{\mathopen{}\mathclose\bgroup\originalleft}
+
+
+\let\OldComment\Comment
+\renewcommand{\Comment}[1]{\textcolor{blue}{\OldComment{#1}}}
+
+\theoremstyle{plain}
+
+\newtheorem{thm}{Theorem}[section]
+    \newtheorem{clm}[thm]{Claim}
+    \newtheorem{lem}[thm]{Lemma}
+    \newtheorem{cor}[thm]{Corollary}
+    \newtheorem{fact}[thm]{Fact}
+\theoremstyle{definition}
+    \newtheorem{defn}[thm]{Definition}
+    \newtheorem{example}[thm]{Example}
+    \newtheorem{rem}[thm]{Remark}

@@ -1,0 +1,96 @@
+\documentclass[11pt, a4paper, logo, onecolumn]{googledeepmind}
+
+\pdfinfoomitdate 1
+\pdftrailerid{redacted}
+
+\newcommand\hmmax{0}
+\newcommand\bmmax{0}
+\usepackage{mystyle}
+
+\usepackage[textsize=tiny]{todonotes}
+\renewcommand{\today}{2025-6-12}
+\newenvironment{hproof}{%
+  \renewcommand{\proofname}{Sketch proof}\proof}{\endproof}
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+\newcommand{\RN}[1]{%
+  \textup{\uppercase\expandafter{\romannumeral#1}}%
+}
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{xcolor}         % colors
+\usepackage{listings}
+\usepackage{wrapfig}
+\usepackage{bbm}
+\usepackage[most,skins,theorems]{tcolorbox}
+\tcbset{
+  aibox/.style={
+    width=\linewidth,
+    top=7pt,
+    bottom=2pt,
+    colback=blue!4!white,
+    colframe=black,
+    colbacktitle=black,
+    enhanced,
+    center,
+    attach boxed title to top left={yshift=-0.1in,xshift=0.15in},
+    boxed title style={boxrule=0pt,colframe=white,},
+  }
+}
+\newtcolorbox{AIbox}[2][]{aibox,title=#2,#1}
+
+\DeclareMathAlphabet{\mathmybb}{U}{bbold}{m}{n}
+\newcommand{\1}{\mathmybb{1}}
+\definecolor{darkgreen}{RGB}{1,170,32}
+\definecolor{lightblue}{RGB}{1,122,190}
+\let\oldthanks\thanks
+\renewcommand{\thanks}[1]{\let\footnotemark\relax\oldthanks{#1}}
+\usepackage{stmaryrd}
+\title{Beyond Markovian: Reflective Exploration via Bayes-Adaptive RL for LLM Reasoning}
+
+\correspondingauthor{$^*$Work done during an internship at Google. $^\dagger$Equal advising. Correspondence to: shenao@u.northwestern.edu, zhaoran.wang@northwestern.edu, yunxuanli@google.com}
+
+\author[1$*$]{Shenao Zhang}
+\author[2]{Yaqing Wang}
+\author[2]{Yinxiao Liu}
+\author[2]{Tianqi Liu}
+\author[3]{Peter Grabowski}
+\author[3]{Eugene Ie}
+\author[1$\dagger$]{\\Zhaoran Wang}
+\author[3$\dagger$]{Yunxuan Li}
+
+\affil[1]{Northwestern University}
+\affil[2]{Google DeepMind}
+\affil[3]{Google}
+
+
+\begin{abstract}
+Large Language Models (LLMs) trained via Reinforcement Learning (RL) have exhibited strong reasoning capabilities and emergent reflective behaviors, such as rethinking and error correction, as a form of in-context exploration. However, the Markovian policy obtained from conventional RL training does not give rise to reflective exploration behaviors since the policy depends on the history only through the state and therefore has no incentive to enrich identical states with additional context. Instead, RL exploration is only useful during training to learn the optimal policy in a trial-and-error manner. Therefore, it remains unclear whether reflective reasoning will emerge during RL, or why it is beneficial. To remedy this, we recast reflective exploration within a Bayesian RL framework, which optimizes the expected return under a posterior distribution over Markov decision processes induced by the training data. This Bayesian formulation admits uncertainty-adaptive policies that, through belief updates, naturally incentivize information-gathering actions and induce self-reflection behaviors. Our resulting algorithm, BARL, instructs the LLM to stitch and switch strategies based on the observed outcomes, offering principled guidance on when and how the model should reflectively explore. Empirical results on both synthetic and mathematical reasoning tasks demonstrate that BARL outperforms conventional RL approaches, achieving superior test-time performance and token efficiency. Our code is available at \url{https://github.com/shenao-zhang/BARL}.
+\end{abstract}
+
+\begin{document}
+
+
+\maketitle
+
+\input{intro}
+\input{related_work}
+\input{background}
+\input{adaptive}
+\input{method}
+\input{example}
+\input{experiments}
+\input{conclusion}
+\input{ack}
+\bibliography{reference.bib}
+\bibliographystyle{plain}
+
+\appendix
+\input{appendix}
+\end{document}

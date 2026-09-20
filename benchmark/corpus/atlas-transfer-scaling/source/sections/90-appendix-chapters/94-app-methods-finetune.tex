@@ -1,0 +1,32 @@
+\subsection{Experimental Details: Scaling Laws Evaluation}
+\label{app:scaling-laws-evaluation}
+
+Typically, to evaluate fitted scaling laws, prior work has adopted the $R^2$ metric, for it's scale-invariant measure of a laws' explanatory power over the observed data.
+However, the choice of what data to hold-out as the test set can have a significant impact on the performance and it's interpretation \citep{li2025mis}.
+For this reason, and because multilingual scaling laws are used to measure more than just the predictive power of the law to larger scales, we use a set of different $R^2$ metrics to measure different objectives.
+These are:
+\begin{enumerate}
+    \item \textbf{$R^2$} Hold-out a randomly selected $20\%$ of the data points from the data. This gives an impression of the models' ability to fit the variance, without measuring particular dimensions of fit.
+    \item \textbf{$R^2(D)$} Hold-out the training runs with training tokens with the top $20\%$ of $D$ tokens.
+    \item \textbf{$R^2(N)$} --- Hold-out a couple of scales of model sizes, including the largest: $N=660M$ and $N=8B$ parameters.
+    \item \textbf{$R^2(C)$} Hold-out the largest compute parts of the training runs, where $C=6ND$ FLOPs. This will include mainly a combination of the larger model sizes, and longer training runs.
+    \item \textbf{$R^2(M)$} Hold-out all mixtures that are not monolingual, bilingual, or unimax. This allows the scaling law to get a baseline sense of each interacting language, but it has to infer the rest of the mixture scaling properties.
+\end{enumerate}
+
+These metric variants allow us to unpack specifically where the scaling laws perform well, and for what purposes they are reliable.
+
+
+\subsection{Experimental Details: Language Finetuning}
+\label{app:language-finetune-details}
+
+In \Cref{sec:finetune} we experiment with continuous pretraining on a single language, starting from a massively multilingual model's checkpoint.
+For clarity, we refer to this as \emph{finetuning}, to distinguish it from pretraining from scratch.
+
+We begin by training massively multilingual models, using \textsc{Unimax} \citep{chung2023unimax} language sampling across all $420$ languages in MADLAD-400.
+\citet{chung2023unimax} demonstrate this is an effective sampling strategy to perform well across languages, as is the objective with many large multilingual models.
+The \textsc{Unimax} sampling rate per language is documented in \Cref{tab:unimax-rates}
+Each of these models we train for $1T$ tokens, to reflect real-world practices.
+
+Using these \unimax{} checkpoints, across model scales, we then conduct continuous monolingual pretraining (which we call \emph{finetuning} here) on all 48 languages separately in \Leval.
+While finetuning, we also observe the loss across all \Leval languages as well. We use the same hyperparameters as discussed for pretraining, but reset the learning schedule, and train for at least another $30k+$ steps.
+These empirical results allow us to compare (across a range of $N,D,C$) the loss on language $t$ between a model finetuned from a \unimax{} checkpoint, and a model pretrained monolingually from scratch on language $t$.

@@ -1,0 +1,36 @@
+\begingroup
+% Tighter columns + slightly taller rows for readability
+\setlength{\tabcolsep}{3.8pt}
+\renewcommand{\arraystretch}{1.08}
+
+\begin{table*}[ht]
+  \centering
+  \small
+  \caption{%
+  The $R^2$ evaluation metrics for the fitted scaling laws, holding out separate dimensions of generalization: the largest model sizes $N$, most training tokens $D$, most compute $C$, and unique multilingual training mixtures $M$. In both monolingual and multilingual settings, we average $R^2$ across languages=[EN, FR, RU, ZH, HI, SW], including [ES, DE] for the multilingual setting. \textbf{We find \ourscl{} outperforms prior work in Monolingual and Multilingual settings.} We ablate the use of the terms for $D_{\mathrm{other}}$ and transfer languages ($\sum_{\mathcal{K}_{t}}D_i$).}
+  \begin{tabular}{@{}>{\centering\arraybackslash}m{3mm}|@{\hspace{2pt}}l@{\hspace{6pt}}c@{\hspace{4pt}}c@{\hspace{4pt}}c@{\hspace{4pt}}c@{\hspace{4pt}}c@{}}
+    \toprule
+    & \textsc{Scaling Laws} & \textbf{$R^2$} & \textbf{$R^2(N)$} & \textbf{$R^2(D)$} & \textbf{$R^2(C)$} & \textbf{$R^2(M)$} \\
+    \addlinespace[1pt]
+    \cmidrule(l{4pt}r{4pt}){2-7}
+
+    \rowgroup{3}{Mono.}
+    & \basicscl{} \citep{hoffmann2022training}                  & 0.94 & 0.68 & 0.94 & 0.90 & -- \\
+    & \textsc{Data-Constrained Scaling Law} \citep{muennighoff2024scaling}       & 0.93 & 0.78 & 0.93 & 0.88 & -- \\
+    & \textbf{\underline{[Ours]}} \oursclabb{} \textsc{($D_t$ only)}              & 0.92 & \textbf{0.88} & 0.91 & 0.88 & -- \\
+    \addlinespace[2pt]
+    \cmidrule(l{4pt}r{4pt}){2-7}
+
+    \rowgroup{5}{Multi.}
+    & \basicscl{} \citep{hoffmann2022training}                             & 0.64 & -0.99 & 0.72 & 0.66 & 0.61 \\
+    % \cmidrule(l{4pt}r{4pt}){2-7}
+    & \textsc{Multilingual Scaling Law} \citep{he2024scaling}& 0.67 & -0.65 & 0.73 & 0.67 & 0.70 \\
+    & \textbf{\underline{[Ours]}} \oursclabb{} \textsc{($D_t$ only)}                       & 0.70 & -0.75 & 0.80 & 0.72 & 0.64 \\
+    & \textbf{\underline{[Ours]}} \oursclabb{} \textsc{($D_t+D_{\mathrm{other}}$)}         & \textbf{0.98} & \textbf{0.89} & \textbf{0.97} & \textbf{0.97} & 0.66 \\
+    & \textbf{\underline{[Ours]}} \oursclabb{} \textsc{($D_t+D_{\mathrm{other}}+\sum_{\mathcal{K}_t}D_i$)} & \textbf{0.98} & \textbf{0.89} & \textbf{0.96} & \textbf{0.98} & \textbf{0.82} \\
+    \bottomrule
+  \end{tabular}
+  \label{tab:evaluations}
+  \vspace{-2mm}
+\end{table*}
+\endgroup

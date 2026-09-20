@@ -1,0 +1,1645 @@
+\documentclass{article} % For LaTeX2e
+\usepackage{iclr2026_conference,times}
+
+% Optional math commands from https://github.com/goodfeli/dlbook_notation.
+%\input{math_commands.tex}
+
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{xcolor}         % colors
+
+\usepackage[labelformat=parens]{subcaption}
+\usepackage{enumitem}
+
+
+\usepackage{comment}
+\usepackage{amsthm, thm-restate}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{conjecture}{Conjecture}
+
+\newtheorem{problem}{Problem}
+\newtheorem*{remark}{Remark}
+\newtheorem*{observation}{Observation}
+\newtheorem*{discussion}{Discussion}
+
+\usepackage{wrapfig}
+
+\newtheorem{definition}{Definition}
+\usepackage[noend]{algpseudocode}
+%\usepackage{subfigure}
+\usepackage{amsfonts}
+\usepackage{algorithm}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{bbm}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{multirow} 
+
+\usepackage{tabularx, makecell, booktabs}
+
+\usepackage{mathtools}
+%\usepackage{subcaption}
+\captionsetup[subfigure]{aboveskip=0pt,belowskip=0pt}
+
+
+
+% from https://tex.stackexchange.com/questions/468597/convert-decimal-to-percentage-value
+\usepackage{siunitx}
+\newcommand\pc[2][round-precision=1]{% default precision: 1
+    \SI[round-mode = places,
+        scientific-notation=fixed, fixed-exponent= 0,
+        output-decimal-marker={.}, #1]{#2e2}{\percent}%
+}
+\newcommand\res[3][round-precision=1]{% default precision: 1
+    \SI[round-mode=places, scientific-notation=fixed, fixed-exponent=0, output-decimal-marker={.},#1]{#2}{}%
+    \pm%
+    \SI[round-mode=places, scientific-notation=fixed, fixed-exponent=0, output-decimal-marker={.},#1]{#3}{}%\percent
+}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+\usepackage{xspace}
+\makeatletter
+\DeclareRobustCommand\onedot{\futurelet\@let@token\@onedot}
+\def\@onedot{\ifx\@let@token.\else.\null\fi\xspace}
+
+\def\iid{{i.i.d}\onedot}
+\def\eg{{e.g}\onedot} \def\Eg{{E.g}\onedot}
+\def\ie{{i.e}\onedot} \def\Ie{{I.e}\onedot}
+\def\cf{{c.f}\onedot} \def\Cf{{C.f}\onedot}
+\def\etc{{etc}\onedot} \def\vs{{vs}\onedot}
+\def\wrt{w.r.t\onedot} \def\dof{d.o.f\onedot}
+\def\etal{\emph{et al}\onedot}
+\makeatother
+
+
+\newcommand{\Method}{Banded Inverse Square Root Factorization\xspace}
+\newcommand{\method}{banded inverse square root factorization\xspace}
+\newcommand{\SR}{SR\xspace}
+\newcommand{\acronym}{BISR\xspace}
+\newcommand{\AOF}{AOF\xspace}
+\newcommand{\AOFFull}{Approximately Optimal Factorization\xspace}
+\newcommand{\AOFfull}{approximately optimal factorization\xspace}
+
+\newcommand{\A}{\mathcal{A}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Ecal}{\mathcal{E}}
+\renewcommand{\H}{\mathcal{H}}
+\renewcommand{\O}{\mathcal{O}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\Y}{\mathcal{Y}}
+\newcommand{\Z}{\mathcal{Z}}
+
+\newcommand{\blue}[1]{\textcolor{blue}{#1}}
+\newcommand{\orange}[1]{\textcolor{orange}{#1}}
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+\newcommand{\chl}[1]{\blue{CHL: #1}}
+\newcommand{\nk}[1]{\orange{NK: #1}}
+\newcommand{\ju}[1]{\red{JU: #1}}
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+
+\newcommand{\sens}{\operatorname{sens}}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\Fr}{F}
+\newcommand{\trace}{\operatorname{trace}}
+\newcommand{\Id}{\operatorname{Id}}
+%\newcommand{\lim}{\operatorname{lim}}
+
+\renewcommand{\b}[1]{{|#1|}} % notation for bandedness
+\newcommand{\toep}{\operatorname{LDToep}}
+
+\renewcommand{\paragraph}[1]{\noindent\textbf{#1}\quad}
+\newcommand{\senskb}{\operatorname{sens}_{k, b}}
+
+\usepackage{listings}
+
+\iclrfinalcopy
+
+\title{Back to Square Roots: An Optimal Bound on the Matrix Factorization Error for Multi-Epoch Differentially Private SGD}
+
+
+\author{%
+  Nikita P.  Kalinin  \\
+  Institute of Science and Technology (ISTA)\\
+  Klosterneuburg, Austria \\
+  \texttt{nikita.kalinin@ist.ac.at} \\
+  % examples of more authors
+  \And
+   Ryan McKenna  \\
+  Google Research\\
+  \texttt{mckennar@google.com} \\
+  \And
+   Jalaj Upadhyay  \\
+  Rutgers University\\
+  New Jersey, USA \\
+  \texttt{jalaj.upadhyay@rutgers.edu} \\
+  \And
+   Christoph H. Lampert \\
+   Institute of Science and Technology (ISTA) \\
+   Klosterneuburg, Austria \\
+   \texttt{chl@ist.ac.at} \\
+}
+
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+
+\iclrfinalcopy % Uncomment for camera-ready version, but NOT for submission.
+\begin{document}
+
+
+\maketitle
+
+\begin{abstract}
+ Matrix factorization mechanisms for differentially private training have emerged as a promising approach to improve model utility under privacy constraints. In practical settings, models are typically trained over multiple epochs, requiring matrix factorizations that account for repeated participation. Existing  theoretical upper and lower bounds on multi-epoch factorization error leave a significant gap. In this work, we introduce a new explicit factorization method, Banded Inverse Square Root (BISR), which imposes a banded structure on the inverse correlation matrix. This factorization enables us to derive an explicit and tight characterization of the multi-epoch error. We further prove that BISR achieves asymptotically optimal error by matching the upper and lower bounds. Empirically, BISR performs on par with state-of-the-art factorization methods, while being simpler to implement, computationally efficient, and easier to analyze. 
+
+\end{abstract}
+
+\section{Introduction}
+Private machine learning has become increasingly important as the use of sensitive data in model training continues to grow. Ensuring privacy while maintaining model accuracy presents a critical challenge, particularly in fields like healthcare, finance, and personal data analysis. \textit{Differential Privacy} (DP) has emerged as a fundamental framework for formalizing privacy guarantees in machine learning. It provides a mathematically rigorous way to limit the influence of any individual data point on the model's output, thereby preserving privacy. One effective approach to achieving DP in iterative training is through the use of structured noise mechanisms that balance privacy guarantees with model utility.
+
+In this work, we focus on the \textit{Matrix Factorization Mechanism} (see Section~\ref{sec:matrix_factorization} for a formal description) for ensuring DP. Matrix factorization has been extensively studied in recent years in the broader machine learning application \citep{Kairouz, Denisov, ConstantMatters, henzinger2023almost, choquette2022multi, andersson2023smooth, Henzinger, kalinin2024, henzinger2025improved, pillutla2025correlated, henzinger2025normalized}. It has also been investigated in private optimization \citep{koloskova2023gradient, choquette2023correlated}, federated learning \citep{zhang2025locally, bienstock2025dmm}, and in the context of adaptive optimizers \citep{kalinin2025continual, ganesh2025design}. In particular, memory-efficient matrix factorization has attracted significant attention in recent years \citep{hasslefree2024, dvijotham2024efficient, andersson2024streaming, henzinger2025binned}.
+
+The approach has also been adopted in practice; for example, Google has reported its use for training production on-device language models in their 2024 blog post ''Advances in private training for production on-device language models" \citep{xu2024advances}. The core idea of the MF mechanism is to inject correlated noise into the gradients during training. The correlations are determined by the inverse of a matrix $C \in \mathbb{R}^{n \times n}$, referred to as the \emph{strategy matrix}. While $C$ serves as a factor in the matrix factorization that defines the mechanism and used in calculation of the privacy level, its inverse $C^{-1}$ functions as the \emph{correlation matrix}, specifying how the injected noise is correlated across training steps. This structure allows the mechanism to preserve model accuracy while still guaranteeing privacy.
+
+{Intuitively, the mechanism can be seen as follows: at each training step, fresh noise is generated and added, but part of the previous noise is stored in a buffer. In subsequent steps, portions of the stored noise are subtracted in a controlled manner. This cancellation effect reduces the total amount of noise that accumulates in the model, thereby improving utility without weakening privacy guarantees.}
+
+
+{When computing privacy, we must account for \emph{multi-epoch participation}, since in multi-epoch training the same datapoints are used multiple times. The notion of multi-epoch participation in the context of matrix factorization was first introduced by \citet{choquette2023amplified}, where it was formulated as an optimization problem over banded matrices.} 
+However, a key limitation of existing methods is the lack of precise theoretical guarantees on the \textit{factorization error} in multi-epoch participation. While \citet{kalinin2024} established a general lower bound and provided an upper bound for \textit{Square Root Factorization}, the error bounds for \textit{Banded Square Root Factorization}, where the correlation matrix $C$ is $p$-banded, remained imprecise with respect to the bandwidth $p$. 
+
+In this work, we propose a novel approach to matrix factorization: rather than imposing a banded structure on the correlation matrix $C$, we introduce a \textit{banded inverse square root}, enforcing the banded structure on $C^{-1}$. This shift\footnote{The inverse correlation matrix has been receiving more attention recently. In the concurrent work \citet{mcmahan2025inversion}, the authors consider the inverse correlation matrix of BLT.} offers several key advantages. First, it allows for precise control over the resulting factorized matrices, enabling us to derive \textbf{explicit upper bounds} on the factorization error with clear dependence on the bandwidth. Second, the method is \textbf{computationally efficient}, as it requires one just to convolve the previous noise with a quickly computable fixed sequence of coefficients, which can be done for instance via Fast Fourier Transform (FFT), making it suitable for large-scale machine learning tasks. Most importantly, we prove that our method achieves \textbf{asymptotically optimal factorization error}: we establish a \textbf{new lower bound} that matches our upper bound, closing a significant theoretical gap in the literature.
+
+By refining the theoretical understanding of banded factorization in multi-epoch settings, our work provides both theoretical insights and practical benefits for privacy-preserving ML training.
+Our main contributions are: \begin{enumerate}[leftmargin=5mm,parsep=0pt]
+\item We introduce a new factorization method, the \textbf{\emph{Banded Inverse Square Root (\acronym)}}, which is scalable, efficient, and agnostic to the underlying training objective. 
+\item We prove that \acronym is \textbf{asymptotically optimal}, by deriving tight upper and lower bounds on the multi-epoch factorization error, with explicit dependence on bandwidth and workload properties. \item We conduct a thorough empirical evaluation, comparing \acronym to existing techniques in multi participation training—including Banded Square Root (BSR) \citep{kalinin2024}, Buffered Linear Toeplitz (BLT) \citep{dvijotham2024efficient}, and Banded Matrix Factorization (Band-MF) \citep{scalingmckenna2024}, showing that \acronym achieves a higher or comparable accuracy for the large matrix sizes.
+\item In the low-memory regime, we propose an optimization method, \textbf{BandInvMF}, which directly optimizes the coefficients of the matrix $C^{-1}$. This approach achieves error rates comparable to state-of-the-art factorization methods, while being easy and efficient to implement. 
+\end{enumerate}
+
+
+\section{Background}
+\label{sec:background}
+
+\subsection{Matrix Factorization (MF)}
+\label{sec:matrix_factorization}
+MF mechanisms provide a promising approach to the private matrix multiplication problem, which has applications in continual counting and Stochastic Gradient Descent for machine learning. Specifically, we aim to estimate the product of a public matrix of coefficients $A \in \mathbb{R}^{n\times n}$ and a private matrix $X \in \mathbb{R}^{n \times d}$. Instead of doing so directly, we adopt a factorization $A = BC$, allowing us to estimate $AX$ privately as $\widehat{AX} = B(CX + Z) = A(X + C^{-1}Z)$. Here, $Z \sim \mathcal{N}(0, s^2)^{n \times d}$ is appropriately scaled Gaussian noise, which ensures that $CX + Z \in \mathbb R^{n \times d}$ is private; the multiplication by $B$ preserves the privacy guarantees due to DP's post-processing property. 
+
+The choice of factorization $A = BC$ can significantly impact the quality of the private estimation.  % approximation error
+%
+We quantify the \emph{approximation quality} by the expected Frobenius error of the estimated product, 
+\begin{equation}
+\mathcal{E}(B,C)^2 = \frac{1}{n}\mathbb{E}_Z \|AX - \widehat{AX}\|_\mathrm{F}^2,\label{eq:approximation_error}
+\end{equation}
+where $\|\cdot\|_\mathrm{F}$ is the Frobenius norm. An elementary analysis~\citep{Li_MF} shows that 
+\begin{equation}
+    \mathcal{E}(B,C)^2 = \frac{s^2}{n} \|B\|^2_\mathrm{F},
+\end{equation}
+and that the required noise strength, $s$, scales proportionally to the \emph{sensitivity} of the matrix $C$. Let $X \sim X'$ indicate that the update vector sequences differ only in the entries corresponding to a single data item. Then the sensitivity of the matrix $C$ is defined as  
+\begin{equation}
+    \text{sens}(C) := \sup_{X \sim X'} \|CX - CX'\|_\mathrm{F}
+\end{equation}
+
+
+\textbf{Private SGD.} In this work, we consider the task of model training with SGD with (optional) weight decay and momentum.
+%
+The corresponding update equations are $\theta_{i+1} = \alpha\theta_{i} - m_{i+1}$ and $m_{i+1}=\beta m_i + x_i$, 
+where $\theta_1,\dots,\theta_n\in\R^{D}$ are the model parameters after each update step, 
+$x_1,\dots,x_n$ are the gradient vectors computed in each update step, $0< \alpha \leq 1$ is the weight decay factor, 
+and $0\leq \beta<1$ is the momentum strength
+\footnote{For simplicity of exposition, we use an implicit learning rate of $1$. Because of the linearity of the operations, the 
+general case can be recovered by pre-scaling $x_1,\dots,x_n$ accordingly.}.
+
+Following~\citet{kalinin2024}, we rewrite the dynamics in the matrix form as $\Theta=A_{\alpha, \beta}X$, 
+with $\Theta=(\theta_1,\dots,\theta_n)^\top\in\R^{n\times D}$, $X=(x_1,\dots,x_n)^\top\in\R^{n\times D}$,
+and $A_{\alpha,\beta}$ is the \emph{SGD workload matrix} defined as follows:
+\begin{equation}
+    A_{\alpha,\beta} = \begin{pmatrix}
+        1 & 0 &  \cdots & 0 \\
+        \alpha + \beta & 1 &  \cdots & 0 \\
+        \vdots & \vdots  & \ddots & \vdots \\
+        \sum\limits_{j = 0}^{n - 1}\alpha^{j}\beta^{n - 1 - j} & \sum\limits_{j = 0}^{n - 2}\alpha^{j}\beta^{n - 2 - j} & \cdots & 1
+    \end{pmatrix}\in\R^{n\times n}.\label{eq:A_alpha_beta}
+\end{equation}
+
+Note that, in contrast to the naive MF setting, in the SGD case any input data (gradient) $x_i$ depends 
+on the previously computed model parameters, $\theta_{i-1}$, that is, we aim for \emph{adaptive privacy}.  
+%
+However, \citet{Denisov} shows that for Gaussian noise, adaptive privacy follows from the non-adaptive one,
+\ie, it suffices for us to solve the case in which the $X$ matrix is an arbitrary fixed data matrix. 
+%
+Consequently, we estimate $A_{\alpha, \beta}X$ privately using the form $\widehat{A_{\alpha, \beta}X} = A_{\alpha, \beta}(X + C^{-1}Z)$.
+%
+This form corresponds to running SGD, but each individual gradient update is perturbed by a correlated noise vector. 
+%
+That has the advantage that we do not need to store any previous gradients, and we can rely on any existing implementation of the SGD procedure.
+
+In multi-epoch SGD, each data sample might contribute to more than one gradient update vector. 
+%
+As a suitable notion of sensitivity, we adopt the setting of $b$-min-separated repeated participation~(two participations of 
+any data point occur at least $b$ update steps apart). The resulting sensitivity can be bounded as \citet{choquette2023amplified}:
+\begin{equation}
+\label{eq:sens_k_b}
+    \text{sens}_{k,b}(C) \leq \max_{\pi \in \Pi_{k,b}} \sqrt{\sum_{i,j \in \pi} |(C^\top C)_{[i,j]}|}
+\end{equation}
+where $\Pi_{k,b}$ denotes the collection of index sets drawn from $\{1,\ldots,n\}$ that contains at most $k$ elements and satisfy the condition that any two distinct indices are separated by at least $b$ positions, so that no two indices in the set lie closer than $b$ apart.
+
+This bound becomes an equality in the case where all entries of $C^\top C$ are non-negative.
+
+
+\begin{figure}[t!]
+    \centering
+    \includegraphics[width=\linewidth]{images/BISR_noise_illustration.pdf}
+    \caption{
+    Illustration of noise correlation using the Banded Inverse Square Root (BISR) method with bandwidth $p=3$. For example, at step $4$, we form a new aggregate from a sampled batch of clipped gradients $x_4$. We take the noise vectors $z_2$ and $z_3$ from the Noise Buffer and add them to the gradient with coefficients $c_1=-\tfrac{1}{2}$ and $c_2=-\tfrac{1}{8}$, respectively. We then generate a new noise vector $z_4$ and add it directly to obtain the private estimate $\hat{x}_4$. Finally, we remove $z_2$ from the buffer and insert $z_4$ in its place.
+    }
+    \label{fig:illustration}
+\end{figure}
+
+\subsection{{Privacy Guarantees}}
+
+The privacy analysis of our mechanism relies on the well-established Gaussian mechanism, 
+which allows achieving arbitrary $(\varepsilon,\delta)$-differential privacy levels by 
+calibrating the noise variance to the sensitivity of the underlying query. 
+In particular, Theorem~2.1 of \citet{Denisov} states that the guarantees proved 
+for the nonadaptive continual release model extend to the fully adaptive setting 
+under a suitable factorization of the query matrix. 
+This ensures that the same differential privacy guarantees hold even when 
+the input stream is chosen adaptively. 
+A related multi-epoch variant was studied in \citet{choquette2023amplified}, which corresponds 
+to a specific choice of the notion of neighboring streams.  
+
+\begin{theorem}{\em \cite[Theorem~2.1]{Denisov}}
+Let $A \in \mathbb{R}^{n \times n}$ be a lower-triangular full-rank query matrix, 
+and let $A = BC$ be any factorization with the following property: 
+for any two neighboring streams of vectors $G, H \in \mathbb{R}^{n \times d}$, differing only in positions of participation of a single user, 
+we have $\lVert C(G - H) \rVert_F \;\leq\; \kappa$. Let $Z \sim \mathcal{N}(0, \kappa^2\sigma^2)^{n \times d}$ with $\sigma$ large enough so that 
+\[
+\mathcal{M}(G) \;=\; AG + BZ \;=\; B(CG + Z)
+\]
+satisfies $(\varepsilon, \delta)$-DP  in the 
+nonadaptive continual release model. 
+Then $\mathcal{M}$ satisfies the same DP guarantee (with the same parameters) 
+even when the rows of the input are chosen adaptively.
+\end{theorem}
+
+Formally, the privacy guarantee of the Gaussian mechanism itself is characterized 
+by the following analytic condition due to \citet{balle2018improving}, which provides the exact 
+relationship between the sensitivity, the privacy parameters, and the variance 
+of the added Gaussian noise:
+
+\begin{theorem}[Analytic Gaussian Mechanism {\citep{balle2018improving}}]
+Let $f : \mathcal{X} \to \mathbb{R}^d$ be a function with global $\ell_2$ sensitivity $\Delta$. 
+For any $\varepsilon \geq 0$ and $\delta \in [0,1]$, the Gaussian output perturbation mechanism
+$M(x) = f(x) + Z$ {with} $Z \sim \mathcal{N}(0, \sigma^2 \mathbb I_d)$ 
+is $(\varepsilon, \delta)$-DP if and only if
+\begin{equation*}
+\Phi\!\left(\tfrac{\Delta}{2\sigma} - \tfrac{\varepsilon\sigma}{\Delta}\right) 
+- e^{\varepsilon} \, \Phi\!\left(-\tfrac{\Delta}{2\sigma} - \tfrac{\varepsilon\sigma}{\Delta}\right) 
+\;\leq\; \delta .
+\end{equation*}
+\end{theorem}
+
+This condition enables tight calibration of the noise level $\sigma$ for any target 
+privacy parameters $(\varepsilon,\delta)$. 
+
+\textbf{Optimal factorization.} 
+%
+Better choices of factorization matrices can achieve the same privacy levels with less added noise, 
+potentially leading to higher utility. 
+%
+Therefore, various factorizations have been proposed and studied theoretically as well as empirically. 
+%
+
+\citet{choquette2023amplified} defines the \emph{optimal factorization} as the one that 
+minimizes the expected approximation error~\eqref{eq:approximation_error},
+and proposed an optimization problem to (approximately) compute this factorization. 
+%
+A downside of this approach is that the optimization problem is computationally expensive 
+and the numeric solution does not provide theoretical insights, such as the optimal 
+(\ie lowest) rate of growth of the approximation error. 
+
+On the other hand, a square root factorization introduced by \citet{Henzinger}, is an explicit factorization, defined by $A_{\alpha, \beta} = C_{\alpha, \beta}^2$, with positive main diagonal.
+%
+\citet{kalinin2024} showed that the factorization error of the square root factorization under 
+multi-epoch participation is worse than that of the optimal factorization and they introduced 
+{\em banded square root} (BSR) factorization, which is defined by making the matrix $C_{\alpha, \beta}$ banded. 
+%
+A limitation of BSR is that its guarantees are implicit in terms of the used bandwidth, which does not allow concluding how they relate to the optimal multi-epoch factorization at a theoretical level. 
+
+
+
+\section{\Method}
+
+
+
+\begin{algorithm}[t]
+\caption{Differentially Private SGD with Banded Inverse Matrix Factorization}
+\label{alg:dp-sgd-bisr}
+\begin{algorithmic}[1]
+\Require Initialization $\theta_0 \in \mathbb{R}^d$, dataset $\mathcal{D}$, batch size $B$, clip norm $\zeta$, learning rate $\eta>0$, weight decay $0<\alpha\le 1$, momentum $0\le \beta<1$, loss $\ell(\theta,d)$, noise multiplier $\sigma_{\epsilon, \delta}>0$, coefficients of the banded inverse Toeplitz correlation matrix $C^{-1}$: $(c_0,\dots,c_{p-1})$
+\State Initialize $m_0 \gets \mathbf{0} \in \mathbb{R}^d$
+\For{$i=1$ to $n$}
+    \State Sample a minibatch $S_i = \{d_1,\dots,d_B\} \subseteq \mathcal{D}$
+    \For{$j=1$ to $B$}
+        \State $g_j \gets \nabla_\theta \,\ell(\theta_{i-1}, d_j)$
+        \State $\tilde g_j \gets \min\!\big(1, \frac{\zeta}{\|g_j\|}\big)\, g_j$ \Comment{per-example clipping}
+    \EndFor
+    \State $x_i \gets \sum_{j=1}^{B} \tilde g_j$ \Comment{aggregate clipped gradients}
+    \State Draw $Z_i \sim \mathcal{N}(0,\sigma_{\epsilon, \delta}^2 \mathbb I_d)$
+    \State $\hat x_i \gets x_i + \zeta \sum_{t=0}^{\min(p, i) - 1} c_t \, Z_{i-t}$ \Comment{BISR noise injection}
+    \State $m_i \gets \beta\, m_{i-1} + \hat x_i$ \Comment{momentum update}
+    \State $\theta_i \gets \alpha\, \theta_{i-1} - \eta\, m_i$ \Comment{weight decay + step}
+\EndFor
+\State \textbf{return} $\theta_n$
+\end{algorithmic}
+\end{algorithm}
+
+
+In this section, we present our main theoretical results: we prove a new lower bound on the achievable approximation error
+(Theorem~\ref{thm:lowerbound}), we introduce the BISR factorization (Definition~\ref{def:bisr}), and we prove that 
+BISR achieves this (therefore optimal) rate (Theorem~\ref{thm:multi_epoch_error_upper_bound}).
+
+
+We first show an improved version of the lower bounds of the approximation error for general factorizations from~\citet{kalinin2024}.
+
+\begin{restatable}[General Multi-Participation Lower Bound]{theorem}{LowerBound}
+\label{thm:lowerbound}
+Let $A_{\alpha, \beta}\in\R^{n\times n}$ be the SGD workload matrix~\eqref{eq:A_alpha_beta}, with momentum $\beta >0$ and weight decay $\alpha > 0$.
+%
+In the multi-participation setting with separation $1\le b \leq n$ and $k = \lceil\frac{n}{b}\rceil$,
+for any factorization $A_{\alpha, \beta} = BC$, it holds 
+\begin{equation}
+\mathcal{E}(B,C) = \begin{cases}
+\Omega( \sqrt{k}\log n + k) &\text{if} \quad \alpha = 1,\\
+\Omega_{\alpha}( \sqrt{k}) &\text{if} \quad \alpha < 1.
+\end{cases}\label{eq:lowerbound}
+\end{equation}
+\end{restatable}
+\begin{proof}
+    [Proof Sketch]
+We use the probabilistic method in Lemma~\ref{lem:k_b_lower_bound_new} to obtain the bounds $\Omega_{\alpha}(\sqrt{k})$ for $\alpha < 1$ and $\mathcal{E}(B,C) = \Omega(\sqrt{k} \log n)$ for $\alpha = 1$. It remains to prove that for $\alpha = 1$, we also have the lower bound $\mathcal{E}(B,C) = \Omega(k)$. For that, we prove a general inequality: given a valid participation vector $\boldsymbol{\pi}$, we have $\mathcal{E}(B, C) \ge \tfrac{1}{n} \|A_{1, \beta} \boldsymbol{\pi}\|_2$.
+\end{proof}
+
+
+As our second main contribution, we now introduce the BISR factorization for multi-epoch SGD. 
+% 
+\begin{definition}[Banded Inverse Square Root (BISR)]
+\label{def:bisr}
+For a given workload matrix $A$, let $C$ be the matrix square root (\ie $C^2 = A$) with positive values on the diagonal. 
+%
+Let $C^{p}$ be the matrix obtained by: i) computing the inverse matrix $C^{-1}$, ii) imposing a banded structure with $p$ bands by setting all elements below the $p$-th diagonal to zero, iii) inverting the resulting banded matrix back. Then, we denote by BISR the matrix factorization $A = B^p C^p$, with $B^p = A (C^p)^{-1}$. 
+\end{definition}
+
+BISR can be seen as an alternative realization of the insights behind the BSR (Banded Square Root) factorization from~\citet{kalinin2024}. 
+%
+There, the intuition was that making the matrix $C$ $p$-banded reduces its sensitivity without 
+increasing the Frobenius norm of the subsequent postprocessing matrix too much, thereby resulting 
+in an overall reduction of the approximation error. 
+%
+The authors did not derive exact rates, though, because the dependence on $p$ is not explicit.
+
+For BISR, we instead make the matrix $C^{-1}$ $p$-banded. This also leads to a reduction of the 
+approximation error compared to the non-banded case, but with two additional advantages. 
+%
+First, the resulting algorithm (see Algorithm~\ref{alg:dp-sgd-bisr} and Figure~\ref{fig:illustration} for the illustration) is time- and memory-efficient because the product of $(C^p)^{-1}Z$ can be represented as a convolution with $p$ elements. Therefore, the computation can be performed efficiently: in a streaming setting, only $p$ rows of the matrix $Z$ need to be stored at any time, while in an offline setting (which requires more storage), it can be accelerated further using the Fast Fourier Transform.
+%
+Second, and mainly, it allows us to derive more explicit expressions of the approximation error with
+respect to the bandwidth $p$. In particular, we show the following.
+
+\begin{restatable}[\acronym Approximation Error]{theorem}{maintheorem}
+\label{thm:multi_epoch_error_upper_bound}
+For $1 \le p \le n$ and $1 \le k \le \frac{n}{b}$ the following upper bound holds for the matrix factorization error 
+of the BISR $A_{\alpha, \beta} = B_{\alpha, \beta}^pC_{\alpha, \beta}^p$ (as in Definition \ref{def:bisr}):
+\begin{equation}
+\mathcal{E}( B_{\alpha, \beta}^p, C_{\alpha, \beta}^{p}) = 
+\begin{cases}  O_{\beta}\left(\sqrt{k}\log p + \sqrt{\frac{nk}{b}} + \sqrt{\frac{nk\log p}{p}} + \sqrt{\frac{kp\log p}{b}}\right) \quad &\text{for}  \quad \alpha = 1,\\
+O_{\alpha, \beta}(\sqrt{k}) \quad &\text{for}  \quad \alpha < 1,\\
+\end{cases}\label{eq:multi_epoch_error_upper_bound}
+\end{equation} 
+where $O_{\alpha,\beta}$ and $O_{\beta}$ indicate that the hidden constant may depend on $\alpha$ and $\beta$, respectively.
+\end{restatable}
+\begin{proof}
+    [Proof sketch] 
+    To prove Theorem~\ref{thm:multi_epoch_error_upper_bound}, we use Lemma~\ref{lem:b_beta_bounds} to bound the Frobenius norm $\|B^{p}_{\alpha, \beta}\|_F$. Then, Theorem 2 from \citet{kalinin2024} (see Theorem~\ref{thm:b-sensitivity}), together with monotonicity of values $C_{\alpha, \beta}^p$ from Lemma~\ref{lem:monotonically_decreasing_values}, provides an explicit way to express the sensitivity $\senskb(C_{\alpha, \beta})$. To bound the sensitivity, we apply Lemma~\ref{lem:c_beta_p_bounds} to bound individual values. The product of the bounds on $\|B^{p}_{\alpha, \beta}\|_F$ and $\senskb(C_{\alpha, \beta})$ yields the result. The full proof of Theorem~\ref{thm:multi_epoch_error_upper_bound} can be found in the appendix.
+\end{proof}
+
+
+
+For comparison, \citet{kalinin2024} proved a bound 
+$O\left(\sqrt{\frac{nk \log p}{p}}\right) + O_{p}(\sqrt{k})$ on the 
+approximation error of the BSR in the case $\alpha=1$, $\beta=0$.
+%
+While the first term also appears in \eqref{eq:multi_epoch_error_upper_bound}, the second is non-informative about the effect of the bandwidth, $p$.  Therefore, it does not allow making a statement about the optimality of the BSR.
+
+In contrast, Theorem~\ref{thm:multi_epoch_error_upper_bound} is explicit about
+the role of $p$. Choosing its value to be $O(b\log b)$, such that the occurring terms in~\eqref{eq:multi_epoch_error_upper_bound}
+are  minimized, we obtain the following corollary.
+
+\begin{corollary}[Optimized \acronym Approximation Error]
+\label{cor:optimized_error_upper_bound}
+Let $A_{\alpha, \beta} = B_{\alpha, \beta}^p C_{\alpha, \beta}^p$ be the BISR factorization defined of Definition~\ref{def:bisr}.
+For $1 \le b \le n$ let $k = \lceil\frac{n}{b}\rceil$. Then, for $p^* =O( b \log b)$, the matrix factorization error 
+admits the following optimized upper bound: 
+\begin{equation}
+\mathcal{E}(B_{\alpha, \beta}^{p^*}, C_{\alpha, \beta}^{p^*}) = 
+\begin{cases}
+ O_{\beta}\left(\sqrt{k} \log n + k\right), & \text{for } \alpha = 1,\\
+O_{\alpha, \beta}(\sqrt{k}), & \text{for } \alpha < 1.
+\end{cases}\label{eq:optimized_error_upper_bound}
+\end{equation}
+\end{corollary}
+Comparing the upper bound in eq.~\eqref{eq:optimized_error_upper_bound} with the lower bound in eq.~\eqref{eq:lowerbound}, we obtain that BISR is an \textbf{asymptotically optimal} factorization in the multi-participation setting.
+
+
+To use the BISR factorization, we apply the following lemma, which provides analytic expressions for the elements of the inverse matrix $C_{\alpha, \beta}^{-1}$.
+
+\begin{restatable}[Inverse Square Root of the Matrix $A_{\alpha, \beta}$]{lemma}{inversesquareroot}
+\label{lem:inv_sqrt_A_alpha_beta}
+For $k\geq 0$, let $\tilde{r}_k = (-1)^k \binom{1/2}{k} = \frac{-r_k}{2k - 1} = \frac{-1}{2k - 1}\left|\binom{-1/2}{k}\right|.$ The inverse square root of the matrix $A_{\alpha, \beta}^{-1/2}$ defined in \eqref{eq:A_alpha_beta}, for $0 \le \beta < \alpha \le 1$, is
+\begin{equation}
+C_{\alpha, \beta}^{-1} =
+\begin{pmatrix}
+1 & 0 & \dots & 0 \\
+\tilde{c}^{\alpha, \beta}_1 & 1 & \dots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+\tilde{c}^{\alpha, \beta}_{n - 1} & \tilde{c}^{\alpha, \beta}_{n - 2} & \dots & 1 \\
+\end{pmatrix}, \quad \text{where} \quad \tilde{c}^{\alpha, \beta}_{k} = \sum\limits_{j = 0}^{k} \tilde{r}_j \beta^j \tilde{r}_{k - j}\alpha^{k - j}.
+\label{eq:C_inv_sqrt}
+\end{equation}
+\end{restatable}
+%
+The values of the matrix $C_{\alpha, \beta}^{-1}$ can then be computed efficiently via the Fast Fourier Transform (FFT) as a convolution of the sequences $\tilde{r}_j \alpha^j$ and $\tilde{r}_j \beta^{j}$, where the sequence $\tilde{r}_j$ for $j = 1, \dots, n$ can be computed in linear time using the recursive expression $\tilde{r}_j = \tfrac{j - 3/2}{j} \, \tilde{r}_{j - 1}$.
+
+
+Following the work of \citet{Andersson2025}, we show that the space complexity of the matrix $(C^p_{\alpha, \beta})^{-1}$ is equal to $p$, meaning that exact multiplication with a random real vector $z$ in a streaming setting, performing continuous operations, requires storing $p$ real values (not including the memory needed to store the matrix coefficients). This implies that, for memory-efficient computation, one must either use a small bandwidth $p$ or consider approximate multiplication. We formally state the result in the following lemma:
+
+\begin{restatable}{lemma}{SpaceComplexity} 
+\label{lem:space_complexity}
+The space complexity--defined as the minimum buffer size required by a {streaming} algorithm to correctly process an input--for computing the product of the Toeplitz matrix $(C^{p}_{\alpha, \beta})^{-1}$ with an arbitrary vector $z \in \mathbb{R}^{n}$, for $n \ge 2p - 1$, is exactly $p$, and at least $\frac{n - 5}{2}$ for $C_{\alpha, \beta}^{-1}$.
+\end{restatable}
+
+
+
+\section{Experiments}\label{sec:experiments}
+In this section, we present numerical results from evaluating various factorization methods in the multi-participation regime.
+
+We first study the effect of using different bandwidths for BSR and BISR, as shown in Figure \ref{fig:bisr_bsr_optimal_bandwidth}. We found that, in most settings, the optimal bandwidth for BSR coincides with the separation parameter $b$, whereas for BISR a smaller bandwidth suffices; therefore, in future comparisons with BISR, we propose optimizing the bandwidth to determine the optimal $p^*$.
+
+
+
+\begin{figure}[t]
+    \centering\scriptsize
+    \begin{subfigure}[c]{.32\linewidth}
+        \includegraphics[width=\linewidth]{images/factorization_results_plot_k=8_n_16384_alpha_1_beta_0.pdf}
+        \subcaption{$\alpha=1$, $\beta=0$}
+    \end{subfigure}
+    \begin{subfigure}[c]{.32\linewidth}
+        \includegraphics[width=\linewidth]{images/factorization_results_plot_k=8_n_16384_alpha_1_beta_0.9.pdf}
+        \subcaption{$\alpha=1$, $\beta=0.9$}
+    \end{subfigure}
+    \begin{subfigure}[c]{.32\linewidth}
+        \includegraphics[width=\linewidth]{images/factorization_results_plot_k=8_n_16384_alpha_0.999_beta_0.pdf}
+        \subcaption{$\alpha=0.999$, $\beta=0$}
+    \end{subfigure}
+    \caption{RMSE comparison for Banded Square Root (BSR) and Banded Inverse Square Root (BISR) methods across varying bandwidths ($p$). The results are shown for a fixed matrix size of $n=16384$ and a participation number of $k=8$. For BSR, the choice $p = b$ is numerically optimal, while for BISR a smaller bandwidth suffices to achieve an optimal value.
+}
+    \label{fig:bisr_bsr_optimal_bandwidth}
+\end{figure}
+
+
+
+We compare BISR with several other methods, including Banded Square Root (BSR), Banded Matrix Factorization (BandMF), introduced by \citet{scalingmckenna2024}, and Buffered Linear Toeplitz (BLT), introduced by \citet{dvijotham2024efficient} and adapted for multi-participation training by \citet{hasslefree2024}. We use a buffer size of $4$, as recommended, and observe that the error saturates quickly as the buffer size increases. We use BandMF with bandwidth equal to $b$, as we did not observe any benefit from using a larger bandwidth. Moreover, we conjecture that optimal multi-epoch participation can always be achieved on a banded lower triangular matrix with bandwidth $b$.
+
+We emphasize that BLT has only been described, analyzed, and implemented for prefix-sum matrices.\footnote{In concurrent work by \citet{huang2025memory}, BLT has been adapted to work with a momentum workload.} Therefore, we do not show BLT results for momentum and weight decay plots. For all methods except BISR, we use efficient implementations from the jax-privacy library \citep{jax-privacy2022github}.
+
+Our experiments (Figure \ref{fig:different_matrix_sizes}) show that \method consistently matches or exceeds BSR in quality across all regimes and outperforms it in scenarios with a large number of participations. The improvement is particularly pronounced when the participation count is high ($k = 16$). BISR achieves RMSE comparable to that of BLT, but has the advantage of easier implementation for both factorization and training, as it only requires convolving previous noise with a fixed set of coefficients—an "embarrassingly parallel" operation (see \citet{scalingmckenna2024}). While in practice, BandMF achieves slightly better RMSE\footnote{This is possible because even though we have shown that BISR provides an asymptotically optimal factorization, that does not imply that it is superior to all other methods for finite problem sizes. } at $k = 16$, it requires solving a computationally expensive optimization problem, making it impractical for matrix sizes beyond $n = 4096$. 
+
+\begin{figure}[t]
+    \centering\scriptsize
+    \begin{subfigure}[c]{.32\linewidth}
+        \includegraphics[width=\linewidth]{images/rmse_plot_k_16_different_n.pdf}
+        \subcaption{$k = 16$, $\alpha = 1$, $\beta = 0$}
+    \end{subfigure}\hfill
+    \begin{subfigure}[c]{.32\linewidth}
+        \includegraphics[width=\linewidth]{images/factorization_results_plot_k_16_varying_n_alpha_1_beta_0.9.pdf}
+        \subcaption{$k=16$, $\alpha=1, \beta=0.9$}
+    \end{subfigure}\hfill
+    \begin{subfigure}[c]{.32\linewidth}
+        \includegraphics[width=\linewidth]{images/factorization_results_plot_k_16_varying_n_alpha_0.999_beta_0.pdf}
+        \subcaption{$k=16$, $\alpha=0.999, \beta=0$}
+    \end{subfigure}
+    
+    \vspace{0.5em} % Add some vertical space between the rows of subfigures
+    
+    \begin{subfigure}[c]{.32\linewidth}
+        \includegraphics[width=\linewidth]{images/rmse_plot_k_4_different_n.pdf}
+        \subcaption{$k=4$, $\alpha = 1$, $\beta = 0$}
+    \end{subfigure}
+    \begin{subfigure}[c]{.32\linewidth}
+        \includegraphics[width=\linewidth]{images/factorization_results_plot_k_4_varying_n_alpha_1_beta_0.9.pdf}
+        \subcaption{$k=4$, $\alpha=1, \beta=0.9$}
+    \end{subfigure}\hfill
+    \begin{subfigure}[c]{.32\linewidth}
+        \includegraphics[width=\linewidth]{images/factorization_results_plot_k_4_varying_n_alpha_0.999_beta_0.pdf}
+        \subcaption{$k=4$, $\alpha=0.999, \beta=0$}
+    \end{subfigure}
+    
+    \caption{RMSE across varying matrix sizes for different factorization methods under multiple optimizer settings and participation levels. We showed that also in practice, BISR performs on par with, or even better than, BSR and BLT. However, methods based on numerical optimization, such as BandMF, may achieve superior performance in certain regimes.}
+    \label{fig:different_matrix_sizes}
+\end{figure}
+
+
+
+
+
+
+
+
+\section{From \acronym to BandInvMF} 
+
+\begin{figure}[t]
+    \centering\scriptsize
+    \begin{subfigure}[c]{.32\linewidth}
+        \includegraphics[width=\linewidth]{images/rmse_plot_k_4_n_2048_band_width.pdf}
+        \subcaption{$k=4$, $\alpha = 1$, $\beta = 0$}
+    \end{subfigure}\hfill
+    \begin{subfigure}[c]{.32\linewidth}
+        \includegraphics[width=\linewidth]{images/factorization_results_plot_k_4_n_2048_alpha_1_beta_0.9.pdf}
+        \subcaption{$k=4$,  $\alpha=1$, $\beta=0.9$}
+    \end{subfigure}\hfill
+    \begin{subfigure}[c]{.32\linewidth}
+        \includegraphics[width=\linewidth]{images/factorization_results_plot_k_4_n_2048_alpha_0.999_beta_0.pdf}
+        \subcaption{$k=4$, $\alpha=0.999$, $\beta=0$}
+    \end{subfigure}
+    
+    \vspace{0.5em} % Add some vertical space
+    
+    \begin{subfigure}[c]{.32\linewidth}
+        \includegraphics[width=\linewidth]{images/rmse_plot_k_16_n_2048_different_band_width.pdf}
+        \subcaption{$k=16$, $\alpha=1$, $\beta = 0$}
+    \end{subfigure}\hfill
+    \begin{subfigure}[c]{.32\linewidth}
+        \includegraphics[width=\linewidth]{images/factorization_results_plot_k_16_n_2048_alpha_1_beta_0.9.pdf}
+        \subcaption{$k=16$,  $\alpha=1$, $\beta=0.9$}
+    \end{subfigure}\hfill
+    \begin{subfigure}[c]{.32\linewidth}
+        \includegraphics[width=\linewidth]{images/factorization_results_plot_k_16_n_2048_alpha_0.999_beta_0.pdf}
+        \subcaption{$k=16$, $\alpha=0.999$, $\beta=0$}
+    \end{subfigure}
+    
+    \caption{RMSE across different factorizations and optimization parameters $\alpha, \beta$, with small bandwidth. The plot shows that BandInvMF and BISR can significantly reduce RMSE for a small bandwidth regime, justifying the use of banded inverse methods  instead of banded factorizations.}
+    \label{fig:small_bandwidth}
+\end{figure}
+%
+In the previous sections, we established that BISR has asymptotically optimal rate 
+for large bandwidths $p \sim b \log b$.
+%
+However, in practice, one might want to work with a smaller value of $p$ to save memory and computational resources. 
+%
+In this section, we showcase a modification to BISR with improved practical properties in this regime.
+%
+We propose to keep the construction of a banded inverse matrix with Toeplitz 
+structure, but to set its values not by the closed form expressions~\eqref{eq:C_inv_sqrt} 
+but by a numeric optimization. 
+%
+Specifically, we optimize an upper bound on $b$-min separation participation, 
+given by Equation~\ref{eq:sens_k_b}. 
+
+
+
+For the sake of numerical optimization, we assume that the optimum is achieved for indices of the form $i + kb$. This assumption can be justified, as we observed that the resulting solution for matrix $C$ is positive and decreasing, which guarantees optimality. If the sequence is not decreasing, it can be uniformly bounded by a decreasing sequence. Specifically, if the values on the diagonals of $C$ are $C_{j,1}$, then they are upper bounded by $\max_{t \ge j} C_{1,t}$, which is a decreasing sequence by construction. We use \method as an initialization for the coefficients. We provide an efficient JAX implementation in the Appendix (see Algorithm~\ref{lst:bandinv_code}) as well as the convergence plots in Figure~\ref{fig:band_inv_optimizatoin}.
+
+The numerical results are presented in Figure~\ref{fig:small_bandwidth} referred to as BandInvMF.  We observe that the error decreases drastically even with the addition of a single band, compared to a trivial factorization. This observation is supported theoretically by the following lemma. 
+
+\begin{restatable}[Optimal Band Inversion Error]{lemma}{OptimalBandInv}
+    \label{lem:optimal_band_inv} 
+    Let the matrix $C_{\lambda}^{-1} = \mathrm{LTT}(1, -\lambda, 0, \dots, 0)$ be a lower triangular Toeplitz matrix with $1$ on the main diagonal and $-\lambda$ on the subdiagonal. Then, for a single participation and the prefix sum matrix $A_{1,0}$, the following bound on the matrix factorization error holds:
+    \begin{equation}
+        \inf_{\lambda \in (0,1)} \mathcal{E}\!\left(A_{1, 0}C^{-1}_{\lambda}, C_{\lambda}\right) 
+        = O(n^{1/4}).
+    \end{equation}
+\end{restatable}
+
+Lemma~\ref{lem:optimal_band_inv}  shows that the optimized inverse banded matrix factorization can achieve an asymptotically better bound than a trivial factorization $A \times \mathbb I$, which yields an error of $O(\sqrt{n})$. Moreover, from Theorem~\ref{thm:multi_epoch_error_upper_bound}, for small $p$, the leading term for \method remains of order $O(\sqrt{n})$. Therefore, we advocate for optimizing the coefficients when the bandwidth is small.
+
+We compare Band-Inv-MF with other methods for training the 3-Block ConvNet model on CIFAR-10 and the BERT-base model ($\sim$100M parameters)  on IMDB (see Figure~\ref{fig:cifar_imdb_experiments}), both with and without amplification by subsampling. For a fairer comparison, we use a recently proposed bins-and-balls subsampling mechanism \citep{chua2024balls}, which combines the accuracy benefits of Poisson subsampling with improved implementation efficiency. More importantly, it supports the matrix mechanism via the MCMC accountant \citep{choquette2024near, choquette2023privacy}, even when the matrix $C$ is not banded. Our results indicate that in a low-memory regime, inverse correlation matrix methods BISR and Band-Inv-MF achieve significantly higher accuracy than BSR and Band-MF, and consistently outperform DP-SGD, with and without amplification. Although Band-Inv-MF achieves lower RMSE than BISR, we did not observe a corresponding gain in accuracy. This indicates that RMSE alone is not a sufficient proxy for model performance in matrix factorization.
+
+\begin{figure}[t]
+    \centering
+    % CIFAR-10
+    \begin{subfigure}{0.47\textwidth}
+        \includegraphics[width=\linewidth]{images/cifar_10_accuracy.pdf}
+        \caption{CIFAR-10 (Amplified)}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.47\textwidth}
+        \includegraphics[width=\linewidth]{images/non_amplified_cifar_10_accuracy.pdf}
+        \caption{CIFAR-10 (Non-amplified)}
+    \end{subfigure}
+    
+    \vspace{1em} % some vertical spacing between rows
+    
+    % IMDB
+    \begin{subfigure}{0.47\textwidth}
+        \includegraphics[width=\linewidth]{images/Bert_base_amplified_imbd_accuracy.pdf}
+        \caption{IMDB (Amplified)}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.47\textwidth}
+        \includegraphics[width=\linewidth]{images/Bert_base_non_amplified_imbd_accuracy.pdf}
+        \caption{IMDB (Non-amplified)}
+    \end{subfigure}
+
+    \caption{\textbf{Accuracy results for CIFAR-10 and IMDB in the small bandwidth (low-memory) regime.} 
+    For CIFAR-10, both amplified (left) and non-amplified (right) results show that inverse factorization methods, BISR and Band-Inv-MF, achieve significantly higher accuracy compared to Band-MF. Both plots correspond to $(9, 10^{-5})$-DP, with training performed using momentum $\beta = 0.9$ and weight decay $\alpha = 0.9999$, which we found to be optimal (see Tables~\ref{tab:hyperparameters} and \ref{tab:accuracies} in the appendix). 
+    For IMDB, we report accuracy from fine-tuning under the same low-memory regime, comparing amplified and non-amplified settings, with training performed using momentum $\beta = 0.95$ and weight decay $\alpha = 0.99999$ (see Tables~\ref{tab:hyperparameters_imdb} and \ref{tab:imdb_accuracies}).}
+    \label{fig:cifar_imdb_experiments}
+\end{figure}
+
+
+
+\section{Discussion}
+
+This work demonstrates that imposing a banded structure on the inverse correlation matrix, rather than on the matrix itself, leads to both theoretical and practical benefits for differentially private training across multiple participations. Our Banded Inverse Square Root (BISR) method enables explicit factorization, supporting clean error analysis and efficient implementation.
+
+We prove that BISR achieves asymptotically optimal factorization error by improving upon previously established lower bounds and showing that BISR matches the asymptotics precisely, thereby closing a fundamental gap in the theory. An interesting direction for future work is to close the gap in constant dependence, as numerical optimization methods (\eg, BandMF, BLT), despite their computational cost, may outperform BISR.
+
+
+In the low-memory regime, we find it beneficial to optimize directly over the coefficients of the inverse correlation matrix. 
+Our Band-Inv-MF method achieves a lower matrix factorization error compared to BISR. However, these improvements do not yet translate to gains in model accuracy when training with the amplification by subsampling. Future research should focus on optimizing the matrix coefficients while explicitly accounting for amplification, in order to bridge this gap.
+
+\section*{Acknowledgments}
+
+We thank Arun Ganesh for providing the code for the MCMC accountant. We thank Joel Andersson, Rasmus Pagh and Monika Henzinger for valuable comments on the early version of the draft. We thank Christian Lebeda for a fruitful discussion on the lower bound theorem. 
+
+Jalaj Upadhyay’s research was funded by the Rutgers Decanal Grant no. 302918, NSF CNS 2433628, Google Research Scholar Award, and Google Seed Fund Grant.
+
+
+Nikita Kalinin's research was funded in part by the Austrian Science Fund (FWF) [10.55776/COE12].
+
+
+\bibliography{lit}
+\bibliographystyle{iclr2026_conference}
+
+\clearpage
+\appendix
+
+\renewcommand{\proofname}{Proof}
+
+
+
+\section*{Key Inequalities and Relationships}
+
+This section compiles the fundamental inequalities and key relationships employed throughout this study. Each entry is presented with a concise explanation of its origin or the context in which it arises.
+
+
+\begin{enumerate}
+    \item $\displaystyle \quad r_k = \bigg|\binom{-1/2}{k}\bigg| = \frac{1}{4^k}\binom{2k}{k}$ \hfill \textit{ \citet{Henzinger}}
+    \item $\displaystyle \quad \frac{1}{\sqrt{\pi (k + 1)}} \le r_k \le \frac{1}{\sqrt{\pi k}}$ \hfill \textit{Lemma 2.1 from \citet{dvijotham2024efficient}}
+    \item  $\displaystyle \quad \sum\limits_{k = 0}^{p - 1}r_k \le  1 +  \frac{1}{\sqrt{\pi}}\sum\limits_{k = 1}^{p - 1}\frac{1}{\sqrt{k}} \le 1 + \frac{2 \sqrt{p}}{\sqrt{\pi}}$ \hfill \textit{Integral inequality.}
+    \item  $\displaystyle \quad \sum\limits_{k = 0}^{p - 1}r^2_k \le 1 + \log p$ 
+    \hfill \textit{Lemma \ref{lem:sum_c_alpha_beta_squared_bounds}}
+    \item $\displaystyle \quad c_k^{\alpha,\beta} = \sum_{j=0}^{k} \alpha^j \beta^{k-j} r_j r_{k-j}$ \hfill \textit{Theorem 1 from \citet{kalinin2024}}
+    
+    \item $\displaystyle \quad c_k^{1,\beta} \le c_{k-1}^{1,\beta} \left[ 1 - \frac{(1 - \beta)^2}{2k} \right] \quad \text{for } k \ge 1.$ \hfill \textit{ Lemma~\ref{lem:c_k_beta_mult_bound}}
+    \item $\displaystyle \quad \sum_{j=0}^{k} c_j^{1,\beta} = \sum_{j=0}^{k} r_j \beta^j \tilde{r}_{k-j}$ \hfill \textit{In the proof of Lemma \ref{lem:c_beta_sum_bounds}}
+    \item $\displaystyle \quad \sum_{j=0}^{k} c_j^{1,\beta} \beta^{k-j} = \sum_{j=0}^{k} r_j^\beta \tilde{r}_{k-j}$ \hfill \textit{In the proof of Lemma \ref{lem:c_beta_sum_bounds}}
+    \item $\displaystyle \quad \sum_{j=0}^{k} \frac{\tilde{c}_j^{1,\beta}(1 - \beta^{k-j+1})}{1 - \beta} = c_k^{1,\beta}$ \hfill \textit{In the proof of Lemma \ref{lem:c_beta_sum_bounds}}
+    \item $\displaystyle \quad r_k (1 - \beta) \le \sum_{j=0}^{k} \tilde{c}_j^{1,\beta} \le c_k^{1,\beta} (1 - \beta)$ \hfill \textit{Lemma \ref{lem:c_beta_sum_bounds}}
+    \item $\displaystyle \quad \frac{\log(k + 1)}{4} \le \sum_{j=0}^{k-1} (c_{j}^{1, \beta})^2 \le \frac{1 + \log k}{(1 - \beta)^2}$ \hfill \textit{Lemma \ref{lem:sum_c_alpha_beta_squared_bounds}}
+    \item $\displaystyle \frac{\alpha^j}{2\sqrt{j + 1}} \le c^{\alpha, \beta}_j \le \frac{\alpha^j}{(1 - \beta/\alpha)\sqrt{j + 1}}$ \hfill \textit{Lemma \ref{lem:sum_c_alpha_beta_squared_bounds}}
+    \item $\displaystyle 1 \le \sum_{j=0}^{k-1} (c^{\alpha, \beta}_j)^2 \le \frac{1}{(\alpha - \beta)^2} \log \left( \frac{1}{1 - \alpha^2} \right)$ \hfill \textit{Lemma \ref{lem:sum_c_alpha_beta_squared_bounds}}
+    \item $\displaystyle \tilde{r}_k = (-1)^k \binom{1/2}{k} = \frac{-1}{2k-1} r_k $ \hfill \textit{Lemma \ref{lem:inv_sqrt_A_alpha_beta}}
+    
+    \item $\displaystyle \tilde{c}_k^{\alpha,\beta} = \sum_{j=0}^{k} \tilde{r}_j \beta^j \tilde{r}_{k-j} \alpha^{k-j}$ \hfill \textit{Lemma \ref{lem:inv_sqrt_A_alpha_beta}}
+    
+    \item $\displaystyle \tilde{r}_k (1 + \beta) \le \tilde{c}_k^{1,\beta} \le 0$ \hfill \textit{Lemma \ref{lem:c_beta_bounds}}
+    
+   
+\end{enumerate}
+\clearpage
+\section{Proofs}
+\label{sub:proofs}
+
+We start by stating some auxiliary results that will be extensively used throughout the proofs.
+
+\begin{lemma}[Theorem~1 in \citet{kalinin2024} -- Square Root of the Matrix $A_{\alpha, \beta}$]\label{def:C_sqrt}
+For $k\geq 0$, let $r_k = \left|\binom{-1/2}{k}\right|$. For $0 \le \beta < \alpha \le 1$, the square root matrix $C_{\alpha, \beta} = A^{1/2}_{\alpha, \beta}$ has the following explicit form:
+%
+\begin{align}
+    \label{eq:C_sqrt}
+    C_{\alpha, \beta} = \begin{pmatrix}
+        1 & 0 & \cdots & 0 \\
+        c_{1}^{\alpha, \beta} & 1 & \cdots & 0 \\
+        \vdots & \vdots & \ddots & \vdots \\
+        c_{n - 1}^{\alpha, \beta} & c_{n - 2}^{\alpha, \beta} & \cdots & 1
+    \end{pmatrix}, \quad \text{where} \quad c_k^{\alpha, \beta} = \sum\limits_{j = 0}^{k}\alpha^j \beta^{k - j}r_j r_{k - j},
+\end{align} 
+\end{lemma}
+
+\begin{restatable}[Theorem 2 from \citet{kalinin2024}]{theorem}{toeplitzsens}\label{thm:b-sensitivity}
+Let $M$ be a lower triangular Toeplitz matrix with decreasing non-negative entries 
+$m_0 \geq m_1 \geq m_2 \geq \dots m_{n-1}\geq 0$ on the diagonals.
+%
+Then the \emph{sensitivity} of $M$ in the setting of \emph{$b$-min-separation} is
+%
+\begin{align}
+\senskb(M) &= \Big\|\sum_{j = 0}^{k-1}M_{[\cdot, 1 + jb]}\Big\|_2
+\label{eq:sens_toeplitz}
+\end{align}
+where $M_{[\cdot, 1 + jb]}$ denotes the $(1 + jb)$-th column of $M$.
+\end{restatable}
+
+
+
+\begin{lemma}[Lemma 7 from \citet{kalinin2024}]
+\label{lem:sum_c_alpha_beta_squared_bounds}
+For $k \in \{1, \dots, n\}$ it holds for $c_i^{\alpha,\beta}$ as defined in equation~\eqref{eq:C_sqrt}:
+\begin{equation}
+\frac{\log(k + 1)}{4} \leq \sum_{i=0}^{k-1} (c^{1, \beta}_i)^2 \leq \frac{1 + \log k}{(1 - \beta)^2}
+\end{equation}
+for $\alpha = 1$, and otherwise
+\begin{equation}
+1 \leq \sum_{i=0}^{k-1} (c^{\alpha, \beta}_i)^2 \leq \frac{1}{(\alpha - \beta)^2} \log \left( \frac{1}{1 - \alpha^2} \right).
+\end{equation}
+\end{lemma}
+
+\SpaceComplexity*
+
+
+\begin{proof}[Proof of Lemma~\ref{lem:space_complexity}]
+Throughout this proof, we use only results from \citet{Andersson2025}, and thus any reference to a theorem or lemma should be understood as coming from that work. We use their Lemma 7, which lower-bounds the space complexity of a Toeplitz matrix using the rank of a corresponding Hankel matrix of its coefficients. The matrix $C_{\alpha, \beta}^{-1}$ has a generating function $f = \sqrt{(1 - \alpha x)(1 - \beta x)}$. The proof of their Corollary 16 implies that the Hankel matrix $H[f]$ has corank at most 3. Thus, Lemma 7 implies that $C^{-1}_{\alpha, \beta}$ has space complexity at least $\frac{n + 1}{2} - 3$. For the matrix $(C^p_{\alpha, \beta})^{-1}$, the generating function is a rational function of degree $p$; therefore, for $n \ge 2p - 1$, their Theorem 2 implies that the space complexity is exactly $p$, concluding the proof.
+\end{proof}
+
+\LowerBound*
+\begin{proof}[Proof of Theorem~\ref{thm:lowerbound}]
+We use the probabilistic method in Lemma~\ref{lem:k_b_lower_bound_new} to obtain the bounds $\Omega_{\alpha}(\sqrt{k})$ for $\alpha < 1$ and $\mathcal{E}(B,C) = \Omega(\sqrt{k} \log n)$ for $\alpha = 1$. It remains to prove that for $\alpha = 1$, we also have the lower bound $\mathcal{E}(B,C) = \Omega(k)$.
+
+We begin with the following observation: given a matrix $C$, we can compute an optimal participation scheme represented by a vector with ones at positions corresponding to participating columns, denoted by $\pi^*_C$. As a lower bound, we consider a specific participation vector $\pi_1$, with ones in columns indexed by $1 + ib$ for $i \in [0, k - 1]$, such that $|\pi_1| = k$. By construction, we have $\senskb(C) := \|C\pi^*_C\|_2 \ge \|C\pi_1\|_2$. Therefore, the error can be bounded as follows:
+\begin{equation}
+    \mathcal{E}(B,C) = \frac{1}{\sqrt{n}} \|B\|_F \senskb(C) 
+    \ge \frac{1}{\sqrt{n}} \|B\|_F \|C\pi_1\|_2 
+    \ge \frac{1}{\sqrt{n}} \|BC\pi_1\|_2 
+    = \frac{1}{\sqrt{n}} \|A_{1, \beta} \pi_1\|_2.
+\end{equation}
+
+As a lower bound, we consider $\beta = 0$ as $\|A_{1, \beta}\pi_1\|_2 \ge \|A_{1, 0}\pi_1\|_2$. The elements of the matrix $A_{1, 0}$ are positive and non-increasing. Therefore, by Theorem~\ref{thm:b-sensitivity}, the $(k, b)$-sensitivity of $A_{1, 0}$ is exactly $\|A_{1, 0} \pi_1\|_2$. By Theorem~9 from \citet{kalinin2024}, this sensitivity is at least $\frac{k \sqrt{n}}{\sqrt{3}}$, resulting in the lower bound:
+\begin{equation}
+    \mathcal{E}(B,C) \ge \frac{k}{\sqrt{3}} = \Omega(k),
+\end{equation}
+which concludes the proof.
+\end{proof}
+
+
+
+\begin{lemma}
+\label{lem:k_b_lower_bound_new}
+    Let $A_{\alpha, \beta} \in \R^{n \times n}$ be the SGD workload matrix~\eqref{eq:A_alpha_beta}.
+    In the multi-participation setting with separation $1 \le b \leq n$ and $k = \lceil\frac{n}{b}\rceil$,
+    for any factorization $A_{\alpha, \beta} = BC$, it holds that
+    \begin{equation}
+        \mathcal{E}(B, C) = \begin{cases} \Omega(\sqrt{k} \log n), &\alpha = 1\\
+        \Omega(\sqrt{k}), &\alpha < 1
+        \end{cases}
+    \end{equation}
+\end{lemma}
+
+\begin{proof}
+Here, we refine Theorem~8 from \citet{kalinin2024} by removing the assumption that the scalar products between the columns of the matrix $C$ are non-negative, \ie, $C^{\top}C \ge 0$. We first prove that
+\begin{equation}
+    \senskb(C)^2 \ge \frac{1}{4b} \|C\|_F^2.
+\end{equation}
+
+
+To do so, we lower bound the $b$-min separation participation by the $(k, b)$-participation, where we have a fixed $b$ separation between vectors but are allowed to include only a subset of them. This splits the set of all column indices into $b$ disjoint subsets $\mathcal{S}_j$ for $j \in [1, b]$ with $|S_j| \le k$. Then, the following inequality holds:
+    \begin{equation}
+        \senskb(C)^2 \ge \max_{j \in [1, b]} \sup_{S \subseteq \mathcal{S}_j} \left\| \sum_{i \in S} C_{[:, i]} \right\|_2^2,
+    \end{equation}
+    where $C_{[:, i]}$ denotes the $i$-th column of the matrix $C$. 
+
+    To prove a lower bound, we use the probabilistic method. Consider i.i.d. random variables $\epsilon_i \sim \text{Bernoulli}(\frac{1}{2})$. Then:
+    \begin{equation}
+    \begin{aligned}
+        \sup_{S \subseteq \mathcal{S}_j} \Big\| \sum_{i \in S} C_{[:, i]} \Big\|_2^2 &\ge \mathbb{E} \Big\| \sum_{i \in \mathcal{S}_j} C_{[:, i]} \epsilon_i \Big\|_2^2 = \frac{1}{2} \sum_{i \in \mathcal{S}_j} \|C_{[:, i]}\|_2^2 + \frac{1}{4} \sum_{\substack{i \ne i' \\ i, i' \in \mathcal{S}_j}} \langle C_{[:, i]}, C_{[:, i']} \rangle \\
+        &= \frac{1}{4} \sum_{i \in \mathcal{S}_j} \|C_{[:, i]}\|_2^2 + \frac{1}{4} \Big\| \sum_{i \in \mathcal{S}_j} C_{[:, i]} \Big\|_2^2 \ge \frac{1}{4} \sum_{i \in \mathcal{S}_j} \|C_{[:, i]}\|_2^2.
+    \end{aligned}
+    \end{equation}
+
+    Thus,
+    \begin{equation}
+        \senskb(C)^2 \ge \max_{j \in [1, b]} \frac{1}{4} \sum_{i \in \mathcal{S}_j} \|C_{[:, i]}\|_2^2 \ge \frac{1}{4b} \sum_{i = 1}^{n} \|C_{[:, i]}\|_2^2 = \frac{1}{4b} \|C\|_F^2.
+    \end{equation}
+
+Therefore,
+\begin{equation}
+\begin{aligned}
+    \mathcal{E}(B, C) &= \frac{1}{\sqrt{n}} \|B\|_F \senskb(C) 
+    \ge \frac{1}{2\sqrt{nb}} \|B\|_F \|C\|_F 
+    \ge \frac{1}{2\sqrt{nb}} \|BC\|_* = \frac{1}{2\sqrt{nb}} \|A_{\alpha, \beta}\|_*.
+\end{aligned}
+\end{equation}
+The nuclear norm of the matrix $A_{\alpha, \beta}$ has been lower bounded in Lemma 8 of \citet{kalinin2024} by $\Omega(n \log n)$ for $\alpha = 1$, and by $\Omega(n)$ for $\alpha < 1$. Substituting $k = \lceil \frac{n}{b} \rceil$ concludes the proof.
+\end{proof}
+
+
+\inversesquareroot*
+\begin{proof}
+
+The matrix for the momentum matrix is given by:
+\begin{equation}
+    A_{\alpha, \beta} = A_{\alpha, 0} \times A_{\beta, 0} = \begin{pmatrix}
+        1 & 0 &  \cdots & 0 \\
+        \alpha & 1 & \cdots & 0 \\
+        \vdots & \vdots & \ddots & \vdots \\
+        \alpha^{n - 1} & \alpha^{n-2} & \cdots & 1
+    \end{pmatrix} \times \begin{pmatrix}
+        1 & 0 &  \cdots & 0 \\
+        \beta & 1 &  \cdots & 0 \\
+        \vdots & \vdots & \ddots & \vdots \\
+        \beta^{n - 1} & \beta^{n-2}  & \cdots & 1
+    \end{pmatrix}.
+\end{equation}
+
+The inverse square root then takes the form:
+\begin{equation}
+    C^{-1}_{\alpha, \beta} = C^{-1}_{\alpha, 0} \times C^{-1}_{\beta, 0},
+\end{equation}
+since all lower triangular Toeplitz (LTT) matrices commute (see \citet{strang1986proposal} or \citet{Toeplitz}). Therefore, it suffices to prove that the inverse square root of the matrix $C_{\alpha, 0}^{-1}$ is a lower triangular Toeplitz matrix with elements $\tilde{r}_i \alpha^{i}$, which would imply the stated formula for $\tilde{c}_k^{\alpha, \beta}$, since the product of LTT matrices is given by the convolution of their elements.
+
+
+
+The proof for the matrix $C_{\alpha, 0}^{-1}$ is based on the identities of the generating functions of the sequences $ r_k$ and $\tilde{r}_k$, derived simultaneously using the binomial formula:
+\begin{equation}
+\begin{aligned}
+(1 - \alpha x)^{-1/2} &= \sum\limits_{k = 0}^{\infty} \binom{-1/2}{k}(-1)^k\alpha^k x^k = \sum\limits_{k = 0}^{\infty} r_k \alpha^k x^k, \\
+(1 - \alpha x)^{1/2} &= \sum\limits_{k = 0}^{\infty} \binom{1/2}{k}(-1)^k \alpha^k x^k = \sum\limits_{k = 0}^{\infty} \tilde{r}_k \alpha^k x^k.
+\end{aligned}
+\end{equation}
+Then the generating function of the product of the matrices $C_{\alpha}$ and the proposed $C_{\alpha}^{-1}$ is given by:
+
+\begin{equation}
+\sum\limits_{n = 0}^{\infty} x^n \left[\sum\limits_{k = 0}^{n} r_{k}\alpha^k \tilde{r}_{n - k} \alpha^{n - k}\right] = (1 - \alpha x)^{1/2} \times (1 - \alpha x)^{-1/2} = 1,
+\end{equation}
+implying that $\tilde{r}_i\alpha^{i}$ are indeed the coefficients of $C_{\alpha}^{-1}$, which concludes the proof. 
+\end{proof}
+
+
+
+\begin{lemma}
+[Bounds on diagonal entries of ${C}^{-1}_{1,\beta}$]
+\label{lem:c_beta_bounds}
+The diagonal elements of the inverse square root of the momentum matrix $C^{-1}_{1, \beta}$ defined in equation~\eqref{eq:C_inv_sqrt} with parameter $0 \leq \beta < 1$, denoted as $(1, \tilde{c}^{1, \beta}_1, \tilde{c}^{1, \beta}_2, \dots, \tilde{c}^{1, \beta}_{n - 1})$, satisfy the following inequality:
+\begin{equation}
+    \tilde{r}_k(1 + \beta) \leq \tilde{c}^{1, \beta}_k \leq 0, \quad \text{for } k \geq 1.
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+The values $\tilde{c}^{1, \beta}_k$ are given by the convolution of $\tilde{r}_k$ and $\beta^k \tilde{r}_k$:
+\begin{equation}
+\begin{aligned}
+    \tilde{c}^{1, \beta}_k = \sum\limits_{j = 0}^{k} \tilde{r}_j \tilde{r}_{k - j} \beta^j = (1 + \beta^k)\tilde{r}_k + \sum\limits_{j = 1}^{k-1} \tilde{r}_j \tilde{r}_{k - j} \beta^j.
+\end{aligned}
+\end{equation}
+Since $\tilde{r}_j$ is negative for $j \geq 1$, the summation term is positive. Furthermore, $1 + \beta^k \leq 1 + \beta$, and since $\tilde{r}_k$ is negative, we obtain the lower bound:
+\begin{equation}
+    \tilde{c}^{1, \beta}_k \geq \tilde{r}_k (1 + \beta).
+\end{equation}
+This bound is tight for $k = 1$ as $\tilde{c}^{1, \beta}_1 = - \frac{1 + \beta}{2}$.
+
+For the upper bound, we first consider the special cases. When $\beta = 0$, we have $\tilde{c}^{1, 0}_k = \tilde{r}_k < 0$. For $\beta = 1$, we formally obtain:
+\begin{equation}
+    \tilde{c}^{1, 1}_k = \sum\limits_{j = 0}^{k} \tilde{r}_j \tilde{r}_{k - j} = 
+    \begin{cases}
+        \;\;1, & k = 0,\\
+        -1, & k = 1,\\
+        \;\;0, & \text{otherwise}.
+    \end{cases}
+\end{equation}
+This follows from the observation that $C_1^{-1} \times C_1^{-1} = A_1^{-1}$, which has the structure described in the equation.
+
+Since the inequality holds for $k = 1$, we now consider $k \geq 2$, where $\tilde{c}^{1}_k = 0$. We show the following, which establishes the upper bound:
+\begin{proposition}
+[Monotonicity of diagonal elements of $C_{1,\beta}^{-1}$]
+\label{prop:tildec}
+    Let $\tilde{c}^{1, \beta}_k$ be the diagonal elements of $C_{1,\beta}^{-1}$  defined in equation~\eqref{eq:C_inv_sqrt}. Then $\tilde{c}^{1, \beta}_k$ is an increasing function of $\beta$, varying from $\tilde{r}_k$ at $\beta = 0$ to $0$ at $\beta = 1$.
+\end{proposition}
+\begin{proof}
+To do so, we differentiate $\tilde{c}^{1, \beta}_k$ with respect to $\beta$:
+\begin{equation}
+\label{eq:differentiation_tildec_k_1beta}
+    \frac{d\tilde{c}^{1, \beta}_k}{d\beta} = k\tilde{r}_k \beta^{k - 1} + \sum\limits_{j = 1}^{k-1} \tilde{r}_j \tilde{r}_{k - j} j\beta^{j-1}= \beta^{k-1} \left(k\tilde{r}_k  + \sum\limits_{j = 1}^{k-1} \tilde{r}_j \tilde{r}_{k - j} j\beta^{j-k} \right).
+\end{equation}
+
+To prove that this expression is positive, we analyze the term in brackets. As $\beta \to 0$, the term tends to positive infinity since $\tilde{r}_j\tilde{r}_{k - j}$ are positive and $j - k$ is negative. Moreover, this term is decreasing as $\beta \to 1$, so it suffices to check its non-negativity at $\beta = 1$, \ie,
+\begin{equation}
+\frac{d\tilde{c}^{1, \beta}_k}{d\beta} \bigg|_{\beta = 1} \geq 0
+\end{equation}
+
+Setting $\beta=1$ in equation~\eqref{eq:differentiation_tildec_k_1beta}, we have 
+\begin{equation}
+\label{eq:derivative_tildec}
+    \frac{d\tilde{c}^{1, \beta}_k}{d\beta} \bigg|_{\beta = 1} = k\tilde{r}_k  + \sum\limits_{j = 1}^{k-1} \tilde{r}_j \tilde{r}_{k - j} j.
+\end{equation}
+To show this, we use an auxiliary identity for the values $\tilde{r}_j j$:
+
+\begin{equation}
+\label{eq:tilde_r_j_times_j}
+    \tilde{r}_j j = -\frac{r_j j}{2j - 1} = \frac{-1}{2} \bigg(r_j + \frac{r_j}{2j - 1} \bigg) = \frac{-r_j}{2} + \frac{\tilde{r}_j}{2}.
+\end{equation}
+
+Using the identity \eqref{eq:tilde_r_j_times_j} in equation~\eqref{eq:derivative_tildec}, we obtain:
+\begin{equation}
+\begin{aligned}
+    \frac{d(\tilde{c}^{1, \beta}_k)}{d\beta} \bigg|_{\beta = 1} &= \frac{1}{2} \tilde{r}_k - \frac{1}{2} r_k  + \frac{1}{2} \sum\limits_{j = 1}^{k-1} \tilde{r}_j \tilde{r}_{k - j} - \frac{1}{2} \sum\limits_{j = 1}^{k-1} r_j \tilde{r}_{k - j} \\
+    &= \frac{1}{2} \sum\limits_{j = 0}^{k} \tilde{r}_j \tilde{r}_{k - j} - \frac{1}{2} \sum\limits_{j = 0}^{k} r_j \tilde{r}_{k - j} = 0.
+\end{aligned}
+\end{equation}
+
+Since both sums vanish for $k \geq 2$, this concludes the proof of Proposition~\ref{prop:tildec}.
+\end{proof}
+This completes the proof of the lemma.
+\end{proof}
+
+\begin{restatable}[Decresing values]{lemma}{decreasingvalueslemma}
+\label{lem:monotonically_decreasing_values}
+The values $(1, c_{1}^{\alpha, \beta}, \dots, c_{p - 1}^{\alpha, \beta}, g^{\alpha, \beta}_{p}, \dots, g^{\alpha, \beta}_{n - 1})$ of matrix $C_{\alpha, \beta}^p$ as defined in Lemma~\ref{lem:c_beta_p_bounds} are decreasing.
+\end{restatable}
+\begin{proof}
+The first $p$ values are decreasing, as shown in \citet{kalinin2024}. For the remaining values, we prove that
+\begin{equation} 
+    g_{p + k}^{\alpha, \beta} - g_{p + k + 1}^{\alpha, \beta} = \sum\limits_{j = 1}^{p - 1} (-\tilde{c}^{\alpha, \beta}_j)(g^{\alpha, \beta}_{p + k - j} - g^{\alpha, \beta}_{p + k + 1 - j}) \ge 0. 
+\end{equation} 
+In Lemma~\ref{lem:c_beta_bounds}, we prove that $(-\tilde{c}^{\alpha, \beta}_j) \ge 0$, so each term in the summation is non-negative. Since the differences $(g^{\alpha, \beta}_{i} - g^{\alpha, \beta}_{i+1})$ are also non-negative by the induction step, the inequality follows, completing the proof.
+\end{proof}
+
+
+
+
+\begin{lemma}
+[Bound on the matrix diagonal sum of $C^{-1}_{1, \beta}$]
+\label{lem:c_beta_sum_bounds}
+The diagonal elements of the inverse square root of the momentum matrix $C^{-1}_{1, \beta}$ defined in equation~\eqref{eq:C_inv_sqrt} with parameter $0 \leq \beta < 1$, denoted as $(1, \tilde{c}^{1, \beta}_1, \tilde{c}^{1, \beta}_2, \dots, \tilde{c}^{1, \beta}_{n - 1})$, satisfy the following inequality:
+\begin{equation}
+    r_k (1 - \beta) \leq \sum\limits_{j =0}^{k} \tilde{c}^{1, \beta}_j \leq c_k^{1, \beta} (1 - \beta), \quad \text{for } k \geq 1.
+\end{equation}
+Here $\tilde c_i^{1,\beta}$ is as defined by equation~\eqref{eq:C_inv_sqrt}. 
+\end{lemma}
+
+\begin{proof}
+
+We first state several properties of the sums of $\tilde{c}_{j}^{1, \beta}$:
+
+\begin{equation}
+\label{eq:properties_tildec}
+\begin{split}
+    (1) &\quad \sum\limits_{j =0}^{k} \tilde{c}^{1, \beta}_j = \sum\limits_{j = 0}^{k} \tilde{r}_{j}\beta^{j} r_{k - j}, \\ 
+    (2) &\quad  \sum\limits_{j =0}^{k} \tilde{c}^{1, \beta}_j\beta^{k - j} = \sum\limits_{j = 0}^{k} r_{j}\beta^{j} \tilde{r}_{k - j}, \\
+    (3) &\quad  \sum\limits_{j =0}^{k} \frac{\tilde{c}^{1, \beta}_j(1 - \beta^{k - j + 1})}{1 - \beta} = c_{k}^{1, \beta}
+\end{split}
+\end{equation}
+
+which can be derived from equating the coefficients of the following generating function identities, respectively:
+\begin{equation}
+\begin{aligned}
+%\begin{split}
+    &(1)\quad \left[\sqrt{1 - x}\sqrt{1 - \beta x}\right] \times \frac{1}{1 -x} = \frac{\sqrt{ 1 - \beta x}}{\sqrt{1 - x}}\\
+    &(2) \quad \left[\sqrt{1 - x}\sqrt{1 - \beta x}\right] \times \frac{1}{1 -\beta x} = \frac{\sqrt{ 1 - x}}{\sqrt{1 - \beta x}}\\
+    &(3) \quad \left[\sqrt{1 - x}\sqrt{1 - \beta x}\right] \times \left[\frac{1}{1 -\beta x}\frac{1}{1 - x}\right] = \frac{1}{\sqrt{ 1 - x}\sqrt{1 - \beta x}}
+%\end{split}
+\end{aligned}
+\end{equation}
+\paragraph{Upper Bound.} First, we rewrite the expression as follows by multiplying and dividing by $1-\beta$ the terms $\tilde{c}^{1, \beta}_j$:
+\begin{equation}
+\begin{aligned}
+%\begin{split}
+     \sum\limits_{j =0}^{k} \tilde{c}^{1, \beta}_j - c_k^{1, \beta} (1 - \beta) &= (1 -\beta)\sum\limits_{j = 0}^{k}\frac{\tilde{c}^{1, \beta}_j(1 -\beta^{k-j + 1} + \beta^{k - j + 1})}{1 - \beta} -c_k^{1, \beta}(1 - \beta)\\ 
+     &= \beta \sum\limits_{j = 0}^{k}\tilde{c}^{1, \beta}_j\beta^{k-j}  =\beta\sum\limits_{j = 0}^{k} r_{j}\beta^{j} \tilde{r}_{k - j} =  \beta^{k + 1}\sum\limits_{j = 0}^{k} \tilde{r}_{j}\beta^{-j} r_{k - j},
+%\end{split}
+\end{aligned}
+\end{equation}
+where the third equality follows from equation~\ref{eq:properties_tildec} (2). For $\beta=0$, the expression is identically $0$. So, now consider when $\beta>0$.  
+We want to show that 
+\begin{equation}
+\sum\limits_{j = 0}^{k} \tilde{r}_{j}\beta^{-j} r_{k - j} \geq 0
+\end{equation}
+for all $\beta \in (0,1]$.
+
+
+As $\beta$ increases from $0$ to $1$, the sum is clearly increasing, since the only positive term does not have a $\beta$ multiplier. For $\beta = 1$, the sum equals zero, as the sequences $\tilde{r}_j$ and $r_j$ have inverse generating functions. Therefore, the sum remains negative, concluding the proof of the upper bound.
+
+\paragraph{Lower Bound.} For the lower bound, using equation~\eqref{eq:properties_tildec} and the recurrence relation of $\tilde r_j$ stated in Lemma~\ref{lem:inv_sqrt_A_alpha_beta}, we get 
+\begin{equation}
+\begin{aligned}
+    \sum\limits_{j =0}^{k} \tilde{c}^{1, \beta}_j - r_k (1 - \beta) &= \sum\limits_{j = 0}^{k }\tilde{r}_j \beta^j r_{k - j} - r_k(1 - \beta)  = \sum\limits_{j = 1}^{k }\tilde{r}_j \beta^j r_{k - j} + \beta r_k \\
+    &=\beta \left[r_k - \sum\limits_{j = 1}^{k}\frac{r_j}{2j - 1} r_{k - j}\beta^{j - 1}\right] \ge \beta \left[r_k - \sum\limits_{j = 1}^{k}\frac{r_j}{2j - 1} r_{k - j}\right]\\
+    &\ge \beta \sum\limits_{j = 0}^{k}\tilde{r}_j r_{k - j} = 0,
+\end{aligned}
+\end{equation}
+concluding the proof. In the above, the first inequality follows from the fact that $0<\beta\leq 1$. The fact is trivially true for $\beta=0$.
+\end{proof}
+
+\begin{lemma}
+[Bound on diagonal values of the matrix $C_{1, \beta}$]
+\label{lem:c_k_beta_mult_bound}
+The diagonal values of the matrix $C_{1, \beta}$ (see equation~\eqref{eq:C_sqrt}) with parameter $0 \le \beta < 1$, denoted as $(1, c_1^{1, \beta}, c_2^{1, \beta}, \dots, c_{n - 1}^{1, \beta})$, satisfy the inequality:
+%
+\begin{equation}
+    c_k^{1, \beta} \le c_{k - 1}^{1, \beta} \left[1 - \frac{(1 - \beta)^2}{2k}\right] \quad \text{for} \quad k \ge 1.
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+We first prove that 
+\begin{equation}
+    c_{k - 1}^{1, \beta} - c_{k}^{1, \beta} \ge (r_{k - 1} - r_{k}) (1 - \beta).
+\end{equation} Using the expression of $c_k^{1,\beta}$, we have 
+%
+\begin{equation*}
+\begin{aligned}
+    c_{k - 1}^{1, \beta} - c_{k}^{1, \beta} - (r_{k - 1} - r_{k}) (1 - \beta) &= \sum\limits_{j = 0}^{k - 1} r_j r_{k - 1 - j} \beta^{j} - \sum\limits_{j = 0}^{k} r_j r_{k - j} \beta^{j} - (r_{k - 1} - r_{k}) (1 - \beta)\\
+    &= \beta(r_{k - 1} - r_{k}) + \sum\limits_{j = 1}^{k - 1} r_j (r_{k - j - 1} - r_{k - j}) \beta^j - r_k \beta^k\\
+    &= \beta^{k} \left[\beta^{1 - k}(r_{k - 1} - r_{k}) + \sum\limits_{j = 1}^{k - 1} r_j (r_{k - j - 1} - r_{k - j}) \beta^{j - k} - r_k\right]
+\end{aligned}
+\end{equation*}
+
+We note that $r_k$ is a decreasing sequence; therefore, the first two terms inside the brackets are positive, and the powers of $\beta$ in front of them are non-positive. Therefore, as a lower bound, we can substitute $\beta = 1$ inside the sum:
+%
+\begin{equation}
+\begin{aligned}
+    c_{k - 1}^{1, \beta} - c_{k}^{1, \beta} - (r_{k - 1} - r_{k}) (1 - \beta) &\ge \beta^{k} \left[r_{k - 1} - r_{k} + \sum\limits_{j = 1}^{k - 1} r_j (r_{k - j - 1} - r_{k - j}) - r_k\right]\\
+    &= \beta^k [r_{k - 1} - 2r_k + (1 - r_{k - 1}) - (1 - 2r_{k})]
+    = 0
+\end{aligned}
+\end{equation}
+
+Using this inequality, we obtain:
+\begin{equation}
+\begin{aligned}
+    \frac{c_{k}^{1, \beta}}{c_{k - 1}^{1, \beta}} &= \frac{c_{k - 1}^{1, \beta} - (c_{k - 1}^{1, \beta} - c_{k}^{1, \beta})}{c_{k - 1}^{1, \beta}} \le 1 - \frac{r_{k - 1} - r_k}{c^{1, \beta}_{k - 1}} (1 - \beta) \\
+    &= 1 - \frac{r_{k - 1}}{2k} \cdot \frac{1 - \beta}{c^{1, \beta}_{k - 1}} \le 1 - \frac{(1 - \beta)^2}{2k},    
+\end{aligned}
+\end{equation}
+concluding the proof.
+\end{proof}
+
+\begin{restatable}[Bounds on diagonals of $B^{p}_{\alpha, \beta}$]{lemma}{bbetapbounds}
+\label{lem:b_beta_bounds}
+The matrix $B^{p}_{\alpha, \beta}$ in the \acronym factorization is a lower triangular Toeplitz matrix. 
+%
+The values on its diagonals are
+\begin{equation}
+    (1, c_1^{\alpha, \beta}, c_2^{\alpha, \beta}, \dots, c_{p - 1}^{\alpha, \beta}, b_{p}^{\alpha, \beta}, \dots, b_{n - 1}^{\alpha, \beta}) \qquad \text{where} \quad 0\leq b_{i}^{\alpha, \beta} \leq \alpha^i c_{p -1}^{1, \beta/\alpha} \quad \text{for} \quad i \geq p
+\end{equation}
+where $c_{i}^{1,\beta/\alpha}$ for $1\leq i \leq p-1$ is as defined in equation~\eqref{eq:C_sqrt} .
+\end{restatable}
+\begin{proof}
+The first $p$ values are identical to the square root factorization $c_{i}^{\alpha, \beta}$ due to the uniqueness of the inverse. The remaining values satisfy the following recurrence:
+\begin{equation}
+\begin{aligned}
+    b_{i}^{\alpha, \beta} &= \sum\limits_{j = 0}^{p - 1} \tilde{c}_j^{\alpha, \beta} \frac{\alpha^{i - j + 1} - \beta^{i - j+1}}{\alpha - \beta} = \alpha^{i} \sum\limits_{j = 0}^{p - 1} \tilde{c}_j^{1, \beta/\alpha} \frac{1 - \beta^{i - j+1}}{1 - \beta / \alpha} = \alpha^{i} b_{i}^{1, \beta/\alpha}.
+\end{aligned}
+\end{equation}
+Therefore, it suffices to prove that $b_i^{1, \beta} \le c_{p - 1}^{1, \beta}$, since we can then substitute $\beta$ with $\beta/\alpha$.
+\begin{equation}
+\begin{aligned}
+    b_{i}^{1, \beta} &= \sum\limits_{j = 0}^{p - 1} \tilde{c}_j^{1, \beta} \frac{1 - \beta^{i - j+1}}{1 - \beta} = \frac{1}{1 - \beta}\sum\limits_{j = 0}^{p - 1} \tilde{c}_j^{1, \beta} - \beta^{i + 1 - p} \sum\limits_{j = 0}^{p - 1} \tilde{c}_j^{1, \beta} \frac{\beta^{p-j}}{1 - \beta}\\
+    &= \frac{1}{1 - \beta}\sum\limits_{j = 0}^{p - 1} \tilde{c}_j^{1, \beta} + \beta^{i + 1 - p} \sum\limits_{j = 0}^{p - 1} \tilde{c}_j^{1, \beta} \frac{(-\beta^{p-j} + 1 - 1)}{1 - \beta}\\
+    &= \frac{1 - \beta^{i + 1 - p}}{1 - \beta}\sum\limits_{j = 0}^{p - 1} \tilde{c}_j^{1, \beta} + c_{p - 1}^{1, \beta}\beta^{i + 1 - p}.
+\end{aligned}
+\end{equation}
+
+We now use Lemma \ref{lem:c_beta_sum_bounds} to first show that $b_i^{1, \beta} \geq 0$, since the sum of $\tilde{c}_j^{1, \beta}$ is non-negative and all other terms are positive. Second, we establish that:
+
+\begin{equation}
+    b_{i}^{1, \beta} \leq \frac{1 - \beta^{i + 1 - p}}{1 - \beta}(1 - \beta) c_{p - 1}^{1, \beta} + c_{p - 1}^{1, \beta}\beta^{i + 1 - p} = c_{p - 1}^{1, \beta},
+\end{equation}
+
+which completes the proof.
+\end{proof}
+
+
+\begin{restatable}[Bounds on diagonals of $C^{p}_{\alpha, \beta}$]{lemma}{cbetapbounds}
+\label{lem:c_beta_p_bounds}
+The matrix $C^{p}_{\alpha, \beta}$ in the \acronym factorization is a lower triangular Toeplitz matrix. 
+The values on its diagonals are 
+$(1, c_1^{\alpha, \beta}, c_2^{\alpha, \beta}, \dots, c_{p - 1}^{\alpha, \beta}, g_{p}^{\alpha, \beta}, \dots, g_{n - 1}^{\alpha, \beta})$, where $c_{i}^{1,\beta/\alpha}$ (for $1\leq i \leq p-1$) is as defined in equation~\eqref{eq:C_sqrt} and 
+    \begin{equation}
+      0\leq g_{i}^{\alpha, \beta} \leq \alpha^i\min\big( c_{i}^{1, \beta/\alpha}, c_p^{1, \beta/\alpha} \gamma_{\beta/\alpha}^{i -p}\big) \quad \text{for} \quad \gamma_{\beta/\alpha} = \left(1 + \frac{(1 - \beta/\alpha)^2}{4p(1 + \beta/\alpha)}\right)^{-1} \quad \text{and} \quad i \geq p.
+    \end{equation}
+\end{restatable}
+
+\begin{proof}
+The first $p$ values of $C_{\alpha, \beta}^{p}$ are the same as those of $C_{\alpha, \beta}$ since the matrix is Lower Triangular Toeplitz (LTT). For the subsequent values, we first prove the following inequality by induction:
+
+\begin{equation}
+    g_i^{\alpha, \beta} = \sum\limits_{j = 1}^{p - 1} (-\tilde{c}_{j}^{\alpha, \beta})g_{i - j}^{\alpha, \beta} \le \sum\limits_{j = 1}^{p - 1} (-\tilde{c}_{j}^{\alpha, \beta})c_{i - j}^{\alpha, \beta} \le \sum\limits_{j = 1}^{i} (-\tilde{c}_{j}^{\alpha, \beta})c_{i - j}^{\alpha, \beta} = c_{i}^{\alpha, \beta} = \alpha^i c_i^{1, \beta/\alpha}.
+\end{equation}
+
+We observe that for all sequences $c_i^{\alpha, \beta}$, $\tilde{c}_i^{\alpha, \beta}$, and $g_i^{\alpha, \beta}$, we can factor out $\alpha^i$ by replacing $\beta$ with $\beta/\alpha$. Therefore, it suffices to prove the inequality $g_i^{1, \beta} \le c_{p}^{1, \beta} \gamma_{\beta}^{i - p}$, after which we may substitute $\beta$ with $\beta/\alpha$. For the subsequent $p$ values, we establish the stated bound $g_i^{1, \beta} \le c_{p}^{1, \beta} \gamma_{\beta}^{i - p}$ using Lemma~\ref{lem:c_k_beta_mult_bound}.
+
+
+
+\begin{equation}
+    \frac{g^{1, \beta}_{p + k}}{c_p^{1, \beta} \gamma_{\beta}^k} \le \frac{c^{1, \beta}_{p + k}}{c_p^{1, \beta}} \left(1 + \frac{(1 - \beta)^2}{4p (1 + \beta)}\right)^k = \prod_{j = 1}^{k} \left(1 - \frac{(1 - \beta)^2}{2(p + j)}\right) \left(1 + \frac{(1 - \beta)^2}{4p(1 + \beta)}\right) \le 1.
+\end{equation}
+
+Since each term in the product is less than 1 for $2p + 2j \le 4p$, the inequality holds. For the induction step, we show:
+%
+\begin{equation}
+\begin{aligned}
+    \frac{g^{1, \beta}_{p +k}}{c^{1, \beta}_p \gamma_{\beta}^k} &= \frac{1}{c^{1, \beta}_p \gamma_{\beta}^k}\sum\limits_{j = 1}^{p - 1}(-\tilde{c}^{1, \beta}_j) g^{1, \beta}_{p + k - j} \le \sum\limits_{j = 1}^{p - 1}(-\tilde{c}^{1, \beta}_j) \gamma_{\beta}^{-j} = \sum\limits_{j = 1}^{p - 1}(-\tilde{c}^{1, \beta}_j) \left(1 + \frac{(1 - \beta)^2}{4p (1 + \beta)}\right)^{j}.
+\end{aligned}
+\end{equation}
+
+For convenience, we denote $\phi_{\beta} = \frac{(1 - \beta)^2}{1 + \beta} < 1$. To proceed, we use the following auxiliary inequality for $j \le p - 1$:
+%
+\begin{equation}
+    \left(1 + \frac{\phi_{\beta}}{4p}\right)^j \le e^{\frac{j\phi_{\beta}}{4p}} \le 1 + \frac{5j \phi_{\beta}}{16p},
+\end{equation}
+
+since $e^{x} \le 1 + 1.25x$ for $x \le \frac{1}{4}$. Combining this inequality with Lemma~\ref{lem:c_beta_sum_bounds}, we obtain:
+\begin{equation}
+\begin{aligned}
+    \frac{g^{1, \beta}_{p +k}}{c^{1, \beta}_p \gamma_{\beta}^k} &\le \sum\limits_{j = 1}^{p - 1}(-\tilde{c}^{1, \beta}_j) \left(1 + \frac{5j \phi_{\beta}}{16p}\right) \le 1 - r_{p - 1}(1 - \beta) + \frac{5\phi_{\beta}}{16p} \sum\limits_{j = 1}^{p - 1} (-\tilde{c}^{1, \beta}_j) j.
+\end{aligned}
+\end{equation}
+
+By Lemma~\ref{lem:c_beta_bounds}, we can upper bound:
+
+\begin{equation}
+    (-\tilde{c}^{1, \beta}_j)j \le (-\tilde{r}_j)j(1 + \beta) = \frac{jr_j}{2j - 1}(1 + \beta) \le r_j (1 + \beta).
+\end{equation}
+
+Using the known bounds $\frac{1}{\sqrt{\pi (j + 1)}} \le r_j \le \frac{1}{\sqrt{\pi j}}$, we conclude:
+\begin{equation}
+\begin{aligned}
+    \frac{g^{1, \beta}_{p +k}}{c^{1, \beta}_p \gamma_{\beta}^k} &\le 1 - \frac{1 - \beta}{\sqrt{\pi p}} + \frac{5 (1 - \beta)^2}{16p\sqrt{\pi}} \sum\limits_{j = 1}^{p - 1}\frac{1}{\sqrt{j}} \le 1 - \frac{1 - \beta}{\sqrt{\pi p}} + \frac{5(1 - \beta)^2}{16p\sqrt{\pi}} \cdot 2\sqrt{p} \\
+    &\le 1 - \frac{1 - \beta}{\sqrt{\pi p}} \left(1 - \frac{5}{8}(1 - \beta)\right) < 1,
+\end{aligned}
+\end{equation}
+
+where for the second inequality we used the integral estimate $\sum_{j = 1}^{k - 1} j^{-1/2} \le \int_{0}^{k} x^{-1/2} dx = 2\sqrt{k}$. Thus, we have shown that $\frac{g^{1, \beta}_{p +k}}{c^{1, \beta}_p \gamma_{\beta}^k} \le 1$ for all $k$, which completes the proof.
+\end{proof}
+
+\maintheorem*
+
+\begin{proof}
+
+We begin with the case $\alpha < 1$. To analyze this, we first consider the Frobenius norm:
+\begin{equation}
+\begin{aligned}
+\frac{\|B_{\alpha, \beta}^p\|_{\text{Fr}}^2}{n} &\le \sum\limits_{i = 0}^{p - 1} (c_i^{\alpha, \beta})^2 + \sum\limits_{i = p}^{n - 1} (b_{i}^{\alpha, \beta})^2 \le \sum\limits_{i = 0}^{p - 1} (c_i^{\alpha, \beta})^2 + (c^{1, \beta/\alpha}_{p - 1})^2\sum\limits_{i = p}^{n - 1} \alpha^{2i}  \\
+&\le  \frac{1}{(\alpha - \beta)^2}\log \left(\frac{1}{1 - \alpha^2}\right) + \frac{\alpha^{2p}}{1 - \alpha^2} =  O_{\alpha, \beta}(1),
+\end{aligned}
+\end{equation}
+where for the second inequality we used Lemma \ref{lem:b_beta_bounds}, and for the third inequality Lemma 7 from \citet{kalinin2024}.
+
+For the $(k, b)$-sensitivity of the matrix $C_{\alpha, \beta}^p$, we use the fact that it is element-wise bounded by the full matrix $C_{\alpha, \beta}$ (see Lemma \ref{lem:c_beta_p_bounds}). For $C_{\alpha, \beta}$, we apply a bound from Theorem 7 of \citet{kalinin2024}, yielding $\senskb(C_{\alpha, \beta}) = O_{\alpha, \beta}(\sqrt{k})$, which concludes the case $\alpha < 1$.
+
+For $\alpha = 1$, we use Lemma~\ref{lem:b_beta_bounds} to get:
+\begin{equation}
+\begin{aligned}
+    \frac{\|B_{1, \beta}^p\|_{\text{Fr}}^2}{n} &\le \sum\limits_{i = 0}^{n - 1} (b_i^{1, \beta})^2 = \sum\limits_{i = 0}^{p - 1}(c^{1, \beta}_i)^2 + \sum\limits_{i = p}^{n - 1}(c^{1, \beta}_{p - 1})^2 =  \frac{1}{(1 - \beta)^2}\sum\limits_{i = 0}^{p - 1}r_i^2 + \frac{1}{(1 - \beta)^2}\sum\limits_{i = p}^{n - 1}r_{p - 1}^2\\
+    &\le \frac{1}{(1 - \beta)^2}\left[1 + \log p + \frac{n - p}{p\pi}\right] = O_{\beta} \bigg(\log p + \frac{n}{p}\bigg).
+\end{aligned}
+\end{equation}
+
+Next, we bound the sensitivity under $k, b$ participation. Using Theorem \ref{thm:b-sensitivity}, combined with Lemma~\ref{lem:monotonically_decreasing_values} we obtain:
+%
+\begin{equation}
+    \senskb^2(C_{1, \beta}^p) = \sum\limits_{j = 0}^{k - 1}\sum\limits_{i = 0}^{k - 1} \langle (C_{1, \beta}^p)_{:,ib}, (C_{1, \beta}^p)_{:,jb} \rangle.
+\end{equation}
+
+We split the sum into the following four terms:
+\begin{equation}
+\begin{aligned}
+    \senskb^2(C_{1, \beta}^p) &= \underbrace{\sum\limits_{i = 0}^{k - 1}\sum\limits_{j \ne i}^{k - 1}\sum\limits_{t = 0}^{\min(p + ib, n) - 1- jb}c^{1, \beta}_{t} c^{1, \beta}_{jb - ib + t}}_{\mathcal{S}_1} + \underbrace{\sum\limits_{i = 0}^{k - 1}\sum\limits_{j \ne i}^{k - 1}\sum\limits_{t = 0}^{\min(p - 1, n - 1 - jb)} c^{1, \beta}_{t} g^{1, \beta}_{jb - ib + t}}_{\mathcal{S}_2}\\
+    &\qquad+ \underbrace{\sum\limits_{i = 0}^{k - 1}\sum\limits_{j \ne i}^{k - 1}\sum\limits_{t = p}^{n - 1 - jb} g^{1, \beta}_{t} g^{1, \beta}_{jb - ib + t}}_{\mathcal{S}_3} + \underbrace{\sum\limits_{i = 0}^{k - 1}\left[\sum\limits_{t = 0}^{\min(p -1, n - 1 - ib)}(c^{1, \beta}_t)^2 + \sum\limits_{t = p}^{n - 1 - ib} (g^{1, \beta}_{t})^2\right]}_{\mathcal{S}_4}
+\end{aligned}
+\end{equation}
+
+\textbf{Step 1 ($\mathcal{S}_1$ Bound)}  
+We note that the case $b < p < n$ has not been considered in \citet{kalinin2024} and is technically more challenging. Consider the half of the sum where $j > i$. The sum requires $jb - ib \le p - 1$; otherwise, the upper limit would be negative. We bound the sum as follows:
+\begin{equation}
+\begin{aligned}
+    \sum\limits_{t = 0}^{\min(p + ib, n) - 1- jb}c^{1, \beta}_{t} c^{1, \beta}_{jb - ib + t} &\le \frac{r_{jb - ib}}{1 - \beta} + \frac{1}{\pi(1 - \beta)^2}\sum\limits_{t = 1}^{p - 1 + ib - jb} \frac{1}{\sqrt{t(jb - ib + t)}}\\
+    & \le \frac{1}{(1 - \beta)^2}\left[1 + \frac{1}{\pi}\int\limits_{0}^{p - 1 + ib - jb} \frac{dx}{\sqrt{x(jb - ib + x)}}\right]\\
+    &= \frac{1}{(1 - \beta)^2}\left[1 + \frac{1}{\pi}f\left(\frac{jb - ib}{p - 1 + ib - jb}\right) \right],
+\end{aligned}
+\end{equation}
+where $f(a) = 2\log\bigg(\sqrt{\frac{1}{a} + 1} + \sqrt{\frac{1}{a}}\bigg)$. We then use the following auxiliary inequality for the function $f(a)$:
+
+\begin{equation}
+    f(a) = \log\left(\frac{1}{a} + 1\right) + 2 \log\left(1  + \frac{1}{\sqrt{a + 1}}\right) \le \log\left(\frac{1}{a} + 1\right) + 2\log 2.
+\end{equation}
+
+This results in the following inequality:
+
+\begin{equation}    
+\sum\limits_{t = 0}^{\min(p + ib, n) - 1- jb}c^{1,\beta}_{t} c^{1,\beta}_{jb - ib + t} \le \frac{1}{(1 - \beta)^2}\left[1 + \frac{2\log 2}{\pi } + \frac{1}{\pi}\log\left(\frac{p - 1 + ib - jb}{jb - ib}\right) \right] \mathbbm{1}_{jb - ib \le p - 1}.
+\end{equation}
+
+We can now upper bound the double sum:
+\begin{equation}
+\begin{aligned}
+\sum\limits_{i = 0}^{k - 1}\sum\limits_{j \ne i}^{k - 1} \sum\limits_{t = 0}^{\min(p + ib, n) - 1- jb} c^{1,\beta}_t c^{1,\beta}_{jb -ib + t} \le \frac{2}{(1 - \beta)^2}\sum\limits_{i = 0}^{k - 1} \sum\limits_{j = i + 1}^{\min(k - 1, i + \lfloor\frac{p - 1}{b}\rfloor)}\left[\frac{3}{2} + \frac{1}{\pi}\log\left(\frac{p - 1}{jb - ib}\right) \right].
+\end{aligned}
+\end{equation}
+
+The first term gives us:
+\begin{equation}
+    \frac{2}{(1 - \beta)^2}\sum\limits_{i = 0}^{k - 1} \sum\limits_{j = i + 1}^{\min(k - 1, i + \lfloor\frac{p - 1}{b}\rfloor)}\frac{3}{2} \le \frac{3k}{(1 - \beta)^2}\left\lfloor\frac{p - 1}{b}\right\rfloor.
+\end{equation}
+
+The second term is more involved. First, we upper bound the upper limit of the sum $\min(k - 1, i + \lfloor\frac{p - 1}{b}\rfloor)$ by $i + \lfloor\frac{p - 1}{b}\rfloor$, since the summands are positive. We can then upper bound the expression by:
+\begin{equation}
+\begin{aligned}
+    \sum\limits_{i = 0}^{k - 1} \sum\limits_{j = i + 1}^{i + \lfloor\frac{p - 1}{b}\rfloor}\log\left(\frac{\frac{p - 1}{b}}{j - i}\right) = \log \prod\limits_{ i = 0}^{k - 1} \frac{(\frac{p - 1}{b})^{\lfloor\frac{p - 1}{b}\rfloor}}{(\lfloor\frac{p - 1}{b}\rfloor)!} = k\log \frac{(\frac{p - 1}{b})^{\lfloor\frac{p - 1}{b}\rfloor}}{(\lfloor\frac{p - 1}{b}\rfloor)!}.
+\end{aligned}
+\end{equation}
+
+Using the auxiliary inequality $k! \ge (\frac{k}{e})^k$, we show that:
+\begin{equation}
+\begin{aligned}
+\log \frac{(\frac{p - 1}{b})^{\lfloor\frac{p - 1}{b}\rfloor}}{(\lfloor\frac{p - 1}{b}\rfloor)!} &\le \left\lfloor\frac{p - 1}{b}\right\rfloor\log \frac{p - 1}{b} -\left\lfloor\frac{p - 1}{b}\right\rfloor \log \left\lfloor\frac{p - 1}{b}\right\rfloor + \left\lfloor\frac{p - 1}{b}\right\rfloor\\
+&= \left\lfloor\frac{p - 1}{b}\right\rfloor\log \left\{\frac{p - 1}{b}\right\} + \left\lfloor\frac{p - 1}{b}\right\rfloor \le  \left\lfloor\frac{p - 1}{b}\right\rfloor.
+\end{aligned}
+\end{equation}
+
+Resulting in:
+%
+\begin{equation}
+\begin{aligned}
+    \sum\limits_{i = 0}^{k - 1}\sum\limits_{j \ne i}^{k - 1} \sum\limits_{t = 0}^{\min(p + ib, n) - 1- jb} c^{1, \beta}_t c^{1, \beta}_{jb -ib + t} &\le \frac{1}{(1 - \beta)^2}\left(3k\left\lfloor\frac{p - 1}{b}\right\rfloor + \frac{2}{\pi} k \left\lfloor\frac{p - 1}{b}\right\rfloor\right) \\
+    &\le \frac{4k}{(1 - \beta)^2}\left\lfloor\frac{p - 1}{b}\right\rfloor,
+\end{aligned}
+\end{equation}
+which concludes this part of the calculations.
+
+\textbf{Step 2 (Bound $\mathcal{S}_2$).} We can bound the inner sum as follows, assuming that $jb - ib \ge p$:
+\begin{equation}
+\begin{aligned}
+\sum\limits_{t = 0}^{\min(p - 1, n - 1 - jb)} c^{1, \beta}_{t} g^{1, \beta}_{jb - ib + t}  &\le c^{1, \beta}_p\sum\limits_{t = 0}^{p - 1} c^{1, \beta}_{t} \gamma_{\beta}^{jb - ib + t - p} =  c^{1, \beta}_p \gamma_{\beta}^{jb - ib - p}\sum\limits_{t = 0}^{p - 1} c^{1,\beta}_{t} \gamma_{\beta}^t\\
+&\le c^{1, \beta}_p \gamma_{\beta}^{jb - ib - p}\sum\limits_{t = 0}^{p - 1} c^{1,\beta}_{t} \le  \frac{r_p\gamma_{\beta}^{jb -ib - p}}{(1 - \beta)^2}  \bigg(1 + \frac{1}{\sqrt{\pi}} \sum\limits_{t = 1}^{p - 1}\frac{1}{\sqrt{t}}\bigg)  \\
+&\le  \frac{r_p\gamma_{\beta}^{jb -ib - p}}{(1 - \beta)^2}  \bigg(1 + \frac{2\sqrt{p}}{\sqrt{\pi}}\bigg) \le \frac{3 \gamma_{\beta}^{jb - ib - p}}{(1 - \beta)^2}
+\end{aligned}
+\end{equation}
+
+For our specific choice of $\gamma_{\beta} = 1 - \frac{\phi_{\beta}}{4p + \phi_{\beta}}= \left(1 + \frac{\phi_{\beta}}{4p}\right)^{-1}$, where $\phi_{\beta} = \frac{(1 - \beta)^2}{1 + \beta}$. We rewrite the bound using the following auxiliary inequality:
+
+\begin{equation}
+    \gamma_{\beta}^{-p} = \bigg(1 + \frac{\phi_{\beta}}{4p}\bigg)^p \le e^{\phi_{\beta}/4} \le e^{1/4}\le \frac{4}{3}, 
+\end{equation}
+
+This yields the upper bound for the whole sum:
+\begin{equation}
+\begin{aligned}
+\sum\limits_{i = 0}^{k - 1}\sum\limits_{j \ne i}^{k - 1}\sum\limits_{t = 0}^{\min(p - 1, n - 1 - jb)} c^{1,\beta}_{t} g^{1,\beta}_{jb - ib + t} \le \frac{8}{(1 - \beta)^2} \sum\limits_{i = 0}^{k - 1}\sum\limits_{j = i + 1}^{k - 1}\gamma_{\beta}^{jb - ib} \le \frac{8k\gamma_{\beta}^b}{(1 - \beta)^2(1 - \gamma_{\beta}^b)}
+\end{aligned}
+\end{equation}
+
+We bound $\gamma_{\beta}^{b}$ in the following way:
+
+\begin{equation}
+    \gamma_{\beta}^b = \left(1 - \frac{\phi_{\beta}}{4p + \phi_{\beta}}\right)^b \le e^{-\frac{b\phi_{\beta}}{4p + \phi_{\beta}}} = e^{-\frac{b\phi_{\beta}}{p} \frac{p}{4p + 1}} \le e^{-\frac{b\phi_{\beta}}{5p}}
+\end{equation}
+
+Thus,
+\begin{equation}
+\begin{aligned}
+    \sum\limits_{i = 0}^{k - 1}\sum\limits_{j \ne i}^{k - 1}\sum\limits_{t = 0}^{\min(p - 1, n - 1 - jb)} c^{1, \beta}_{t} g^{1,\beta}_{jb - ib + t}  &\le \frac{8k}{(1 - \beta)^2(\gamma_{\beta}^{-b} - 1)} \\
+    &\le \frac{8k}{(1 - \beta)^2(e^{\frac{b\phi_{\beta}}{5p}} - 1)} \le \frac{40kp(1 + \beta)}{b(1 - \beta)^4}.
+\end{aligned}
+\end{equation}
+
+
+
+\textbf{Step 3 (Bound $\mathcal{S}_3$)}
+We first bound the inner sum, assuming $j > i$:
+\begin{equation}
+\begin{aligned}
+    \sum\limits_{t = p}^{n - 1 - jb} g^{1, \beta}_{t} g^{1,\beta}_{jb - ib + t}&\le (c_{p}^{1,\beta})^2\sum\limits_{t = p}^{n - 1 - jb} \gamma_{\beta}^{t - p}\gamma_{\beta}^{jb - ib + t - p} \\
+    &\le \frac{(c^{1,\beta}_p)^2\gamma_{\beta}^{jb - ib}}{1 - \gamma_{\beta}^2} \le \frac{(c^{1,\beta}_p)^2\gamma_{\beta}^{jb - ib}(4p + \phi_{\beta})}{2\phi_{\beta}}\\
+    &\le \frac{r^2_p(4p + 1)\gamma_{\beta}^{jb - ib}}{2\phi_{\beta}( 1 - \beta)^2}
+    \le \frac{5r_p^2\gamma_{\beta}^{jb - ib}p}{2\phi_{\beta}( 1 - \beta)^2} \\
+    &\le \frac{5\gamma_{\beta}^{jb - ib}}{2\pi \phi_{\beta}( 1 - \beta)^2} \le \frac{\gamma_{\beta}^{jb - ib}(1 + \beta)}{( 1 - \beta)^4}.
+\end{aligned}
+\end{equation}
+
+This yields the upper bound:
+
+\begin{equation}
+    \sum\limits_{i = 0}^{k - 1}\sum\limits_{j \ne i}^{k - 1}\sum\limits_{t = p}^{n - 1 - jb} g^{1, \beta}_{t} g^{1, \beta}_{jb - ib + t} \le \frac{2(1 + \beta)}{(1 - \beta)^4}\sum\limits_{i = 0}^{k - 1}\sum\limits_{j = i + 1}^{k - 1}\gamma_{\beta}^{jb - ib} \le \frac{10kp(1 + \beta)^2}{b(1 - \beta)^6}.
+\end{equation}
+analogously to the previous step.
+
+\textbf{Step 4 (Bound $\mathcal{S}_4$)}
+We bound the sum of squared column norms  as follows: 
+\begin{equation}
+\begin{aligned}
+     \sum\limits_{i = 0}^{k - 1}\left[\sum\limits_{t = 0}^{\min(p -1, n - 1 - ib)}(c^{1,\beta}_t)^2 + \sum\limits_{t = p}^{n - 1 - ib} (g^{1,\beta}_{t})^2\right] &\le \frac{k}{(1 - \beta)^2}\left[\sum\limits_{t = 0}^{p - 1} r_t^2  + \frac{r_p^2}{1 - \gamma_{\beta}^2}\right]\\
+     &\le  \frac{k}{(1 - \beta)^2}\left[1 + \log p + \frac{5 ( 1 + \beta)}{2\pi (1 - \beta)^2}\right].
+\end{aligned}
+\end{equation}
+
+\textbf{Step 5 (Combination)} Combining all steps together, we bound the $k, b$ sensitivity as follows:
+\begin{equation}
+\begin{aligned}
+    \senskb^2(C_{1, \beta}^p) &= \sum\limits_{j = 0}^{k - 1}\sum\limits_{i = 0}^{k - 1} \langle (C_{1, \beta}^p)_{:,ib}, (C_{1, \beta}^p)_{:,jb} \rangle\\
+    &\le \frac{k}{(1 - \beta)^2} \bigg(1 + \log p + \frac{5(1 + \beta)}{2\pi} + 10\frac{p(1 + \beta)}{b(1 - \beta)^2}\bigg(4 + \frac{1 + \beta}{(1 - \beta)^2}\bigg)  +  4\left\lfloor\frac{p - 1}{b}\right\rfloor\bigg)\\
+    &\le \frac{k(1 + \beta)^2}{(1 - \beta)^6}\bigg(2 + \log p + 54 \frac{p}{b} \bigg)
+\end{aligned}
+\end{equation}
+
+Thus,
+
+\begin{equation}
+    \mathcal{E}( B_{1, \beta}^p, C_{1,\beta}^{p})^2 \le \frac{k(1 + \beta)^2}{(1 - \beta)^8}\left(1 + \log p + \frac{n - p}{p\pi}\right)\left(2 + \log p + 54 \frac{p}{b} \right)
+\end{equation}
+And 
+
+\begin{equation}
+    \mathcal{E}( B_{1,\beta}^p, C_{1, \beta}^{p}) = O_{\beta}\left(\sqrt{k}\log p + \sqrt{\frac{nk}{b}} + \sqrt{\frac{nk\log p}{p}} + \sqrt{\frac{kp\log p}{b}}\right).
+\end{equation}
+\end{proof}
+
+\OptimalBandInv*
+
+
+\begin{proof}
+If the matrix $C_{\lambda}^{-1}$ is given by $\text{LTT}(1, -\lambda, 0, \dots, 0)$, then its inverse is $C_{\lambda} = \text{LTT}(1, \lambda, \lambda^{2}, \dots, \lambda^{n - 1})$. The product $A_{1, 0} C^{-1}_{\lambda} = \text{LTT}(1, 1 - \lambda, \dots, 1 - \lambda)$, which leads to the following error:
+%
+\begin{equation}
+    \mathcal{E}(A_{1, 0} C^{-1}_{\lambda}, C_{\lambda})^2 = \frac{1}{n} \left(1 + (1 - \lambda)^2(n - 1)\right) \sum\limits_{k = 0}^{n - 1} \lambda^{2k} = \frac{(1 + (1 - \lambda)^2(n - 1))(1 - \lambda^{2n})}{n(1 - \lambda^2)}.
+\end{equation}
+Therefore,
+\begin{equation}
+    \inf_{\lambda \in (0,1)} \mathcal{E}(A_{1, 0} C^{-1}_{\lambda}, C_{\lambda})^2 \le  \frac{\left(2 - \frac{1}{n}\right) \left(1 - \left(1 - \frac{1}{\sqrt{n}}\right)^{n}\right)}{\sqrt{n}} \le \frac{2}{\sqrt{n}},
+\end{equation}
+when $\lambda =\sqrt{1 - \frac{1}{\sqrt{n}}}$ as $1 - \lambda \le 1 - (1 - \frac{1}{\sqrt{n}}) = \frac{1}{\sqrt{n}}$. The bound follows.
+\end{proof}
+
+\clearpage
+\section{Additional Materials}
+
+
+\begin{figure}[t]
+    \centering\scriptsize
+    \begin{subfigure}[c]{.32\linewidth}
+        \includegraphics[width=\linewidth]{images/band_inv_varying_steps_k=4_alpha=1_beta=0.pdf}
+        \subcaption{$k=4$, $\alpha = 1$, $\beta = 0$}
+    \end{subfigure}\hfill
+    \begin{subfigure}[c]{.32\linewidth}
+        \includegraphics[width=\linewidth]{images/band_inv_varying_steps_k=4_alpha=1_beta=0.9.pdf}
+        \subcaption{$k=4$,  $\alpha=1$, $\beta=0.9$}
+    \end{subfigure}\hfill
+    \begin{subfigure}[c]{.32\linewidth}
+        \includegraphics[width=\linewidth]{images/band_inv_varying_steps_k=4_alpha=0.999_beta=0.pdf}
+        \subcaption{$k=4$, $\alpha=0.999$, $\beta=0$}
+    \end{subfigure}
+    
+    \vspace{0.5em} % Add some vertical space
+    
+    \begin{subfigure}[c]{.32\linewidth}
+        \includegraphics[width=\linewidth]{images/band_inv_varying_steps_k=16_alpha=1_beta=0.pdf}
+        \subcaption{$k=16$, $\alpha=1$, $\beta = 0$}
+    \end{subfigure}\hfill
+    \begin{subfigure}[c]{.32\linewidth}
+        \includegraphics[width=\linewidth]{images/band_inv_varying_steps_k=16_alpha=1_beta=0.9.pdf}
+        \subcaption{$k=16$,  $\alpha=1$, $\beta=0.9$}
+    \end{subfigure}\hfill
+    \begin{subfigure}[c]{.32\linewidth}
+        \includegraphics[width=\linewidth]{images/band_inv_varying_steps_k=16_alpha=0.999_beta=0.pdf}
+        \subcaption{$k=16$, $\alpha=0.999$, $\beta=0$}
+    \end{subfigure}
+    
+    \caption{Convergence of Band-Inv-MF under different settings: for participation numbers $k = 4, 16$, with and without momentum ($\beta$) and weight decay ($\alpha$), across various matrix sizes (iterations). In general, we observe that 20 steps are sufficient for the procedure to converge.}
+    \label{fig:band_inv_optimizatoin}
+\end{figure}
+
+\begin{table}[t]
+\caption{Hyperparameters for CIFAR-10 Experiments. We train all methods with and without amplification to achieve \((9, 10^{-5})\)-differential privacy. Training uses a weight decay of \(0.9999\), momentum of \(0.9\), and batch size \(512\). Noise multipliers are computed via an MCMC accountant for the amplified case, and as \(\sigma_{\epsilon, \delta} \times \senskb(C)\) for the non-amplified case, assuming 10 training epochs.}
+
+\centering
+\renewcommand{\arraystretch}{1} % Adjust row height
+\setlength{\tabcolsep}{4pt}      % Adjust column spacing
+\begin{tabular}{llccccc}
+\toprule
+ & \textbf{Method} & \textbf{Noise Multiplier} & \textbf{Learning Rate}   & \textbf{bandwidth} & \textbf{Clip Norm}\\ 
+\midrule
+\multirow{5}{*}{Amplified} &   
+DP-SGD & $1.2$ & $0.1$ & $1$  & $10$ \\ 
+  & BSR& $2.3$ & $0.3$ & $4$ & $10$ \\ 
+ & BISR & $4.4$ & $0.7$ & $4$ & $10$ \\ 
+ & Band-MF&  $2.4$ & $0.3$ & $4$ & $10$\\
+ & Band-Inv-MF& $8.2$ & $0.4$ & $4$ & $10$ \\
+\midrule
+\multirow{5}{*}{Non-amplified} &  
+DP-SGD & $1.8$ & $0.1$ & $1$  & $10$ \\ 
+  & BSR& $3.3$ & $0.2$ & $4$ & $10$ \\ 
+ & BISR & $5.8$ & $0.7$ & $4$ & $10$ \\ 
+ & Band-MF&  $3.5$ & $0.2$ & $4$ & $10$\\
+ & Band-Inv-MF& $9.1$ & $0.5$ & $4$ & $10$ \\
+
+\bottomrule
+\end{tabular}
+\label{tab:hyperparameters}
+\end{table}
+
+\begin{table}[b!]
+\caption{CIFAR-10 experiments with and without amplification, for   $\varepsilon = 9$, $\delta = 10^{-5}$ showing test accuracy ($\%$) over 10 epochs. Mean $\pm$ standard error computed over 3 runs.}
+
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llcccccccccc}
+\toprule
+ & \textbf{Method} & \textbf{Epoch 1} & \textbf{Epoch 2} & \textbf{Epoch 3} & \textbf{Epoch 4} & \textbf{Epoch 5} & \textbf{Epoch 6} & \textbf{Epoch 7} & \textbf{Epoch 8} & \textbf{Epoch 9} & \textbf{Epoch 10} \\
+\midrule
+\multirow{5}{*}{Amp.}
+& DP-SGD          & 12.7 $\pm$ 2.2 & 28.0 $\pm$ 1.1 & 34.4 $\pm$ 0.4 & 37.6 $\pm$ 0.7 & 39.8 $\pm$ 1.2 & 41.6 $\pm$ 0.2 & 42.3 $\pm$ 0.8 & 42.8 $\pm$ 0.3 & 43.5 $\pm$ 0.4 & 44.6 $\pm$ 0.7 \\
+& BSR             & 28.3 $\pm$ 0.7 & 40.2 $\pm$ 1.1 & 43.6 $\pm$ 1.1 & 46.5 $\pm$ 0.9 & 48.0 $\pm$ 2.0 & 48.8 $\pm$ 1.4 & 48.9 $\pm$ 1.4 & 49.4 $\pm$ 0.7 & 49.2 $\pm$ 1.2 & 49.8 $\pm$ 0.3 \\
+& BISR            & 32.3 $\pm$ 0.7 & 42.7 $\pm$ 1.1 & 47.5 $\pm$ 1.1 & 50.3 $\pm$ 0.9 & 52.8 $\pm$ 2.0 & 56.5 $\pm$ 1.4 & 57.9 $\pm$ 1.4 & 58.5 $\pm$ 0.7 & 60.5 $\pm$ 1.2 & 61.8 $\pm$ 0.3 \\
+& Band-MF         & 27.7 $\pm$ 2.0 & 38.5 $\pm$ 0.3 & 43.1 $\pm$ 1.6 & 43.7 $\pm$ 1.8 & 46.8 $\pm$ 0.8 & 47.7 $\pm$ 0.3 & 48.2 $\pm$ 0.6 & 47.8 $\pm$ 2.6 & 49.1 $\pm$ 0.6 & 50.0 $\pm$ 0.4 \\
+& Band-Inv-MF     & 23.6 $\pm$ 2.8 & 34.6 $\pm$ 1.3 & 40.0 $\pm$ 2.4 & 44.6 $\pm$ 1.3 & 48.6 $\pm$ 1.0 & 50.4 $\pm$ 1.0 & 50.6 $\pm$ 0.5 & 53.4 $\pm$ 0.8 & 56.2 $\pm$ 0.6 & 57.4 $\pm$ 1.2 \\
+\midrule
+\multirow{5}{*}{Non-Amp.}
+& DP-SGD          & 19.5 $\pm$ 3.0 & 31.0 $\pm$ 1.1 & 36.7 $\pm$ 0.2 & 37.2 $\pm$ 0.4 & 37.7 $\pm$ 1.2 & 39.3 $\pm$ 2.0 & 39.8 $\pm$ 1.2 & 39.1 $\pm$ 0.3 & 39.5 $\pm$ 0.5 & 39.0 $\pm$ 0.7 \\
+& BSR             & 25.4 $\pm$ 1.2 & 36.7 $\pm$ 1.2 & 40.8 $\pm$ 1.1 & 41.6 $\pm$ 2.0 & 43.6 $\pm$ 0.9 & 44.5 $\pm$ 0.7 & 45.0 $\pm$ 0.9 & 44.4 $\pm$ 2.1 & 45.3 $\pm$ 1.8 & 45.2 $\pm$ 0.8 \\
+& BISR            & 31.8 $\pm$ 1.5 & 41.7 $\pm$ 2.2 & 45.4 $\pm$ 1.4 & 48.5 $\pm$ 1.3 & 51.1 $\pm$ 1.0 & 51.4 $\pm$ 2.7 & 53.8 $\pm$ 1.0 & 54.0 $\pm$ 1.2 & 55.5 $\pm$ 0.8 & 56.2 $\pm$ 0.2 \\
+& Band-MF         & 25.9 $\pm$ 1.5 & 36.7 $\pm$ 0.9 & 41.1 $\pm$ 1.4 & 43.2 $\pm$ 1.3 & 42.8 $\pm$ 1.4 & 45.0 $\pm$ 0.2 & 45.5 $\pm$ 0.4 & 45.4 $\pm$ 1.8 & 46.7 $\pm$ 0.9 & 45.8 $\pm$ 0.2 \\
+& Band-Inv-MF     & 27.4 $\pm$ 3.0 & 36.0 $\pm$ 2.5 & 39.5 $\pm$ 2.4 & 43.7 $\pm$ 1.2 & 46.7 $\pm$ 0.5 & 47.0 $\pm$ 2.0 & 49.7 $\pm$ 1.7 & 53.5 $\pm$ 0.5 & 54.4 $\pm$ 1.5 & 57.9 $\pm$ 0.4 \\
+\bottomrule
+\end{tabular}
+}
+\label{tab:accuracies}
+\end{table}
+
+
+\begin{table}[t!]
+\caption{Hyperparameters for IMDB Sentiment Analysis Experiments with BERT-base. We train all methods with and without amplification to achieve \((9, 10^{-5})\)-differential privacy. Training uses a weight decay of \(0.99999\), momentum of \(0.95\), and batch size \(512\). Noise multipliers are computed via an MCMC accountant for the amplified case, and as \(\sigma_{\epsilon, \delta} \times \senskb(C)\) for the non-amplified case, assuming 10 training epochs.}
+
+\centering
+\renewcommand{\arraystretch}{1} % Adjust row height
+\setlength{\tabcolsep}{4pt}      % Adjust column spacing
+\begin{tabular}{llccccc}
+\toprule
+ & \textbf{Method} & \textbf{Noise Multiplier} & \textbf{Learning Rate}   & \textbf{Bandwidth} & \textbf{Clip Norm}\\ 
+\midrule
+\multirow{5}{*}{Amplified} &   
+DP-SGD & $1.2$ & $0.02$ & $1$  & $10$ \\ 
+  & BSR& $2.3$ & $0.02$ & $4$ & $10$ \\ 
+ & BISR & $4.4$ & $0.15$ & $4$ & $10$ \\ 
+ & Band-MF&  $2.4$ & $0.02$ & $4$ & $10$\\
+ & Band-Inv-MF& $8.2$ & $0.1$ & $4$ & $10$ \\
+\midrule
+\multirow{5}{*}{Non-amplified} &  
+DP-SGD & $1.8$ & $0.02$ & $1$  & $10$ \\ 
+  & BSR& $3.3$ & $0.02$ & $4$ & $10$ \\ 
+ & BISR & $5.8$ & $0.15$ & $4$ & $10$ \\ 
+ & Band-MF&  $3.5$ & $0.02$ & $4$ & $10$\\
+ & Band-Inv-MF& $9.1$ & $0.1$ & $4$ & $10$ \\
+\bottomrule
+\end{tabular}
+\label{tab:hyperparameters_imdb}
+\end{table}
+
+
+\begin{table}[b!]
+\caption{IMDB sentiment analysis (BERT-base) with and without amplification, for $\varepsilon = 9$, $\delta = 10^{-5}$ showing test accuracy ($\%$) over 10 epochs. Mean $\pm$ standard error computed over 3 runs.}
+
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llcccccccccc}
+\toprule
+ & \textbf{Method} & \textbf{Epoch 1} & \textbf{Epoch 2} & \textbf{Epoch 3} & \textbf{Epoch 4} & \textbf{Epoch 5} & \textbf{Epoch 6} & \textbf{Epoch 7} & \textbf{Epoch 8} & \textbf{Epoch 9} & \textbf{Epoch 10} \\
+\midrule
+\multirow{5}{*}{Amp.}
+& DP-SGD      & 71.23 $\pm$ 0.79 & 82.42 $\pm$ 0.54 & 84.45 $\pm$ 0.21 & 85.57 $\pm$ 0.19 & 86.18 $\pm$ 0.05 & 86.64 $\pm$ 0.03 & 86.93 $\pm$ 0.03 & 86.99 $\pm$ 0.14 & 87.26 $\pm$ 0.03 & 87.43 $\pm$ 0.12 \\
+& BSR         & 75.26 $\pm$ 2.67 & 84.46 $\pm$ 0.25 & 86.11 $\pm$ 0.29 & 86.96 $\pm$ 0.11 & 87.48 $\pm$ 0.13 & 87.77 $\pm$ 0.07 & 87.84 $\pm$ 0.08 & 87.91 $\pm$ 0.13 & 88.19 $\pm$ 0.14 & 88.11 $\pm$ 0.06 \\
+& BISR        & 83.27 $\pm$ 0.21 & 87.08 $\pm$ 0.05 & 88.16 $\pm$ 0.09 & 88.83 $\pm$ 0.06 & 89.20 $\pm$ 0.05 & 89.21 $\pm$ 0.09 & 89.49 $\pm$ 0.03 & 89.41 $\pm$ 0.11 & 89.60 $\pm$ 0.05 & 89.58 $\pm$ 0.17 \\
+& Band-MF     & 76.66 $\pm$ 1.24 & 84.66 $\pm$ 0.17 & 86.36 $\pm$ 0.17 & 87.22 $\pm$ 0.15 & 87.62 $\pm$ 0.40 & 87.89 $\pm$ 0.23 & 88.04 $\pm$ 0.19 & 88.16 $\pm$ 0.21 & 88.33 $\pm$ 0.26 & 88.31 $\pm$ 0.19 \\
+& Band-Inv-MF & 82.91 $\pm$ 0.53 & 86.92 $\pm$ 0.31 & 88.25 $\pm$ 0.05 & 88.60 $\pm$ 0.17 & 89.02 $\pm$ 0.19 & 89.23 $\pm$ 0.06 & 89.50 $\pm$ 0.06 & 89.50 $\pm$ 0.06 & 89.65 $\pm$ 0.00 & 89.53 $\pm$ 0.25 \\
+\midrule
+\multirow{5}{*}{Non-Amp.}
+& DP-SGD      & 62.94 $\pm$ 1.47 & 78.21 $\pm$ 0.56 & 83.05 $\pm$ 0.19 & 84.17 $\pm$ 0.20 & 85.01 $\pm$ 0.06 & 85.40 $\pm$ 0.20 & 85.53 $\pm$ 0.17 & 85.80 $\pm$ 0.13 & 85.81 $\pm$ 0.17 & 85.71 $\pm$ 0.09 \\
+& BSR         & 76.74 $\pm$ 1.04 & 84.09 $\pm$ 0.09 & 85.70 $\pm$ 0.22 & 86.59 $\pm$ 0.26 & 86.93 $\pm$ 0.03 & 87.15 $\pm$ 0.13 & 87.20 $\pm$ 0.11 & 87.19 $\pm$ 0.09 & 87.31 $\pm$ 0.15 & 87.18 $\pm$ 0.10 \\
+& BISR        & 81.85 $\pm$ 0.86 & 86.65 $\pm$ 0.33 & 87.60 $\pm$ 0.39 & 88.64 $\pm$ 0.10 & 88.90 $\pm$ 0.05 & 88.83 $\pm$ 0.18 & 89.02 $\pm$ 0.09 & 89.43 $\pm$ 0.07 & 89.37 $\pm$ 0.00 & 89.42 $\pm$ 0.15 \\
+& Band-MF     & 73.39 $\pm$ 1.39 & 83.63 $\pm$ 0.38 & 85.39 $\pm$ 0.16 & 86.09 $\pm$ 0.29 & 86.99 $\pm$ 0.06 & 87.08 $\pm$ 0.13 & 87.23 $\pm$ 0.16 & 87.34 $\pm$ 0.14 & 87.34 $\pm$ 0.07 & 87.08 $\pm$ 0.14 \\
+& Band-Inv-MF & 81.99 $\pm$ 0.23 & 86.06 $\pm$ 0.19 & 87.98 $\pm$ 0.11 & 88.46 $\pm$ 0.12 & 88.63 $\pm$ 0.03 & 88.79 $\pm$ 0.32 & 88.85 $\pm$ 0.29 & 89.02 $\pm$ 0.21 & 88.89 $\pm$ 0.37 & 89.23 $\pm$ 0.16 \\
+\bottomrule
+\end{tabular}
+}
+\label{tab:imdb_accuracies}
+\end{table}
+
+
+
+\clearpage
+
+\lstset{
+  language=Python,                 % Choose the language
+  basicstyle=\ttfamily\footnotesize, % Font and size for code
+  %numbers,                    % Display line numbers on the left
+  %umberstyle=\tiny\color{gray},   % Style for line numbers
+  caption={Python code for Band-Inv-MF factorization. The function "Band\_Inv\_MF" takes the matrix size ($n$), the minimum separation ($b$), the number of participations ($k$), the bandwidth ($p$), the weight decay ($\alpha$), the momentum ($\beta$), and the number of optimization steps.}, % Add a caption
+  frame=single,                    % Add a frame around the code
+  breaklines=true,                 % Enable line breaking
+  aboveskip=1em, belowskip=1em,     % Add some space above and below
+  showstringspaces=false,          % Don't show spaces in strings with a special character
+  tabsize=2                        % Set tab size to 2 spaces
+}
+
+
+\begin{lstlisting}[label={lst:bandinv_code}]
+import jax_privacy
+from jax_privacy.maxtrix_factorization import toeplitz
+import jax.numpy as jnp
+import functools
+import numpy as np
+
+def expected_mean_error(inv_coef, n, k, workload_coef) -> float:
+    inv_coef = jnp.pad(inv_coef, (0, n - inv_coef.size))
+    B_norm_squared = toeplitz.mean_error(noising_coef=inv_coef, n=n,  workload_coef=workload_coef, skip_checks=True)
+    
+    coef = toeplitz.inverse_coef(inv_coef)
+    min_sep = n // k # assume divisible
+
+    sensitivity_squared = toeplitz.minsep_sensitivity_squared(coef, min_sep, k, n, skip_checks=True)
+
+    return sensitivity_squared * B_norm_squared
+
+def compute_square_root(x, n) -> np.ndarray:
+    y = np.zeros(n)
+    y[0] = np.sqrt(x[0])
+    for k in range(1, n):
+        y[k] = (x[k] -np.dot(y[1:k], y[1:k][::-1])) / (2 * y[0])
+    return y
+
+def init(n, p, alpha = 1.0, beta = 0.0) -> jnp.ndarray:
+    x = jnp.array([1, -alpha - beta, alpha * beta] + [0]*(n-3))
+    return jnp.array(compute_square_root(x, n)[:p])
+
+def Band_Inv_MF(n, b, k, p, alpha, beta, steps = 20):
+    # compute workload matrix
+    M = jnp.array([(alpha ** (k + 1) - beta ** (k + 1)) / (beta - alpha) for k in range(n)])
+    
+    # initialize with BISR coefficients
+    C_inv_init = init(n, p, alpha, beta)
+    
+    # optimize!
+    C_inv_opt = toeplitz.optimize_banded_toeplitz(
+      n=n,
+      bands=p,
+      strategy_coef=C_inv_init,
+      loss_fn=functools.partial(expected_mean_error, k=k, workload_coef=M),
+      max_optimizer_steps=steps,
+    )
+    return C_inv_opt
+\end{lstlisting}
+
+
+\clearpage
+
+
+\end{document}

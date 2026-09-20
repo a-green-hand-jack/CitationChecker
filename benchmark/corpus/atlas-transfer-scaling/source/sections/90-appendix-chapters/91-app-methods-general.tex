@@ -1,0 +1,56 @@
+\section{Experimental Details}
+\label{app:experimental-details}
+
+To understand multilingual scaling characteristics we run $774$ separate experiments, across different model scales, and language mixtures.
+In \Cref{tab:experiment-summary} we summarize the experiment segments, using the notation below, that defines sets of languages or scales.
+
+% ------------------------------------------------------------------
+%  Definitions of language & scale sets
+% ------------------------------------------------------------------
+\begin{itemize}
+  \item $\mathcal{L}_{\text{mono}}$ (7): \{en, fr, ru, zh, hi, sw, yo\}
+  \item $\mathcal{L}_{\text{pairs}}$ (10): \{en, fr, ru, zh, hi, de, es, pt, ja, vi\}
+  \item $\mathcal{L}_{\text{target}}$ (15): en/$X$ for $X\in\mathcal{L}_{\text{pairs}}$ + \{es/pt, fr/zh, hi/ru, de/ja, hi/vi\}
+  \item $\mathcal{L}_{\text{eval}}$ (48): complete evaluation set (all 48 languages)
+
+  \item $\mathcal{C}_{\text{exp}}$ (12): \{4\,$\times$\,4, 6, 8\,$\times$\,2, 12, 16, 24, 32, 50\}
+  
+  \item $\mathcal{S}_{\text{full}}$ (20): \{0, 1, 2, 4, 6, 8, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 42, 46\}
+  \item $\mathcal{S}_{\text{part}}$ (11): \{0, 4, 8, 12, 16, 20, 24, 28, 34, 42, 46\}
+  \item $\mathcal{S}_{\text{min}}$ (7):  \{0, 8, 16, 24, 34, 42, 46\}
+\end{itemize}
+
+To see the model sizes defined by the scales in $\mathcal{S}_{\text{full}}$, $\mathcal{S}_{\text{part}}$, and $\mathcal{S}_{\text{min}}$, see \Cref{tab:scales}.
+We select these scale ranges to empirically observe models from $10M$ to $8B$ parameters.
+Subsets of languages, or subsets of the full scale ($\mathcal{S}_{\text{part}}$, or $\mathcal{S}_{\text{min}}$) are chosen to ensure the experiment number is sufficiently tractable for each research question, but also computationally feasible given our resources.
+
+\input{tables/experiments-summary}
+
+\subsection{Language Choice} 
+
+The fifty languages we selected come from the intersection of languages covered by both Flores-200 and MADLAD-400. They were selected to cover a wide range of language families, scripts, and resource levels. To get this collection, we sorted all languages in the Flores-MADLAD intersection by the number of characters, and then selected every six languages. We then went over this list and perturbed the index up or down if it was too typologically similar to an already-selected language. For example, Language 48 was Afrikaans, but there were already several Germanic languages on the list, so we opted to take language 47 instead (Telugu). 
+
+\subsection{Experiment Design}
+
+\paragraph{Pretraining Hyperparameter Details}
+We rely on the hyperparameter settings refined by prior work to obtain reliable performance across model sizes. We also conducted initial experiments, varying batch sizes, learning rates, optimizer, and dropout to ensure our settings were relatively robust.
+In \cref{tab:pretrain-hyperparams} we enumerate and explain all our hyperparameter choices, citing related work.
+
+\paragraph{Train \& Test Data}
+We use two test sets. For each we measure the vocabulary-insensitive loss proposed in \citet{tao2024scaling} in order to fairly evaluate across languages. 
+\begin{enumerate}
+    \item \textbf{MADLAD-400 Test} We isolate a test set from each of our 50 evaluation languages in MADLAD-400 \citep{kudugunta2024madlad}.
+    In initial experiments we find stable metrics over random seeds requires sampling roughly (sequence length x num instances) $2048*10000=$ 20,480,000 tokens.
+    For each language we randomly sample the minimum of either 20M tokens or 20\% of the total tokens for low resource languages min(20M tokens, 20\%).
+    \item \textbf{Flores-101} We use Flores-101 \citep{flores101}, a language-parallel set of 101 high-quality translations, as a comparable test set. We extract the monolingual sequences the test set, using those to compute sequence losses, comparable to MADLAD-400 Test.
+\end{enumerate}
+
+
+\paragraph{Vocabulary Details} We use a vocabulary trained by \citeauthor{kudugunta2024madlad}, with a 64000 sized vocabulary, $T=100$ and 99.9995\% character coverage.
+
+
+\input{tables/pretraining-hyperparameters}
+
+\input{tables/scales}
+
+\input{tables/unimax-rates}

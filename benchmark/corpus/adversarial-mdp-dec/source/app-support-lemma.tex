@@ -1,0 +1,154 @@
+\newpage
+\section{Concentration Inequality}
+\begin{lemma}[Freedman's inequality \citep{beygelzimer2011contextual}]\label{lem: strengthen freed}
+    Let $X_1, X_2,\ldots$ be a martingale difference sequence with respect to a filtration $\mathfrak{F}_1 \subset \mathfrak{F}_2 \subset \cdots$ such that $\E[X_t|\mathfrak{F}_t]=0$ and assume $X_t\leq B$ almost surely. Then for any $\alpha\geq B$, with probability at least $1-\delta$, 
+    \begin{align*}
+        \sum_{t=1}^T X_t \leq \frac{1}{\alpha} \sum_{t=1}^T \E[X_t^2|\mathfrak{F}_t] + \alpha \log (1/\delta).  \numberthis \label{eq: to substitutate}
+    \end{align*}
+    %where 
+    % \begin{align*}
+    %    V_T = \sum_{t=1}^T \E[X_t^2|\mathfrak{F}_t], \quad U_T =  \max\left\{\epsilon, \max_{t\in[T]} |X_t|\right\}. 
+    %\end{align*}
+\end{lemma}
+
+\begin{lemma}[Empirical Freedman's inequality]\label{lem: empirical freed}
+    Let $X_1, X_2,\ldots$ be a sequence with respect to a filtration $\mathfrak{F}_1 \subset \mathfrak{F}_2 \subset \cdots$ such that $\E[X_t|\mathfrak{F}_t]=\mu_t$ and assume $\max\{X_t-\mu_t,X_t\}\leq B$ almost surely. Then for any $\alpha\geq 4B$, with probability at least $1-\delta$, 
+    \begin{align*}
+        \sum_{t=1}^T (\mu_t - X_t) \leq \frac{4}{\alpha} \sum_{t=1}^T X_t^2 + \alpha \log (1/\delta).  \numberthis \label{eq: to empirical substitutate}
+    \end{align*}
+    %where 
+    % \begin{align*}
+    %    V_T = \sum_{t=1}^T \E[X_t^2|\mathfrak{F}_t], \quad U_T =  \max\left\{\epsilon, \max_{t\in[T]} |X_t|\right\}. 
+    %\end{align*}
+\end{lemma}
+\begin{proof}
+    Denote $\E_t[\cdot]=\E[\cdot~|~\mathfrak{F}_t]$. We have at any time step
+    \begin{align*}
+    &\E_{t}\left[\exp\left(\frac{1}{\alpha}(\mu_t - X_t) - \frac{4}{\alpha^2}X_t^2\right)\right]
+    \\&\leq \E_{t}\left[1+ \frac{1}{\alpha}(\mu_t - X_t) - \frac{4}{\alpha^2}X_t^2 +\left(\frac{1}{\alpha}(\mu_t - X_t) - \frac{4}{\alpha^2}X_t^2\right)^2\right]
+    \\&\leq 1+\E_{t}\left[ - \frac{4}{\alpha^2}X_t^2 +\frac{2}{\alpha^2}((\mu_t - X_t)^2+X_t^2)\right]\leq 1. 
+    \end{align*}
+    Markov inequality finishes the proof.
+\end{proof}
+
+\begin{lemma}\label{lem: useful inequali}
+    Let $(X_1, Y_1), (X_2, Y_2)\ldots$ be a sequence with respect to a filtration $\mathfrak{F}_1 \subset \mathfrak{F}_2 \subset \cdots$ such that $|X_t|\leq B$ and $0\leq Y_t\leq B$ almost surely. Furthermore, $\E[X_t|\mathfrak{F}_t]\geq \E[Y_t|\mathfrak{F}_t] $ and $B\E[X_t|\mathfrak{F}_t]\geq \E[X_t^2|\mathfrak{F}_t]$. Then with probability at least $1-\delta$, 
+    \begin{align}
+        \frac{1}{2}\sum_{t=1}^T \E[X_t|\mathfrak{F}_t] \leq \sum_{t=1}^T \left(X_t - \frac{1}{4}Y_t\right) + 9B\log(1/\delta).\label{eq: useful 11}  
+    \end{align}
+    Also, with probability at least $1-\delta$, 
+    \begin{align}
+        \frac{1}{2}\sum_{t=1}^T X_t \leq \sum_{t=1}^T \left(X_t - \frac{1}{4}Y_t\right) + 9B\log(1/\delta).\label{eq: useful 22}   
+    \end{align}
+    
+\end{lemma}
+\begin{proof}
+    Denote $\E_t[\cdot]=\E[\cdot~|~\mathfrak{F}_t]$. Let $c\in[\frac{1}{2},1]$ be a fixed constant, and define $Z_t = cX_t - \frac{1}{4}Y_t$. Applying \pref{lem: strengthen freed} with $\alpha=9B$ gives 
+    \begin{align*}
+        \sum_{t=1}^T  \left(\E_t[Z_t] - Z_t\right) 
+        &\leq \frac{1}{9B}\sum_{t=1}^T  \E_t[(\E_t[Z_t] - Z_t)^2] + 9B\log(1/\delta) \\
+        &\leq \frac{1}{9B}\sum_{t=1}^T  \E_t[Z_t^2] + 9B\log(1/\delta) \\
+        &\leq \frac{1}{9B} \sum_{t=1}^T \left(2c^2\E_t[X_t^2] + \frac{2}{16}\E_t[Y_t^2] \right) + 9B\log(1/\delta) \\
+        &\leq \frac{1}{9} \sum_{t=1}^T \left(2c^2\E_t[X_t] + \frac{2}{16}\E_t[X_t] \right) + 9\log(1/\delta) \tag{$\E_t[Y_t^2]\leq B\E_t[Y_t]$ because $Y_t\in[0,B]$}
+    \end{align*}
+    Rearranging:  
+    \begin{align}
+       \sum_{t=1}^T \E_t\left[Z_t - \left(\frac{2c^2}{9} + \frac{1}{72}\right)X_t\right]\leq \sum_{t=1}^T Z_t + 9B\log(1/\delta). \label{eq: useful44}
+    \end{align}
+    To prove \pref{eq: useful 11}, let $c=1$, which gives 
+    $\E_t\left[Z_t - \left(\frac{2c^2}{9} + \frac{1}{72}\right)X_t\right]= \E_t\left[X_t - \frac{1}{4}Y_t - \frac{17}{72} X_t\right] \geq \frac{1}{2}\E_t[X_t]  $. Combining this with \pref{eq: useful44} proves \pref{eq: useful 11}. To prove \pref{eq: useful 22}, let $c=\frac{1}{2}$. which gives  $\E_t\left[Z_t - \left(\frac{2c^2}{9} + \frac{1}{72}\right)X_t\right]= \E_t\left[\frac{1}{2}X_t - \frac{1}{4}Y_t - \frac{5}{72} X_t\right] \geq 0$. Combining this with \pref{eq: useful44} and rearranging proves \pref{eq: useful 22}. 
+\end{proof}
+
+\newpage
+\section{Mirror Descent}
+
+\begin{lemma}[First-order optimality condition]\label{lem: bregman}
+   For any concave and differentiable function $F$, if $\nu'\in\argmax_{\nu\in\Omega} F(\nu)$ for some convex set $\Omega$, then $F(\nu)\leq F(\nu') - \breg_{(-F)}(\nu, \nu')$ for any $\nu\in\Omega$. 
+\end{lemma}
+\begin{proof}
+Define $G = -F$. Then $G$ is convex and $\nu'\in\argmin_{\nu'} G(\nu')$. We have by the definition of Bregman divergence $\breg_G(\nu, \nu')= G(\nu) - G(\nu') - \langle \nabla G(\nu'), \nu-\nu'\rangle$, and first-order optimality condition $\langle \nabla G(\nu'), \nu-\nu'\rangle \ge 0$. Thus, $G(\nu) \ge G(\nu') + \breg_G(\nu, \nu')$, which is equivalent to $F(\nu) \le F(\nu') + \breg_{(-F)}(\nu, \nu')$.
+\end{proof}
+
+\begin{lemma}\label{lem:stability}
+    Let $g: \Phi\to [-1,1]$ be any function and let $\nu, \rho\in\Delta(\Phi)$. Then for any $\eta>0$, 
+    \begin{align*}
+        \E_{\phi\sim \nu}[g(\phi)] - \E_{\phi\sim \rho}[g(\phi)] - \frac{1}{\eta} \KL(\nu, \rho) \leq \eta. 
+    \end{align*}
+\end{lemma}
+\begin{proof}
+    \begin{align*}
+        \E_{\phi\sim \nu}[g(\phi)] - \E_{\phi\sim \rho}[g(\phi)] \leq 2D_{\text{TV}}(\nu, \rho) \leq 2\sqrt{\KL(\nu, \rho)}\leq \frac{1}{\eta}\KL(\nu, \rho) + \eta, 
+    \end{align*}
+    where we use Pinsker's inequality and AM-GM inequality. 
+\end{proof}
+
+
+\begin{lemma}[Mirror descent with auxiliary terms]\label{lem: mirror descent}
+Let $F_t$ be a convex function over $\Delta_N$, and let $\ell_t, b_t\in\mathbb{R}^N$ with $\ell_t^2$ denoting $(\ell_t(1)^2, \ldots, \ell_t(N)^2)$. Then the update $p_1=\frac{1}{N}\mathbf{1}$ and 
+    \begin{align*}
+        p_{t+1} = \argmin_{p\in\Delta_N} \Big\{ 
+  \inner{p, \ell_t + 4\gamma \ell_t^2 + b_t} + F_t(p) + \frac{1}{\gamma}\KL(p, p_t)\Big\}
+    \end{align*}
+    with $\gamma |\ell_t(i)|\leq \frac{1}{16}$ and $0\leq \gamma b_t(i)\leq \frac{1}{4}$ for all $i\in[N]$  ensures for any $p^\star\in\Delta_N$, 
+    \begin{align*}
+       &\sum_{t=1}^T \inner{p_t,\ell_t} \\
+       &\leq \frac{\log N}{\gamma} + \sum_{t=1}^T \Big(\inner{p^\star, \ell_t + 4\gamma\ell_t^2} + \inner{p^\star, b_t} - \frac{1}{2}\inner{p_t,b_t} + F_t(p^\star) - F_t(p_{t+1}) - \breg_{F_t}(p^\star, p_{t+1})\Big). 
+    \end{align*}
+    
+\end{lemma}
+\begin{proof}
+    By \pref{lem: bregman}, 
+    \begin{align*}
+        &\inner{p_{t+1}, \ell_t + 4\gamma\ell_t^2 + b_t} + F_t(p_{t+1}) + \frac{1}{\gamma}\KL(p_{t+1}, p_t) \\
+        &\leq \inner{p^\star, \ell_t + 4\gamma\ell_t^2 + b_t} + F_t(p^\star) + \frac{1}{\gamma}\KL(p^\star, p_t) - \breg_{F_t}(p^\star, p_{t+1}) - \frac{1}{\gamma}\KL(p^\star, p_{t+1}). 
+    \end{align*}
+    Rearranging gives 
+    \begin{align*}
+        &\inner{p_t, \ell_t + 4\gamma\ell_t^2} \\
+        &\leq \inner{p^\star, \ell_t + 4\gamma \ell_t^2} +  \inner{p_t-p_{t+1}, \ell_t + 4\gamma\ell_t^2 + b_t} - \frac{1}{\gamma} \KL(p_{t+1}, p_t) \\
+        &\quad  + \inner{p^\star - p_{t}, b_t} + \frac{\KL(p^\star, p_t) - \KL(p^\star, p_{t+1})}{\gamma} + F_t(p^\star) - F_t(p_{t+1}) - \breg_{F_t}(p^\star, p_{t+1}).   \label{eq: apply here}  \numberthis
+    \end{align*}
+    Since $\gamma |\ell_t(i) + 4\gamma\ell_t(i)^2 + b_t(i)|\leq \frac{1}{16} + 4\times (\frac{1}{16})^2 + \frac{1}{4}\leq 1$, by \pref{lem:stability} we have 
+    \begin{align*}
+        &\inner{p_t-p_{t+1}, \ell_t + 4\gamma\ell_t^2 + b_t} - \frac{1}{\gamma} \KL(p_{t+1}, p_t) \\
+        &\leq \gamma\inner{p_t, (\ell_t + 4\gamma\ell_t^2 + b_t)^2} \\
+        &\leq 2\gamma \inner{p_t, ({\textstyle \frac{5}{4}}\ell_t)^2} + 2\gamma\inner{p_t, b_t^2} \\
+        &\leq \inner{p_t, 4\gamma\ell_t^2} + \frac{1}{2}\inner{p_t, b_t}. 
+    \end{align*}
+    Using this in \pref{eq: apply here} we get 
+    \begin{align*}
+        \inner{p_t, \ell_t} 
+        &\leq \inner{p^\star, \ell_t + 4\gamma\ell_t^2} + \inner{p^\star, b_t} - \frac{1}{2}\inner{p_t, b_t} \\
+        &\qquad + \frac{\KL(p^\star, p_t) - \KL(p^\star, p_{t+1})}{\gamma} + F_t(p^\star) - F_t(p_{t+1}) - \breg_{F_t}(p^\star, p_{t+1}). 
+    \end{align*}
+    Summing over $t$ gives the desired inequality. 
+\end{proof}
+
+\iffalse
+\begin{lemma}[Strengthened Freedman's inequality \cite{zimmert2022return}]\label{lem: strengthen freed}
+    Let $X_1, X_2,\ldots$ be a martingale difference sequence with respect to a filtration $\mathfrak{F}_1 \subset \mathfrak{F}_2 \subset \cdots$ such that $\E[X_t|\mathfrak{F}_t]=0$ and assume $|X_t|\leq \infty$ almost surely. Let $\epsilon > 0$ be a fixed number. Then with probability at least $1-\delta$, 
+    \begin{align*}
+        \sum_{t=1}^T X_t \leq 3\sqrt{V_T \log \frac{2\max\{U_T, \sqrt{V_T}\}}{\epsilon\delta}} + 2U_T \log \frac{2\max\{U_T, \sqrt{V_T}\}}{\epsilon\delta}\numberthis \label{eq: to substitutate}
+    \end{align*}
+    where 
+     \begin{align*}
+        V_T = \sum_{t=1}^T \E[X_t^2|\mathfrak{F}_t], \quad U_T =  \max\left\{\epsilon, \max_{t\in[T]} |X_t|\right\}. 
+    \end{align*}
+    
+\end{lemma}
+
+
+
+\begin{proof}
+    This is a direct corollary of the Theorem~9 of \cite{zimmert2022return}. We apply their Theorem~9 with $X_t' = \frac{X_t}{\epsilon}$, which gives 
+    \begin{align*}
+        \sum_{t=1}^T X_t' \leq 3\sqrt{V_T' \log \frac{2\max\{U_T', \sqrt{V_T'}\}}{\delta}} + 2U_T' \log \frac{2\max\{U_T', \sqrt{V_T'}\}}{\delta}
+    \end{align*}
+    where 
+    \begin{align*}
+        V_T' = \sum_{t=1}^T \E[X_t'^2|\mathfrak{F}_t] = \frac{1}{\epsilon^2}V_T, \quad U_T' =  \max\left\{1, \max_{t\in[T]} |X_t'|\right\} = \frac{1}{\epsilon}U_T. 
+    \end{align*}
+    Substituting $(V_T', U_T')$ with $(V_T, U_T)$ in \pref{eq: to substitutate} gives the inequality. 
+\end{proof}
+\fi
+

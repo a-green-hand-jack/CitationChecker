@@ -1,0 +1,12 @@
+\vspace{-0.1cm}
+\section{Background: Kolmogorov Complexity}
+\label{sec:background}
+\vspace{-0.1cm}
+
+We give a brief introduction to Kolmogorov complexity, with an extended and more formal version in Appendix \ref{sec:app-background}. 
+ Intuitively, the \emph{Kolmogorov complexity} $K(x)$ of an object $x$ is the length of the shortest program, written in some standard programming language, that prints $x$. Similarly, the Kolmogorov complexity $K(f)$ of a discrete function $f$ is the length of the shortest program that computes $f$. To formalize these notions, Kolmogorov complexity can be defined with respect to \emph{universal prefix Turing machines}, which are multi-tape Turing machines that represent programs as binary strings encoded on a read-only \emph{program tape}. The key \emph{invariance theorem} states that $K(x)$ is independent of the particular choice of universal prefix Turing machine up to an additive constant. %
+ While Kolmogorov complexity is not strictly computable due to the halting problem, we write $K_{T,R}(f)$ to denote a computable approximation under a \emph{resource bound} $R = (R_t, R_s) \in \N^2$, which considers only programs that terminate within $R_t$ steps and require at most $R_s$ registers on any tape, with respect to universal prefix Turing machine $T$. As resource bounds increase, $K_{T,R}(f)$ monotonically decreases to $K(f)$, up to an additive constant, per the invariance theorem. We introduce concise notation to express such relations that hold up to additive constants next.
+
+\vspace{-0.1cm}
+\paragraph{Inequalities with additive constants} Let $f: \mathcal{X} \to \mathbb{R}$ and $g: \mathcal{X} \to \mathbb{R}$ be functions over the same domain $\gX$. Then we can write $\forall x,~f(x) \leqc g(x)$ if and only if there exists some constant $c\in \mathbb{R}$ such that $\forall x,~f(x) < g(x) + c$, where the additive constant $c$ must not depend on $x$. We write $\forall x,~f(x) \eqc g(x)$ to denote that both
+$\forall x,~f(x) \leqc g(x)$ and $\forall x,~g(x) \leqc f(x)$ hold.\footnote{Extending this notation to codelength functions over variables $X$ and $Y$, $\forall X,Y,~L_1(Y \mid X) \leqc L_2(Y \mid X)$ implies $\exists c \in \mathbb{R},\forall X,Y,~L_1(Y \mid X) < L_2(Y \mid X) + c$, where $c$ does not depend on $X$ or $Y$. We omit explicit quantifiers when they are clear from context.}

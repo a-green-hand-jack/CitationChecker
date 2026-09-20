@@ -1,0 +1,18 @@
+\vspace{-1mm}
+\section{Experimental Setup} 
+\vspace{-1mm}
+
+\noindent\textbf{Datasets and Evaluation} We use the MADLAD-400 dataset \citep{kudugunta2024madlad}, a popular CommonCrawl-based dataset with the most expansive coverage of languages, totaling over 400. 
+The MADLAD-400 authors prioritized multilingual-specific curation for this pretraining corpus, including language detection, filtering, and preprocessing.
+For 50 languages, chosen to represent a range of language families, scripts, and degrees of resourcefulness, we partition a random test set, to evaluate vocabulary-insensitive loss \citep{tao2024scaling} for fairer cross-lingual comparisons.
+Following \citep{muennighoff2024scaling, he2024scaling}, we evaluate the fit of our parametric scaling laws using $R^2$ calculated on held-out test sets partitioned to assess specific dimensions of generalization: $R^2(N)$ for the largest model sizes, $R^2(D)$ for the largest token ranges, $R^2(C)$ for the largest compute runs, and $R^2(M)$ for unique training language mixtures not seen at training (more details in \Cref{app:scaling-laws-evaluation}).
+We separate these dimensions in response to prior work that has demonstrated the importance of rigorous test-set splits in scaling laws research \citep{li2025mis}.
+
+
+\noindent\textbf{Model Training} We pretrain models from 10M to 8B parameters, using hyperparameter choices similar to those trained in \citet{kudugunta2024madlad} (with updates as prescribed by recent work). 
+In this work, we train both monolingual and multilingual models, varying the model size $N$, training tokens $D$, multilingual data proportions, and the total training compute $C$. 
+In particular, we focus on training monolingual models, bilingual models, and massively multilingual \unimax{} models \citep{chung2023unimax}.
+most experiments center around scale, token, and mixture variations on these languages: English, French, Chinese, Hindi, Swahili, Russian, Spanish, Portuguese, Japanese, though certain experiments evaluate across 50 languages. 
+We use a 64k Sentence Piece Model vocabulary \citep{kudo2018sentencepiece}.
+Across experiments we pretrain 280 monolingual models, 240 bilingual models, 120 multilingual mixtures, and we finetune 130 monolingual models from \unimax{} checkpoints, totaling over 750 independent training runs.
+Full experimental details, including the specific language choices, hyperparameters, and training mixtures are provided in full in \Cref{app:experimental-details}.

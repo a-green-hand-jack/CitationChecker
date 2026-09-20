@@ -1,0 +1,32 @@
+\section{Extended Related Work}\label{sec:rw}
+
+\paragraph{Scaling Laws} Scaling laws are used to study the behavior of deep learning systems on scaling training data and/or compute. Various researchers have observed scaling properties of generalization error with training data size and model capacity~\citep{banko2001scaling,hestness2017deep,amodei2016deep}. Specifically, in the context of LLMs, \citet{kaplan2020scaling} explicitly propose a power law for the relationship between the loss $L$, number of parameters in the language model $N$, and the number of dataset tokens $D$. Later, \citet{hoffmann2022training} proposed a different formula:
+
+\begin{equation}
+    L(N, D) = E + \frac{A}{N^\alpha} + \frac{B}{D^\beta} 
+\end{equation}
+
+We build upon this form throughout the paper to fit our scaling laws. Other researchers, too, have built upon these scaling laws to study various aspects of scaling, such as neural network architectures~\citep{clark2022unified,tay2022scaling,frantar2023scaling,gu2023mamba,scao2022language} or transfer learning~\citep{henighan2020scaling}. Researchers have also investigated scaling properties in different domains of deep learning such as neural machine translation~\citep{ghorbani2021scaling,gordon2021data}, vision language models like CLIP~\citep{cherti2023reproducible,henighan2020scaling}, vision~\citep{alabdulmohsin2022revisiting,zhai2022scaling}, reinforcement learning \citep{hilton2023scaling,jones2021scaling, gao2023scaling}, and recommendation systems~\citep{ardalani2022understanding}. 
+
+
+\paragraph{Scaling Laws for Data Mixtures} Many prior works~\citep{hoffmann2022training} assume a fixed dataset distribution to study the effect of scaling on model performance. However, empirically, dataset composition can have a significant impact on quality~\citep{longpre2023pretrainer,albalak2024survey,sorscher2022beyond}. \citet{hashimoto2021model} studies the relationship between dataset composition and model loss, finding a simple scaling law quantifying this relationship. \citet{bansal2022data} study the impact of data quality and noise on architecture, finding that synthetic data has a different exponent. \citet{fernandes2023scaling} study scaling for multilingual neural translation~\citep{bapna-etal-2022-building}, but experiments are restricted to 2-3 language pairs. \citet{aghajanyan2023scaling}, in a similar vein, propose bimodal scaling laws for multimodal foundation models~\citep{reid2024gemini}. Other researchers have considered different aspects of dataset composition that can affect model scaling: \citet{muennighoff2024scaling} study the effect of data repetition on scaling, while \citet{goyal2024scaling} consider how the effect of mixing data pools of varying quality changes with scale. 
+
+Foundation models involve training models on a mixture of datasets with the aim of achieving a certain validation loss on various validation sets and downstream datasets of interest. Based on the observation that optimal data mixture changes with scale, several recent works have attempted to characterize the change in the scaling law equation when either the train or test distribution changes.
+
+Some researchers predict the optimal data mixture by first ablating mixtures using smaller models, and second, training a larger scaled-up model using the found optimal mixture~\citep{ye2024data,xie2024doremi,liu2024regmix}. However, it is unclear if this optimal data mixture can extrapolate to a much larger magnitude, with some evidence in computer vision that this is not the case \citep{goyal2024scaling} - i.e., the optimal data mixture changes with scale.
+
+Some researchers have described scaling laws for different downstream evaluation sets for the same model \citep{dubey2024llama,chen2024scaling}, while others \citep{brandfonbrener2024loss} have derived power law relationships between models trained on different distributions and the same model on different test sets.
+
+
+Recently, several researchers have attempted to predict the final loss of a model for a given data mixture with scaling laws. \cite{ge2024data} use the observation of a logarithmic shift in scaling pattern to predict loss on subsets of the Pile weighted in various proportions on a fixed model size. \cite{ye2024data}, too, fit a scaling law for data mixtures based on a single scale. \cite{kang2024autoscale} empirically show that the optimal mixture for a model changes with scale, and propose a method that addresses this on GPT-2 scale models. \cite{que2024d} use continual pre-training as a tool to develop their scaling law. \cite{shukor2025scaling}, too, develop scaling laws that account for the transfer between data mixtures changing at scale for English LLMs and multimodal models for less than 10 domains. 
+
+\paragraph{Multilingual Scaling Laws}
+Prior work has also investigated multilingual transfer effects specifically in pretraining \citep{chang2024multilinguality} and post-training \citep{shimabucoro2025post}, though on a smaller scale of models.
+\citet{he2024scaling} is the work closest to ours, where the authors attempt to describe scaling laws for multilingual LLMs. A crucial distinction from our work is that we account for individual-language transfer learning in our scaling laws, and achieve a better resulting fit (\Cref{tab:evaluations}).
+
+% Much related work (a) assumes that optimal training recipes for a mixture of datasets do not change with scale, but (b) several works that do not assume this, and show that this assumption is not necessarily true. However, most of the latter consider only a few languages or data mixtures at a time, while a production ready model may at least support a few dozen languages. 
+
+% (a) Data Mixing Laws: Optimizing Data Mixtures by Predicting Language Modeling Performance
+% (a) DoReMi: Optimizing Data Mixtures Speeds Up Language Model Pretraining 
+% (b) Scaling Laws for Data Filtering -- Data Curation cannot be Compute Agnostic
+%  Several 

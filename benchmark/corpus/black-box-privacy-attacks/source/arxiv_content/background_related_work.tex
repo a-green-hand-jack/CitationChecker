@@ -1,0 +1,86 @@
+\section{Background and Related Work}
+
+We provide background on multitask learning, related work on existing privacy attacks, and federated learning.
+
+\subsection{Multitask Learning}
+
+The goal of MTL (see~\cite{caruana-1997-multitask} for an early survey) is to learn jointly over several related tasks, often with sparse data, by exploiting shared features between them. A \textit{task} $\tau$ is defined as a distribution over samples in $\mathcal{X} \times \mathcal{Y}$ (e.g. $d$-dimensional real vectors that correspond to binary labels). In this work, we assume that the tasks for some learning problem are drawn from a \textit{task distribution}, $\mathcal{Q}$. To leverage common features between tasks, we can learn a shared representation $h : \mathcal{X} \to \mathcal{Z}$, that maps samples in $\mathcal{X}$ to a lower dimensional space, $\mathcal{Z}$, where the representation vectors, called \emph{embeddings}, capture the shared structure of the tasks. Mapping these samples to a lower dimensional space simplifies the learning problem, allowing us to use simple, linear classifiers $g_i: \mathcal{Z} \to \{0,1\}$. Given data samples from $T$ tasks $\vec{\tau} = (\tau_1,  \dots,  \tau_T)$ and a loss function $\mathcal{L}$, learning the shared representation $h$ can be written as the following optimization problem:
+\begin{align*}
+     \min_{{h_\theta \in \mathcal{H}}} 
+     \left( 
+     \min_{g_{\beta_1},\dots,g_{\beta_{T}}} \sum_{i=1}^{\mathcal{T}} \mathcal{L}(g_{\beta_{i}} \circ h_{\theta}, \: \tau_i) 
+     \right)
+\end{align*}
+
+The shared representation $h$ often takes the form of a neural network that maps an example $x \in \mathcal{X}$ to an embedding vector $z \in \mathcal{Z}$ with task-specific classifiers $\{g_1, ..., g_{T}\}$ being linear classifiers applied to the embedding vector.  Thus, the goal is to learn an $h$ such that it maps data samples to embedding vectors that are linearly separable. 
+
+\subsubsection{Defining Tasks}
+
+In this work, we consider two MTL settings that are representative of common scenarios: (1) \textbf{personalization}, where each \emph{user} or \emph{person} represents a task with a personalized objective (e.g., multilabel face detection, recommendation, etc.) learned from sparse data by leveraging the shared representation trained over all users; and (2) \textbf{multiple learning problems}, where the tasks correspond to distinct classification problems (e.g.,  detection of facial attributes, binary topic classification, etc.) that share a similar underlying structure. We choose these two settings because they highlight how our proposed threat model (Section~\ref{sec:threatmodel}) captures and abstracts the privacy threats posed by existing attacks at the individual level~\cite{shokri-2016-mi}, user level~\cite{kandpal2023userinference}, and property level~\cite{ateniese-2015-property_inference}. 
+ 
+% Leaking information in these settings is semantically similar to existing privacy attacks: user inference~\cite{kandpal2023userinference} for personalization and property inference~\cite{ateniese-2015-property_inference} for multiple objectives.
+
+\subsubsection{Connections to Distributed and Collaborative Learning}
+
+The most ubiquitous approaches to collaborative learning are based on federated learning~\cite{mcmahan2017FLoriginal} (FL). FL is a collaborative machine learning framework where a central, trusted server coordinates model training across several parties, such as users or silos~\cite{huang2022crosssiloFL}. In a simple FL setting, the server publishes an initial machine learning model to several devices and each device computes model updates locally on its data. The parties then send the updated models or the raw updates themselves to the trusted server to be aggregated, and the process repeats until convergence. While FL can be used as a tool to learn a single task over several parties and publish the shared model, many popular constructions of FL aim to collaboratively learn models that can be locally adapted to an individual party's data during training in a multitask fashion~\cite{smith2017federated}.
+
+In fact, there are a multitude of prior works that study the connections between FL and MTL~\cite{yu-2022-FLadaptation, tan-2023-personalizedFL, hu2023privatemtl, fallah2020personalizedfederatedlearningmetalearning, mansour2020personalization}, many of which focus on techniques to personalize models on users' data by leveraging shared representations. Using collaborative learning for personalizing to users' data has also seen adoption in industry research~\cite{msr2022PersonalizedFL}, making it imperative to understand whether there are privacy risks incurred by having minimal access to the shared portion of the collaboratively learned model.
+
+
+\subsection{Privacy Attacks on ML Models}
+
+While overparameterized deep learning models are known to memorize individual training data points, even in settings where the labeling is random~\cite{zhang-2017-rethinking}, prior work has shown that models capable of such memorization still achieve good generalization on unseen data~\cite{belkin-2019-reconciling, feldman-2020-longtail, brown-2021-irrelevant}. This fact opens multiple paths for an inference attack adversary to learn sensitive information about a machine learning model's training data. In particular, these models can leak membership information about the individual points they memorized~\cite{shokri-2016-mi}, and they can leak information about the distributions of subpopulations within their training datasets~\cite{ateniese-2015-property_inference, kandpal2023userinference}.
+
+\subsubsection{Membership-Inference Attacks}
+Membership inference attacks (MIAs)~\cite{homer-2008-mi,SankararamanOJH09,dwork-2015-trace,shokri-2016-mi} seek to determine whether or not a given data record was present in a machine learning model's training dataset. These attacks are the most widely studied in the privacy literature as they represent a fundamental form of privacy leakage that has direct connections to the definition of differential privacy~\cite{dwork-2006-dmns}. Because of this, MIAs have been adapted to several machine learning settings and architectures, such as encoder models~\cite{liu2021encodermi, song-2020-embeddingleakage}, large language models~\cite{zhang2024mink, duan2024membershipinferenceattackswork}, and federated learning~\cite{suri2023subjectmembershipinferenceattacks, nasr-2019-federatedmia}, and they are often used to audit the empirical privacy leakage of machine learning models~\cite{song-2018-auditingmi, ye-2022-enhanced_mi, jagielski2020auditing}. While the privacy risks that such attacks pose on their own is subtle, mounting accurate MIAs is often a necessary step for performing powerful attacks such as training data extraction~\cite{carlini-2020-extraction_llm, carlini-2023-extraction_diffusion}. 
+
+Additionally, there are studies on membership-inference attacks in the setting where the adversary has some knowledge of the distributions that comprise the training dataset~\cite{humphries-2023-dependencies, rezaei-2022-subpopulationbasedmia}. These works find that distinguishing between a member target sample and known non-member samples from the same subpopulation is an easier adversarial objective than distinguishing between a member target sample and a i.i.d. samples from the training dataset's distribution. The former study~\cite{humphries-2023-dependencies} investigates how this fact changes differential privacy guarantees, while the latter work~\cite{rezaei-2022-subpopulationbasedmia} leverages this additional knowledge to mount efficient membership-inference attacks.
+
+% Add non iid attacks here
+
+
+\subsubsection{Property-Inference Attacks} In contrast to individual privacy attacks, property (or distribution) inference attacks~\cite{ateniese-2015-property_inference} aim to determine global attributes of the dataset, such as the proportions of subpopulations. These attacks were originally formalized as a distinguishing test between two worlds in which the subpopulation of interest comprises either $t_0$ or $t_1 > t_0$ fraction of the training data set. In recent years, the property inference threat model has been extensively studied in various settings in recent years with black-box and white-box access~\cite{suri2023dissectingdistributioninference, zhou2022propinfGANS, ganju2018propinfpermutation, hartmann-2023-distributioninference}, under data poisoning~\cite{mahloujifar2022propertypoisoning, chaudhari-2022-snap}, and within collaborative learning~\cite{xu2020subjectpropinf, melis-2018-exploitingunintendedcollab}. Extensions of the original property inference threat model, known as \emph{property existence attacks}~\cite{chaudhari-2022-snap} or \emph{distributional membership inference}~\cite{hartmann-2023-distributioninference}, have shown that, with and without data poisoning, respectively, an adversary can determine whether a property appeared at all in the data, rather than determining its frequency in the dataset. This can be seen as a special case of property inference, where $t_{0} = 0$ and $t_1 > 0$.
+
+
+\subsubsection{Attacks on Representation Models} There are multiple works studying privacy leakage from representation models, which are trained to produce rich embedding vectors that can be applied to several downstream learning tasks. In two of the the seminal works on privacy leakage from embedding models~\cite{song-2020-overlearning, song-2020-embeddingleakage}, the authors find that unsupervised representation models can leak information about the training set that is uncorrelated with the learning task. The latter of these two works investigates a variety of attacks, such as membership-inference and inversion, on word embeddings. In~\cite{liu2021encodermi}, the authors observe that vision encoders trained with contrastive loss produce embedding vectors that are robust to augmentations, such as rotations and horizontal flips, of images that were included in training. By leveraging this fact, along with reference (or shadow) models to calibrate the attack, they mount successful membership-inference attacks on encoders. 
+
+
+\subsubsection{Privacy Attacks on Groups} 
+While there are countless studies on individual privacy attacks, few works have studied attacks with coarser granularity than MIA and extraction but finer than property inference. Such privacy attacks can leverage the the composition of privacy leakage over correlated groups of sensitive samples, such as multiple messages or logs from a single device~\cite{mcmahan-2018-learningdplm}, to amplify privacy attacks on a single individual. One study on dual encoder models~\cite{song-2020-embeddingleakage} proposed attacks to infer membership of multiple sentences in a language model's context at once by measuring the similarity between context sentences in representation space. A similar work on facial detection models~\cite{chen2023faceauditor} shows that an adversary can infer inclusion of a person's contribution of images to the model's training data. Both of these works use large reference datasets to calibrate the adversary's attack using learned similarity scores and shadow models, respectively, from known members and non-members.
+
+Recent work has started to explore user or distribution-level attacks with weaker assumptions. For example,~\cite{kandpal2023userinference} explores the privacy risks associated with fine-tuning generative large language models on data that are user-partitioned. This work uses similar techniques to the membership-inference literature, but generalizes the distinguishing test to the level of a given user's entire contribution to a dataset. This is accomplished by first observing the prediction confidences of a fine-tuned language model on a user's sentences that were not seen during training which assumes the same data access as our \textbf{weak} adversary. Their attack then calibrates the confidence scores against the prediction confidences of a pretrained reference model for which the user's contributions are assumed to be non-members. One related work to user level attacks \cite{suri2023subjectmembershipinferenceattacks} investigates leakage of subjects, or individuals, in cross-silo federated learning, where the adversary uses query access to the model after each federation round to determine a subject's inclusion in the training data.  
+
+In a similar vein, the extension of property inference proposed by \cite{chaudhari-2022-snap} and \cite{hartmann-2023-distributioninference} aims to infer the membership of subpopulations in general rather than a particular user. The adversaries considered in both works have a similar level of access to the \textbf{weak} adversary. However, these works assume that the adversary has a sufficient number of samples from the target subpopulation and computational power to train several reference models. Recent related work has also investigated an adversary's ability to infer membership at the resolution of entire datasets in text corpora used to train large language models~\cite{maini-2024-datasetinference, ren-2025-datasetself}.
+
+
+
+
+% imilarly,~\citet{tao2024rangemia} develops MIAs that operate across a range of examples, often a set of augmentations or variations of a particular sample for which the adversary seeks to infer membership. 
+
+% Kandpal et al: applies only to LLMs. Determines if user is present, but not based on representation.
+
+% Tao and Shokri: carry out MIA based on transforms or augmentations of the true example. Have access to predictions, not embeddings
+
+% Chaudhari et al: Works on very small subpopulations, requires poisoning with a few samples
+
+% End paragraph with the message of our paper: "Our work is the first work to do X"
+
+
+ 
+% We show our attacks work on models trained in a federated setting. Our attack uses only the final model (it does not see intermediate updates). 
+
+
+
+% \begin{figure}[h!]
+%     \centering
+%     \includegraphics[width=0.60\columnwidth]{figs/mtl_diagram.pdf}
+%     \caption{Example of a Neural Network in the Multitask Setting}
+%     \label{fig:mtl_diagram}
+% \end{figure}
+
+% As shown in Figure~\ref{fig:mtl_diagram}, the representation $\mathcal{H}$ often takes the form of a deep neural network (\textit{orange layers}) that receives a sample $x$ as input (e.g. an image of a cat image) and produces an embedding vector (\textit{green layer}) which is later passed to one of the $\{g_0 ..., g_{|\mathcal{T}|}\}$ linear layers (\textit{purple layers}), each representing a task from $\mathcal{T} = \{\tau_0, ..., \tau_{|\mathcal{T}|}\}$. 
+
+
+% In scenarios such as face recognition or text analysis, tasks in a multi-task model can represent real users who contribute a small number of their data samples or subpopulations that comprise larger fractions of the dataset. In particular the weights in the final, linear layers are fine-tuned for a specific task  $\tau_i$ that convert the embedding vector $\mathcal{H}(x)$ to a prediction output with the highest accuracy possible for that task. 
+
+% A significant part of the success for this architecture stems not only from the weights of the final layers, but also from the quality of the upstream $\mathcal{H}$ embeddings. As such, a reasonably trained $\mathcal{H}$ will inherently produce different distributions of embeddings for \textit{unknown} tasks, compared to the ones present in training. Under this intuition, we argue that the changes of distributions are statistically detectable, and identifying which tasks where present in training is equivalent to answering the question: \textit{``Was this model trained on the data of user $\tau_i$?''}. 

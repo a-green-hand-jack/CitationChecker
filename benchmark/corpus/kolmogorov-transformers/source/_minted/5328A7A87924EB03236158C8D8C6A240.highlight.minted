@@ -1,0 +1,51 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kn}{from}\PYG{+w}{ }\PYG{n+nn}{alta}\PYG{+w}{ }\PYG{k+kn}{import} \PYG{n}{program\PYGZus{}builder} \PYG{k}{as} \PYG{n}{pb}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{build\PYGZus{}turing\PYGZus{}machine\PYGZus{}program\PYGZus{}spec}\PYG{p}{(}\PYG{n}{spec}\PYG{p}{:} \PYG{n}{MachineSpec}\PYG{p}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{pb}\PYG{o}{.}\PYG{n}{ProgramSpec}\PYG{p}{:}
+\PYG{+w}{  }\PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}Returns ALTA program spec for a Turing machine emulator.\PYGZdq{}\PYGZdq{}\PYGZdq{}}
+
+  \PYG{n}{variables} \PYG{o}{=} \PYG{p}{\PYGZob{}}
+      \PYG{l+s+s2}{\PYGZdq{}halted\PYGZdq{}}\PYG{p}{:} \PYG{n}{pb}\PYG{o}{.}\PYG{n}{var}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{),}
+      \PYG{l+s+s2}{\PYGZdq{}state\PYGZdq{}}\PYG{p}{:} \PYG{n}{pb}\PYG{o}{.}\PYG{n}{var}\PYG{p}{(}\PYG{n}{spec}\PYG{o}{.}\PYG{n}{num\PYGZus{}states}\PYG{p}{),}
+      \PYG{l+s+s2}{\PYGZdq{}symbol\PYGZdq{}}\PYG{p}{:} \PYG{n}{pb}\PYG{o}{.}\PYG{n}{input\PYGZus{}var}\PYG{p}{(}\PYG{n}{spec}\PYG{o}{.}\PYG{n}{num\PYGZus{}symbols}\PYG{p}{),}
+      \PYG{l+s+s2}{\PYGZdq{}head\PYGZdq{}}\PYG{p}{:} \PYG{n}{pb}\PYG{o}{.}\PYG{n}{input\PYGZus{}var}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{,} \PYG{n}{init\PYGZus{}fn}\PYG{o}{=}\PYG{k}{lambda} \PYG{n}{x}\PYG{p}{:} \PYG{n}{x} \PYG{o}{==} \PYG{n}{START}\PYG{p}{),}
+      \PYG{l+s+s2}{\PYGZdq{}one\PYGZdq{}}\PYG{p}{:} \PYG{n}{pb}\PYG{o}{.}\PYG{n}{var}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{,} \PYG{n}{default}\PYG{o}{=}\PYG{l+m+mi}{1}\PYG{p}{),}  \PYG{c+c1}{\PYGZsh{} Constant for queries.}
+  \PYG{p}{\PYGZcb{}}
+  \PYG{n}{attention\PYGZus{}heads} \PYG{o}{=} \PYG{p}{\PYGZob{}}
+      \PYG{c+c1}{\PYGZsh{} Read the symbol at the current head position.}
+      \PYG{l+s+s2}{\PYGZdq{}head\PYGZus{}symbol\PYGZdq{}}\PYG{p}{:} \PYG{n}{pb}\PYG{o}{.}\PYG{n}{qkv}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}one\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}head\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}symbol\PYGZdq{}}\PYG{p}{),}
+      \PYG{c+c1}{\PYGZsh{} Identify tape cells to the left and right of the head.}
+      \PYG{l+s+s2}{\PYGZdq{}head\PYGZus{}left\PYGZdq{}}\PYG{p}{:} \PYG{n}{pb}\PYG{o}{.}\PYG{n}{v\PYGZus{}relative}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}head\PYGZdq{}}\PYG{p}{,} \PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{p}{),}
+      \PYG{l+s+s2}{\PYGZdq{}head\PYGZus{}right\PYGZdq{}}\PYG{p}{:} \PYG{n}{pb}\PYG{o}{.}\PYG{n}{v\PYGZus{}relative}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}head\PYGZdq{}}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{),}
+  \PYG{p}{\PYGZcb{}}
+
+  \PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{ffn\PYGZus{}fn}\PYG{p}{(}\PYG{n}{x}\PYG{p}{):}
+\PYG{+w}{    }\PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}FFN function for Turing machine emulator.\PYGZdq{}\PYGZdq{}\PYGZdq{}}
+    \PYG{k}{if} \PYG{n}{x}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}halted\PYGZdq{}}\PYG{p}{]:}
+      \PYG{k}{return}
+
+    \PYG{c+c1}{\PYGZsh{} Get the next action from the state transition function.}
+    \PYG{n}{output} \PYG{o}{=} \PYG{n}{spec}\PYG{o}{.}\PYG{n}{transition\PYGZus{}fn}\PYG{p}{(}
+        \PYG{n}{TransitionIn}\PYG{p}{(}\PYG{n}{state}\PYG{o}{=}\PYG{n}{x}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}state\PYGZdq{}}\PYG{p}{],} \PYG{n}{head\PYGZus{}symbol}\PYG{o}{=}\PYG{n}{x}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}head\PYGZus{}symbol\PYGZdq{}}\PYG{p}{])}
+    \PYG{p}{)}
+    \PYG{n}{x}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}state\PYGZdq{}}\PYG{p}{]} \PYG{o}{=} \PYG{n}{output}\PYG{o}{.}\PYG{n}{state}
+    \PYG{k}{if} \PYG{n}{output}\PYG{o}{.}\PYG{n}{halt}\PYG{p}{:}
+      \PYG{n}{x}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}halted\PYGZdq{}}\PYG{p}{]} \PYG{o}{=} \PYG{l+m+mi}{1}
+
+    \PYG{c+c1}{\PYGZsh{} Write a new symbol at current head position if specified.}
+    \PYG{k}{if} \PYG{n}{x}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}head\PYGZdq{}}\PYG{p}{]} \PYG{o+ow}{and} \PYG{n}{output}\PYG{o}{.}\PYG{n}{symbol} \PYG{o+ow}{is} \PYG{o+ow}{not} \PYG{k+kc}{None}\PYG{p}{:}
+      \PYG{n}{x}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}symbol\PYGZdq{}}\PYG{p}{]} \PYG{o}{=} \PYG{n}{output}\PYG{o}{.}\PYG{n}{symbol}
+
+    \PYG{c+c1}{\PYGZsh{} Move the tape head to left or right if specified.}
+    \PYG{k}{if} \PYG{n}{output}\PYG{o}{.}\PYG{n}{move} \PYG{o+ow}{is} \PYG{o+ow}{not} \PYG{k+kc}{None} \PYG{o+ow}{and} \PYG{n}{x}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}head\PYGZdq{}}\PYG{p}{]:}
+      \PYG{n}{x}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}head\PYGZdq{}}\PYG{p}{]} \PYG{o}{=} \PYG{l+m+mi}{0}
+    \PYG{k}{if} \PYG{n}{output}\PYG{o}{.}\PYG{n}{move} \PYG{o}{==} \PYG{n}{Move}\PYG{o}{.}\PYG{n}{RIGHT} \PYG{o+ow}{and} \PYG{n}{x}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}symbol\PYGZdq{}}\PYG{p}{]} \PYG{o}{!=} \PYG{n}{START} \PYG{o+ow}{and} \PYG{n}{x}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}head\PYGZus{}left\PYGZdq{}}\PYG{p}{]:}
+      \PYG{n}{x}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}head\PYGZdq{}}\PYG{p}{]} \PYG{o}{=} \PYG{l+m+mi}{1}
+    \PYG{k}{elif} \PYG{n}{output}\PYG{o}{.}\PYG{n}{move} \PYG{o}{==} \PYG{n}{Move}\PYG{o}{.}\PYG{n}{LEFT} \PYG{o+ow}{and} \PYG{n}{x}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}symbol\PYGZdq{}}\PYG{p}{]} \PYG{o}{!=} \PYG{n}{END} \PYG{o+ow}{and} \PYG{n}{x}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}head\PYGZus{}right\PYGZdq{}}\PYG{p}{]:}
+      \PYG{n}{x}\PYG{p}{[}\PYG{l+s+s2}{\PYGZdq{}head\PYGZdq{}}\PYG{p}{]} \PYG{o}{=} \PYG{l+m+mi}{1}
+
+  \PYG{k}{return} \PYG{n}{pb}\PYG{o}{.}\PYG{n}{program\PYGZus{}spec}\PYG{p}{(}
+      \PYG{n}{ffn\PYGZus{}fn}\PYG{o}{=}\PYG{n}{ffn\PYGZus{}fn}\PYG{p}{,} \PYG{n}{variables}\PYG{o}{=}\PYG{n}{variables}\PYG{p}{,} \PYG{n}{heads}\PYG{o}{=}\PYG{n}{attention\PYGZus{}heads}\PYG{p}{,}
+      \PYG{n}{output\PYGZus{}name}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}symbol\PYGZdq{}}\PYG{p}{,} \PYG{n}{input\PYGZus{}range}\PYG{o}{=}\PYG{n}{spec}\PYG{o}{.}\PYG{n}{num\PYGZus{}symbols} \PYG{o}{+} \PYG{l+m+mi}{2}\PYG{p}{,} \PYG{n}{position\PYGZus{}range}\PYG{o}{=}\PYG{k+kc}{None}\PYG{p}{,}
+  \PYG{p}{)}
+\end{MintedVerbatim}

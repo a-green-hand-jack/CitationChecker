@@ -1,0 +1,174 @@
+\subsection{Experimental Details: Multilingual Capacity}
+\label{app:model-capacity-exp-details}
+
+\subsubsection{Multilingual Capacity Scaling Laws}
+
+\input{tables/capacity-experiments}
+
+In \Cref{sec:capacity} we aim to understand how a model's capacity hinders multilingual learning---also termed the \emph{curse of multilinguality} \citep{conneau2019unsupervised, chang2024multilinguality}.
+To do this, we train models of various sizes, and with a range of language mixtures, shown in \Cref{tab:capacity-exps}.
+For simplicity, languages are always evenly sampled within their mixtures, even if some languages have more available text than others.
+We train models on these mixtures, and evaluate the validation loss of all other languages, throughout training.
+
+For a given target language $t$ we have empirical loss scores across 11 differently sized models (from 10M to 8B), and across each mixture that contains the language in training, including monolingual, bilingual, and the multilingual mixtures shown in \Cref{tab:capacity-exps}.
+
+We model each language's loss as $L(N,D,K)$, where $N$ is the model size, $D$ are the number of training tokens for the \emph{target} language, and $K$ is the number of languages in the training mixture (evenly sampled).
+We define $L(N,D,K)$ as follows:
+\begin{equation}
+  L(N,D,K)
+  \;=\;
+  L_{\infty}
+  \;+\;
+  \frac{A\,K^{\phi}}{N^{\alpha}}
+  \;+\;
+  \frac{B\,K^{\psi}}{D^{\beta}}
+\label{eq:capacity-eq}
+\end{equation}
+
+This law preserves the well-validated power-law behavior of monolingual scaling laws, while introducing $K$ into both the capacity term ($A K^{\phi}/N^{\alpha}$) and the data term ($B K^{\psi}/D^{\beta}$).
+The exponent $\phi$ captures how capacity requirements grow with the number of languages, while $\psi$ captures how data requirements change with multilinguality: $\psi<0$ indicates \emph{positive transfer} (sublinear per-language data needs as $K$ increases), $\psi=0$ implies no net transfer in the data term, and $\psi>0$ implies negative transfer/interference.
+Under even sampling, the total tokens across languages are $D_{\mathrm{tot}} = K\cdot D$, in which case the data term can be rewritten as $B\,K^{\psi+\beta}/D_{\mathrm{tot}}^{\beta}$.
+
+
+\subsubsection{Adding languages: $K$ to $K*r$}
+
+Practitioners may wish to change the number of languages supported by a model, from $K$ to $K*r$.
+If the model size and training tokens remain unchanged, it will lead to a degradation in loss across languages, as the same compute budget is allocated across more languages.
+When adding languages, the practitioner may wish to know how much they need to scale the model ($N$, $D$) and the training compute $C$ to maintain the same performance per language, as before.
+We call this an \emph{iso-loss}, as it approximately preserves the loss values, with a change in $K$.
+
+
+\paragraph{Compute-Optimality for \Cref{eq:capacity-eq}.}
+As we increase $K$ to $K*r$ we would like to understand the new $N',D'$ that \emph{minimize} training compute on the iso-loss surface.
+Let $r = K'/K$.
+Minimizing $C' \propto N' D'$ subject to
+\[
+\frac{A (K r)^{\phi}}{N'^{\alpha}} + \frac{B (K r)^{\psi}}{D'^{\beta}}
+\;=\;
+\frac{A K^{\phi}}{N^{\alpha}} + \frac{B K^{\psi}}{D^{\beta}}
+\]
+yields the closed-form optimum:
+\[
+\Bigl(\tfrac{N'}{N}\Bigr)^\star = r^{\phi/\alpha},
+\qquad
+\Bigl(\tfrac{D'}{D}\Bigr)^\star = r^{\psi/\beta},
+\qquad
+\Bigl(\tfrac{D_{tot}'}{D_{tot}}\Bigr)^\star = r^{1+\psi/\beta}.
+\]
+These expressions show a clear separation of roles: $\phi/\alpha$ governs the parameter burden of adding languages, whereas $\psi/\beta$ governs the data burden (with $\psi<0$ reducing the per-language data requirement due to positive transfer).
+Since the compute budget is in terms of total tokens $D_{\mathrm{tot}} = K\cdot D$, and $C \propto N D_{\mathrm{tot}}$.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 1.  Compute-multiplier when the language count grows K → rK
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\paragraph{Adding languages: $K$ to $K*r$ --- Finding the compute multiplier.}
+At the iso-loss optimum, the compute multiplier is
+\[
+\frac{C'}{C}
+\;=\;
+\frac{N' D_{tot}'}{N D_{tot}}
+\;=\;
+\Bigl(\tfrac{N'}{N}\Bigr)^\star
+\Bigl(\tfrac{D'_{\mathrm{tot}}}{D_{\mathrm{tot}}}\Bigr)^\star = r^{1+\phi/\alpha+\psi/\beta}\,.
+\]
+Intuitively, $\tfrac{\phi}{\alpha}$ measures the extra parameter capacity per added language, while $\tfrac{\psi}{\beta}$ measures the extra (or reduced, if $\psi<0$) per-language token budget.
+But since compute is defined with total tokens $D_{\mathrm{tot}}$, then we consider the additional factor of $r$ from enlarging the language inventory.
+
+
+\paragraph{Adding languages: $K$ to $K*r$ --- Finding the Iso-loss curve.}
+Let $s \equiv \tfrac{N'}{N}$ and $t \equiv \tfrac{D'}{D}$ denote the multipliers for model size and (per-target-language) data when we grow the language inventory from $K$ to $K' = rK$.
+Define the baseline term contributions
+\[
+w_N
+\;\equiv\;
+\frac{A K^{\phi}/N^{\alpha}}
+     {A K^{\phi}/N^{\alpha} + B K^{\psi}/D^{\beta}},
+\qquad
+w_D \;=\; 1 - w_N.
+\]
+The iso-loss condition equates the \emph{sum of the two error terms} before and after the change in $K$:
+\[
+\frac{A (Kr)^{\phi}}{(Ns)^{\alpha}} \;+\; \frac{B (Kr)^{\psi}}{(Dt)^{\beta}}
+\;=\;
+\frac{A K^{\phi}}{N^{\alpha}} \;+\; \frac{B K^{\psi}}{D^{\beta}}.
+\]
+Dividing both sides by $A K^{\phi}/N^{\alpha} + B K^{\psi}/D^{\beta}$ yields the normalized \emph{iso-loss constraint}
+\begin{equation}
+r^{\phi}\, w_N\, s^{-\alpha} \;+\; r^{\psi}\, w_D\, t^{-\beta} \;=\; 1.
+\label{eq:iso-loss-constraint}
+\end{equation}
+
+\textbf{Solving for $t$ given $s$.}
+Rearranging \eqref{eq:iso-loss-constraint} gives
+\[
+t
+\;=\;
+\left[
+\frac{ r^{\psi}\, w_D }
+     { 1 - r^{\phi}\, w_N \, s^{-\alpha} }
+\right]^{\!1/\beta}.
+\]
+The denominator must be positive, which implies the feasibility condition
+\[
+s^{\alpha} \;>\; r^{\phi}\, w_N.
+\]
+As $s^{\alpha} \downarrow r^{\phi} w_N$ the denominator tends to $0^+$ and $t \to \infty$; as $s \to \infty$, the denominator tends to $1$ and $t \to (r^{\psi} w_D)^{1/\beta}$.
+
+\textbf{Solving for $s$ given $t$.}
+By symmetry,
+\[
+s
+\;=\;
+\left[
+\frac{ r^{\phi}\, w_N }
+     { 1 - r^{\psi}\, w_D \, t^{-\beta} }
+\right]^{\!1/\alpha},
+\qquad
+\text{with feasibility } \;
+t^{\beta} \;>\; r^{\psi}\, w_D.
+\]
+
+\textbf{Total-token form.}
+Under even sampling, $D_{\mathrm{tot}} = K D$ and $D'_{\mathrm{tot}} = K' D' = r K D'$, so
+\[
+\frac{D'_{\mathrm{tot}}}{D_{\mathrm{tot}}}
+\;=\;
+r \,\frac{D'}{D}
+\;=\;
+r \left[
+\frac{ r^{\psi}\, w_D }
+     { 1 - r^{\phi}\, w_N \, s^{-\alpha} }
+\right]^{\!1/\beta}.
+\]
+
+\textbf{Compute-optimal frontier (starting from a compute-optimal $(K,N,D)$).}
+Suppose the \emph{baseline} $(K,N,D)$ is compute-optimal for its loss level, i.e., it minimizes $C \propto N D$ subject to $A K^{\phi}/N^{\alpha} + B K^{\psi}/D^{\beta} = \text{const}$. A standard Lagrange multiplier argument then yields
+\[
+\alpha\,\frac{A K^{\phi}}{N^{\alpha}} \;=\; \beta\,\frac{B K^{\psi}}{D^{\beta}}
+\quad\Longleftrightarrow\quad
+w_N \;=\; \frac{\beta}{\alpha+\beta},
+\;\;\;
+w_D \;=\; \frac{\alpha}{\alpha+\beta}.
+\]
+After changing $K \to rK$, the compute along the iso-loss curve is $C'/C = s\,t$ (or $C'/C = s \cdot \tfrac{D'_{\mathrm{tot}}}{D_{\mathrm{tot}}}$ if compute is defined with total tokens).
+Minimizing this product subject to \eqref{eq:iso-loss-constraint} again via Lagrange multipliers gives the stationarity condition
+\[
+\alpha\, r^{\phi}\, w_N\, s^{-\alpha} \;=\; \beta\, r^{\psi}\, w_D\, t^{-\beta}.
+\]
+Combining with \eqref{eq:iso-loss-constraint} and substituting the compute-optimal weights above yields the \emph{unique} minimum-compute point on the new frontier:
+\[
+\Bigl(\tfrac{N'}{N}\Bigr)^\star \!= r^{\phi/\alpha},
+\qquad
+\Bigl(\tfrac{D'}{D}\Bigr)^\star \!= r^{\psi/\beta},
+\qquad
+\Bigl(\tfrac{D'_{\mathrm{tot}}}{D_{\mathrm{tot}}}\Bigr)^\star \!= r^{\,1+\psi/\beta}.
+\]
+At this point each error component is \emph{individually restored} to its baseline magnitude:
+\(
+A (Kr)^{\phi}/N'^{\alpha} = A K^{\phi}/N^{\alpha}
+\) and
+\(
+B (Kr)^{\psi}/D'^{\beta} = B K^{\psi}/D^{\beta}
+\),
+so the weights $(w_N,w_D)$—and hence the balance of capacity/data bottlenecks—remain unchanged. Because the frontier is convex in $(\log s,\log t)$ and $\log C'=\log s+\log t$ is linear, this stationary point is the global compute minimum along the iso-loss curve.
+

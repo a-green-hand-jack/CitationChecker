@@ -1,0 +1,195 @@
+% \pdfoutput=1
+
+% \PassOptionsToPackage{numbers}{natbib}
+\documentclass{article} % For LaTeX2e
+\usepackage{iclr2026_conference,times}
+% Optional math commands from https://github.com/goodfeli/dlbook_notation.
+\input{math_commands.tex}
+
+\usepackage[T1]{fontenc}
+\usepackage[hidelinks]{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsfonts}
+\usepackage{nicefrac}
+\usepackage[svgnames]{xcolor}
+
+\usepackage{enumitem}
+\usepackage[most]{tcolorbox}
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{subcaption}
+\usepackage{placeins}
+\usepackage{wasysym}
+\usepackage{colortbl}
+\usepackage{adjustbox}
+\usepackage{cleveref}
+\usepackage{multirow}
+\usepackage{minitoc}
+\usepackage{wrapfig}
+\usepackage{ifthen}
+\usepackage[textsize=tiny]{todonotes}
+\usepackage{tikz}
+\usepackage{array,makecell}
+
+
+% \usepackage{booktabs,longtable}   % add in your preamble
+% \usepackage{siunitx}              % optional → nice thousands separators
+% \sisetup{group-separator={,}}
+
+\input{macros}
+
+\DeclareRobustCommand{\suppinfo}[1]{%
+    \ifthenelse{\boolean{includeappendix}}%
+    {\Cref{#1}}%
+    {Supplementary Information (SI)}%
+}
+\newboolean{includeappendix}
+\setboolean{includeappendix}{true}
+
+
+
+\newcommand{\Lmono}{\(\mathcal{L}_{\text{mono}}\) (7)}
+\newcommand{\Lpairs}{\(\mathcal{L}_{\text{pairs}}\) (10)}
+\newcommand{\Ltarget}{\(\mathcal{L}_{\text{target}}\) (15)}
+\newcommand{\Leval}{\(\mathcal{L}_{\text{eval}}\) (48)}
+
+\newcommand{\Scap}{\(\mathcal{C}_{\text{exp}}\) (12)}
+\newcommand{\Sfull}{\(\mathcal{S}_{\text{full}}\) (20)}
+\newcommand{\Spart}{\(\mathcal{S}_{\text{part}}\) (11)}
+\newcommand{\Smin}{\(\mathcal{S}_{\text{min}}\) (7)}
+
+
+\definecolor{greencell}{HTML}{2e7d43}
+\definecolor{redcell}{HTML}{FF3333}
+
+\Crefname{section}{Section}{Sections}
+\Crefname{subsection}{Subsection}{Subsections}
+\Crefname{appendix}{Appendix}{Appendices}
+\Crefname{figure}{Figure}{Figures}
+\Crefname{table}{Table}{Tables}
+
+% colorboxes used in instructions appendix
+\newtcolorbox{instructionsbox}[1][]{
+  breakable,
+  colframe=cyan!75!black,    % Frame color
+  colback=green!5!white,     % Background color
+  coltitle=black,            % Color of the title text
+  title=#1,                  % Optional title
+  rounded corners,           % Corner style
+  boxrule=0.5mm,             % Frame thickness
+  boxsep=5pt,                % Space between content and box
+  toptitle=1mm,              % Space above the title
+  bottomtitle=1mm,           % Space below the title
+  left=10pt,                 % Left padding
+  right=10pt,                % Right padding
+  top=5pt,                   % Top padding
+  bottom=5pt,                % Bottom padding
+  fonttitle=\bfseries        % Font style for the title
+}
+
+\newtcolorbox{promptbox}[1][]{
+  breakable,
+  colframe=orange!60!brown,    % Frame color
+  colback=brown!10!white,     % Background color
+  coltitle=black,            % Color of the title text
+  title=#1,                  % Optional title
+  rounded corners,           % Corner style
+  boxrule=0.5mm,             % Frame thickness
+  boxsep=5pt,                % Space between content and box
+  toptitle=1mm,              % Space above the title
+  bottomtitle=1mm,           % Space below the title
+  left=10pt,                 % Left padding
+  right=10pt,                % Right padding
+  top=5pt,                   % Top padding
+  bottom=5pt,                % Bottom padding
+  fonttitle=\bfseries        % Font style for the title
+}
+
+% \title{Breaking the Curse of Multilinguality with Unified Scaling Laws for Pretraining, Finetuning, and Language Transfer}
+\title{ATLAS \protect\inlineatlas: Adaptive Transfer Scaling Laws \\for Multilingual Pretraining, Finetuning, and Decoding the Curse of Multilinguality}
+
+% \usepackage{fancyhdr}
+% \pagestyle{fancy}
+% \setlength{\headheight}{15pt}
+% \setlength{\headwidth}{0.92\textwidth}
+% \fancyhead{}
+% \renewcommand{\headrulewidth}{0.4pt}
+% % \fancyhead[C]{\textcolor{red}{Version 1.0, Updated July 6, Under Embargo. Please do not re-distribute.}}
+% \fancyhead[C]{Consent in Crisis: The Rapid Decline of the AI Data Commons}
+
+% \usepackage{authblk}
+% \renewcommand*{\Authfont}{\bfseries}
+
+% \makeatletter
+% \renewcommand\AB@affilsepx{\hspace{1em}\protect\Affilfont}
+% \makeatother
+
+% \author[1]{Shayne Longpre}
+% \author[2]{Sneha Kudugunta}
+% \author[3]{Niklas Meunnighoff}
+% \author[4]{I-Hung Hsu}
+% \author[5]{Isaac Caswell}
+% \author[1]{Alex Pentland}
+% \author[4]{Sercan \"{O}. Ar{\i}k}
+% \author[4]{Chen-Yu Lee}
+% \author[5]{Sayna Ebrahimi}
+
+% \affil[1]{MIT}
+% \affil[2]{University of Washington}
+% \affil[3]{Stanford University}
+% \affil[4]{Google Cloud}
+% \affil[5]{Google DeepMind}
+
+% \affil[ ]{\vspace{1em} \authorcr MIT \authorcr \normalfont{Correspondence: slongpre@media.mit.edu}}
+
+\author{Shayne Longpre\thanks{Correspondence: slongpre@media.mit.edu}$^{\;\;1}$ \ \ Sneha Kudugunta$^{2}$ \  Niklas Muennighoff$^{3}$ \  I-Hung Hsu$^{4}$ \\ \textbf{Isaac Caswell}$^{5}$ \  \textbf{Alex Pentland}$^{1}$ \  \textbf{Sercan \"{O}. Ar{\i}k}$^{4}$ \  \textbf{Chen-Yu Lee}$^{4}$ \ \textbf{Sayna Ebrahimi}$^{5}$ \\ \\
+$^{1}$MIT \;$^{2}$University of Washington \;$^{3}$Stanford University\;$^{4}$Google Cloud AI\;$^{5}$Google DeepMind}
+
+\renewcommand{\thepart}{}  % Remove part numbering
+\renewcommand{\partname}{}  % Remove "Part" text
+\newcommand{\niklas}[1]{\textcolor{purple}{\textbf{Niklas:} #1}}
+\newcommand{\sayna}[1]{\textcolor{blue}{\textbf{Sayna:} #1}}
+\newcommand{\sneha}[1]{\textcolor{pink}{\textbf{Sneha:} #1}}
+
+
+\iclrfinalcopy % For Final Camera Ready Version, Go to "iclr2026_conference.sty" Line 88 to add header text back
+
+\begin{document}
+\maketitle
+\doparttoc
+\faketableofcontents
+
+\input{sections/0-abstract}
+\input{sections/1-introduction}
+\input{sections/2-methodology}
+\input{sections/3a-scaling-laws}
+\input{sections/3b-language-transfer}
+\input{sections/3d-capacity-constraints}
+\input{sections/3c-finetuning}
+% \input{sections/3e-inference-efficiency}
+
+% \input{sections/8-related-work}
+\input{sections/conclusion}
+\input{sections/7-acknowledgements}
+
+\clearpage
+
+% \bibliographystyle{unsrtnat}
+\bibliography{references}
+\bibliographystyle{iclr2026_conference}
+
+\clearpage
+
+
+% \clearpage
+% \input{sections/9-contributions}
+
+\clearpage
+\appendix
+\counterwithin{figure}{section}
+\counterwithin{table}{section}
+\input{sections/90-appendix}
+
+
+\end{document}

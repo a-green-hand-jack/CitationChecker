@@ -94,7 +94,7 @@ citationchecker doctor
 When source is available, pass the project directory:
 
 ```bash
-citationchecker check ./my-paper --provider <provider> --model <model>
+citationchecker check ./my-paper
 ```
 
 CitationChecker finds the likely main `.tex`, stages the project, and Pi reads LaTeX directly. No PDF conversion is performed.
@@ -110,7 +110,7 @@ For a single `.tex`, sibling `.bib` files are staged automatically.
 ### PDF-only manuscript
 
 ```bash
-citationchecker check paper.pdf --provider <provider> --model <model>
+citationchecker check paper.pdf
 ```
 
 For PDF-only input, CitationChecker uses PyMuPDF4LLM once during staging:
@@ -201,18 +201,25 @@ Evidence depth:
 
 The PDF conversion stage is intentionally isolated and replaceable. It does not make citation judgments.
 
-## Micro benchmark
+## Controlled benchmark
 
-The repository includes a small diagnostic benchmark under `benchmark/`: **12 single-citation tasks** (6 positive + 6 manually mutated negative examples) grounded in real citation relationships from arXiv papers. The negatives cover metadata corruption, swapping in a real-but-irrelevant reference, and over-strengthening the manuscript claim.
+The repository includes a controlled benchmark under `benchmark/` built from ten
+real ICLR 2026 papers. Each paper has a version-pinned arXiv TeX source archive,
+compiled PDF, extracted source tree, and SHA-256 provenance manifest. Every paper
+has four manually specified citation cases: a valid self-reference, a wrong-year
+mutation, a fabricated reference, and a swap to another real but irrelevant paper.
 
-Run the full benchmark:
+Development runs default to `apex-deepseek/deepseek-v4-flash`:
 
 ```bash
-python benchmark/run.py --provider <provider> --model <model>
+python benchmark/run.py --workers 8
 python benchmark/evaluate.py benchmark/runs/predictions.jsonl
 ```
 
-The scorer reports reference-status accuracy, support-label accuracy, overall exact match, and results by mutation type. See [`benchmark/README.md`](benchmark/README.md) for provenance and limitations.
+Use `--workers 1` for a serial run, or change the worker count to match the
+provider quota. Use `--provider` and `--model` to override the development default. See
+[`benchmark/README.md`](benchmark/README.md) for corpus verification, task
+generation, case semantics, and provenance.
 
 ## Scope
 

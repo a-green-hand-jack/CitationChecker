@@ -9,6 +9,7 @@ from pathlib import Path
 
 from .staging import stage_manuscript
 from .verify import verify_report
+from .config import DEFAULT_MODEL, DEFAULT_PROVIDER
 
 
 def _run_id(manuscript: Path) -> str:
@@ -37,6 +38,8 @@ def run_check(
     timeout: int,
     dry_run: bool,
 ) -> int:
+    provider = provider or DEFAULT_PROVIDER
+    model = model or DEFAULT_MODEL
     package_dir = Path(__file__).resolve().parents[1]
     run_root = Path(os.environ.get("CITATIONCHECKER_RUN_ROOT", "runs")).resolve()
     run_dir = out.resolve() if out else run_root / _run_id(manuscript)

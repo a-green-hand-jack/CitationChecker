@@ -1,0 +1,842 @@
+\documentclass{article}
+\usepackage{iclr2026_conference,times}
+
+\input{math_commands.tex}
+\usepackage{graphicx}
+\usepackage{bbm}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{subfigure}
+
+\PassOptionsToPackage{hyphens}{url}\usepackage{hyperref}
+\usepackage{url}
+\usepackage{siunitx}
+\usepackage{float}
+
+\title{Beyond Accuracy: Are Time Series Foundation Models Well-Calibrated?}
+
+
+\author{
+\begin{tabular}{c}
+\\
+Coen Adler\textsuperscript{1} , 
+Yuxin Chang\textsuperscript{1} , 
+Felix Draxler\textsuperscript{1} , 
+Samar Abdi\textsuperscript{3} , 
+Padhraic Smyth\textsuperscript{1,2} \\
+\mdseries \textsuperscript{1}Department of Computer Science \quad
+\mdseries \textsuperscript{2}Department of Statistics \\
+\mdseries University of California, Irvine \\
+\mdseries \textsuperscript{3}Google, Irvine \\
+\mdseries \texttt{\{ctadler,yuxinc20,fdraxler,smyth\}@uci.edu} \\
+\mdseries \texttt{samaradbi@google.com} \\
+\end{tabular}
+}
+
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+
+\iclrfinalcopy 
+\begin{document}
+
+
+\maketitle
+
+\begin{abstract}
+The recent development of foundation models for time series data has generated considerable interest in using such models across a variety of applications.
+Although foundation  models achieve state-of-the-art predictive performance, their calibration properties remain relatively underexplored, despite the fact that calibration can be critical for many practical applications. 
+In this paper, we investigate the calibration-related properties of five recent time series foundation models and two competitive baselines. 
+We perform a series of systematic evaluations assessing model calibration (i.e., over- or under-confidence), effects of varying prediction heads, and calibration under long-term autoregressive forecasting.
+We find that time series foundation models are consistently better calibrated than baseline models and tend not to be either systematically over- or under-confident, in contrast to the overconfidence often seen in other deep learning models. 
+\end{abstract}
+
+\section{Introduction}
+\label{intro}
+
+Prediction and modeling of time series data is ubiquitous in data analysis, with applications across a broad range of fields including  climate science~\citep{mudelsee2014climate}, energy forecasting~\citep{deb2017review}, healthcare~\citep{crabtree1990individual}, consumer behavior modeling~\citep{goel2010predicting}, and financial forecasting~\citep{tsay2005analysis}.
+Traditional statistical approaches such as linear autoregressive (AR) models and associated variants are well-established in the field~\citep{hamilton1994time,forecasttextbook}; they have been supplemented in recent years by a variety of machine learning approaches using richer model representations, including deep learning time series models such as N-BEATS~\citep{nbeats} and Informer~\citep{zhou2021informer}.
+
+A more recent trend is the emergence of \textit{time series foundation models (TSFMs)}~\citep{patchtst,timeseriesfmtutorial}.
+Unlike traditional statistical and machine learning approaches where models are fitted to time series from a single source, TSFMs are general-purpose models trained on a broad range of time series from various domains and are capable of zero-shot or few-shot forecasting on any time series in principle~\citep{timeseriesfmsurvery,timeseriesfmtutorial}. 
+This is appealing to practitioners in that only a single global model is required rather than retraining a new model for every time series~\citep{opportunitiesfm,benidis2022deep}.
+
+With this increase of interest in TSFMs, it becomes important to understand and characterize the calibration properties of such models. 
+TSFMs, in general, produce conditional distributions over potential future values, rather than just single point forecasts (e.g., the expected value of the time series at a future time). 
+This  distributional information is important and useful in many applications. 
+In particular, it can be essential for decision-making~\citep{probforcasttext,petropoulos2022forecasting}, for example in downstream tasks such as anomaly detection~\citep{confidenceanomaly} and in critical domains such as healthcare~\citep{farah2014bayesian,healthprobts}. 
+A natural question in this context is: {\bf how well calibrated are TSFMs in terms of their conditional distributions, i.e., how well do the predicted probabilities match the observed data?} 
+
+
+While the calibration properties of classification and regression models have received considerable attention in machine learning in recent years (e.g., ~\citet{guo2017calibration,regressioncalibration,beyondpinball}), the calibration properties of TSFMs remain relatively underexplored.
+To address this gap, we perform an empirical study of TSFMs and baselines with respect to \textit{calibration-specific metrics}. 
+Our systematic evaluation includes five state-of-the-art TSFMs and two well-established baseline methods in terms of their zero-shot forecasts across six univariate time series datasets with different temporal granularities.
+We measure calibration properties through a comprehensive set of metrics, such as Probabilistic Calibration Error~\citep{calibrationNN,calibratedregression,beyondpinball},
+in the context of a variety of different aspects of conditional uncertainty in model predictions.
+
+In general, TSFMs produce conditional distributions using two approaches: some models predict the parameters of conditional density models~\citep{lagllama,moirai,chronos}, while others predict sets of conditional quantiles~\citep{timesfm,tirex,yinglong}.
+To fully understand the calibration properties of TSFMs, we isolate the impact of different prediction heads by training individual quantile and distribution heads for each of the TSFM base architectures and then evaluate the effect of prediction heads on calibration performance.
+
+Additionally, TSFMs vary in their approaches for long-term forecasting.
+For long-term forecasting beyond the \textit{forecast horizon} (the prediction length of a single forward-pass), many TSFMs rely on autoregressive forecasting~\citep{timesfm,chronos-bolt,toto}. %, requiring models to recursively add predictions to the context.
+Prior works~\citep{tirex,yinglong} have shown that using autoregressive forecasting can have negative effects on model performance due to the reinitialization of the probabilistic forecast.
+Solutions include multi-patch forecasting~\citep{moirai} where models can predict sequential patches at a time, and stochastic autoregression which propagates probabilistic information to subsequent forecasts as described in Section~\ref{sec:models}. 
+In this context, it is important to understand how limited forecast horizons can affect calibration on long-term forecasts.
+To investigate this, we compare TSFM calibration on long-term forecasting across varying forecast horizon lengths and autoregressive implementations. 
+
+The primary contributions of our work are as follows:
+\begin{itemize}
+    \item We conduct a first-of-its-kind systematic calibration study with five state-of-the-art foundation models and two well-established baselines across six datasets from different domains\footnote{Code available at \url{https://github.com/Coaster41/Beyond-Accuracy-TSFM-Calibration}}.
+    \item We use three calibration-specific metrics to quantify the overall calibration error and over- and under-confidence of prediction models; we analyze the calibration effects of various distributional and quantile prediction heads; and we investigate the effect of different long-range forecasting methods on calibration. 
+    \item We find that TSFMs are better calibrated than baseline models, tend to be neither systematically over- nor under-confident, are generally insensitive to the form of distributional prediction head, and consistently competitive in both prediction and calibration.
+\end{itemize}
+
+
+\section{Background and Related Work}
+
+\subsection{Probabilistic Time Series Forecasting} 
+
+
+Given a {\it context} of $T$ observations $y_{1:T}$ for a time series, we evaluate the $L$-length forecasting performance on the prediction $y_{T+1: T+L} \mid y_{1:T}$. 
+We denote the median prediction as $\hat{y}_{t}^{0.5}$ at each $t \in \{T+1,..., T+L\}$ for point estimates, and predicted quantiles $\hat{y}^q_{t}$ to assess the uncertainty and calibration. 
+The predicted quantiles are either produced directly by a multi-quantile prediction head for each of the $L$ future points, or can be computed from the predicted conditional density.
+
+TSFMs can differ slightly in their approaches to data aggregation and functionality, but typically they tokenize time series in patches of a predetermined length~\citep{patchtst}. 
+We denote the \textit{forecast horizon} $H$ as the number of future time steps a model can forecast in a single forward-pass.
+A simple approach when the desired forecast length $L$ is greater than the model's forecast horizon $H$ is to use autoregressive (AR) forecasting based on point estimates, where the model will incorporate the previous forecasts $\hat{y}_{T+1:T+H}$ into the observed context.
+The model then uses this extended or shifted context $y_{1+H:T+H}$ to forecast the next set of patches $\hat{y}_{T+H+1:T+2H}$, recursively until the desired forecast $\hat{y}_{T+1:T+L}$ is reached~\citep{chronos-bolt,toto}.
+Methods to reduce the reliance on AR forecasting include extending the number of simultaneous output patches in multi-patch forecasting~\citep{moirai}, increasing output patch length~\citep{timesfm}, and incorporating missing-data masks to extend the context into the future~\citep{tirex}.
+We empirically compare these approaches for long-term forecasting in Section~\ref{sec:ar_experiments}.
+
+In TSFMs, patched time series are passed into a model-specific backbone, which translates the embeddings into a latent space as an input to the final projection block.
+These probabilistic predictions can then be directly predicted as quantiles through a multi-headed projection block or a model can use the latent activations to output the parameters to a distribution where the full densities can be recovered.
+Some prediction heads can better represent different types of data, for instance, a negative binomial would be well-suited for count data, while a Student's $t$ distribution would be appropriate for a general continuous-valued time series.
+Furthermore, parameterizations of mixture of distributions, as well as quantile heads, have also been proposed \citep{moirai,timesfm,toto} to allow for additional flexibility in terms of how TSFMs can model conditional distributions.
+We evaluate these different projection blocks across a range of domains to identify if certain heads are better calibrated for specific datasets in Section~\ref{sec:prediction_heads}.
+
+\subsection{Related Work on Calibration}
+
+Predictive calibration has long been recognized as a topic of importance in statistics and machine learning~\citep{glenn1950verification,probforcasttext}. 
+In recent years, a number of different studies have investigated the calibration of deep learning models, and have shown that such models are often systematically susceptible to overconfidence, for example in image classification with deep models \citep{guo2017calibration,ye2023mitigating,pinto2022impartial} and in multiple question-answering tasks for large language models ~\citep{jiang2021can,mielke2022reducing,xiongcan}.
+
+\begin{figure}[t]
+\vskip -0.1in
+\begin{center}
+\centerline{\includegraphics[width=0.9\columnwidth]{figures/wql_pce_mase_scatter.pdf}}
+\caption{\textbf{Weighted Quantile Loss (WQL) calibration metric can be highly correlated with point accuracy error (MASE).} Results shown for  WQL (left) and PCE (right) plotted against MASE on the Glucose dataset used in our experiments.   Background markers are results for each model and each individual time series; larger centroids are medians across time series. \textbf{On this dataset, WQL incorrectly identifies ARIMA as the best calibrated model.}}
+\label{fig:wql_pce_mase_scatter}
+\end{center}
+\vskip -0.2in
+\end{figure}
+
+
+   
+In the evaluation of time series forecasting models, calibration is also an important component~\citep{m5dataset,gifteval,timesfm}.
+One of the most commonly used calibration metrics is the Continuous Ranked Probability Score (CRPS), which directly compares the cumulative distribution function (CDF) of model predictions to the observed value's CDF~\citep{crps}.
+Since computing CRPS can be intractable and some TSFMs only produce quantiles rather than full conditional densities, the Weighted Quantile Loss (WQL) is also often used as a discrete surrogate for CRPS~\citep{moirai,gifteval}, defined as the pinball (or quantile) loss scaled by the absolute sum of the true values. 
+Another common calibration metric is Mean Scaled Interval Score (MSIS)~\citep{makridakis2020m4}, which takes the mean difference in upper and lower bound predictions and adds an error penalty when the true value lies outside the bounds.
+
+Using these metrics, prior works have claimed that TSFMs are better calibrated than baseline methods like ARIMA and N-BEATS~\citep{gifteval,chronos,tirex}. 
+However, \cite{beyondpinball} proved that the metrics above (CRPS, WQL, MSIS) measure a combination of both probabilistic calibration and sharpness~\citep{probforcasttext}, rather than calibration alone.
+This combination can result in an imbalance in evaluation that can skew towards prioritizing predictive sharpness~\citep{beyondpinball}. 
+Figure~\ref{fig:wql_pce_mase_scatter} shows a concrete example of how PCE and WQL can differ in practice: WQL can be highly correlated with Mean Absolute Scaled Error (MASE), while PCE directly measures calibration. 
+In the next section, we discuss calibration-focused metrics that address this issue by focusing solely on measuring calibration.
+
+
+\section{Experimental Setup}
+\label{sec:experimental_setup}
+ 
+
+\subsection{Metrics}
+\label{sec:metrics}
+
+The first calibration metric we use is \textbf{Probabilistic Calibration Error (PCE)}~\citep{calibratedregression,calibrationNN}:
+\begin{equation}
+    \mbox{PCE}  = \frac{1}{|Q|} \sum_{q\in Q}\left|q - \frac{1}{L}\sum_{t=T+1}^{T+L} \mathbf{1}[y_t \leq \hat{y}^q_t]\right|,
+\end{equation}
+where $q \in Q = \{0.1, 0.2, ..., 0.9\}$ is the set of quantiles that we average over in our experiments.
+Intuitively, PCE measures the differences between empirical and predicted CDFs with lower values indicating better-calibrated models. 
+PCE is lower-bounded by 0 and upper-bounded by 0.5 for the case where predicted quantiles are always all above or below the observed value $y_t$. 
+
+However, well-calibrated models are not sufficient to produce useful forecasts: a model could for example always predict the marginal distribution, independent of  the inputs. 
+In this context, a metric that specifically captures {\it  sharpness} (the concentration of the predictive distributions) is also important in an overall evaluation of calibration~\citep{probforcasttext,calibratedregression}.
+A simple surrogate for sharpness is the width of a predicted confidence interval, e.g., where an 80\%-confidence interval is the interval between the symmetric $q_{\text{low}}= 10$\% and $q_{\text{high}}= 90$\% quantile predictions.
+We refer to this as \textbf{Scaled Interval Width (SIW)} where $s$ is the confidence associated with the interval (i.e., $s = q_{\text{high}} - q_{\text{low}} = 80\%$ in the preceding example):
+\begin{equation}
+    \mbox{SIW}_s = \frac{1}{L}\sum_{t=T+1}^{T+L} \frac{\hat{y}^{q_{\text{high}}}_t - \hat{y}^{q_{\text{low}}}_t}{y^{q_{\text{high}}}-y^{q_{\text{low}}}}.
+\end{equation}
+Models with lower SIW values (i.e., tighter prediction intervals) are more confident in their predictions, while models with larger SIW values (i.e., wider-spread predictions) are less confident.
+
+We are also interested in whether a model is systematically miscalibrated in one direction or another. 
+To quantify this, we define the metric \textbf{Centered Calibration Error (CCE)} that compares the amount of observed data in a predicted interval with the associated confidence $s$:
+\begin{equation}
+    \mbox{CCE} = \frac{1}{|S|}\sum_{s\in S} s-\frac{1}{L}\sum_{t=T+1}^{T+L}\mathbf{1}\left[\hat{y}_t^{q_{\text{low}}} \leq y_t \leq \hat{y}_t^{q_{\text{high}}}\right].
+\end{equation}
+
+A model's over- or under-confidence can be identified by combining the direction of CCE and its SIW.
+Positive CCE values indicate there is more observed data outside the predicted interval than expected by the confidence level; together with a low SIW value, we can infer that a model is overconfident. 
+On the other hand, negative CCE values and larger SIW values imply that the model is under-confident. 
+For both CCE and SIW, we average over $s \in \{0.2, 0.4, 0.6, 0.8\}$ in our analyses.
+
+Finally, to assess the point accuracy of TSFMs (independently from any calibration error) we use \textbf{Mean Absolute Scaled Error (MASE)} for the predicted median, scaling the Mean Absolute Error (MAE) by a naive predictor~\citep{forecasttextbook}: 
+\begin{equation} 
+     \mbox{MASE}  = \frac{\frac{1}{L}\sum^{T+L}_{t=T+1}|\hat{y}^{0.5}_t - y_t|}{\frac{1}{L-1}\sum^{T+L}_{t=T+2}|y_t - y_{t-1}| }.
+\end{equation}
+Note that for multi-step predictions ($L>1$) that the MAE of the naive predictor in the denominator is in effect using information ``from the future," with the result that the overall MASE may take values greater than 1 even for useful models. 
+The absolute values of MASE are not important, but the relative MASE values across different predictors $\hat{y}$ are what we will focus on.
+
+\subsection{Models}
+\label{sec:models}
+\paragraph{Base Models}
+We evaluate calibration properties of five TSFMs in terms of their zero-shot forecasts: Chronos-Bolt~\citep{chronos,chronos-bolt}, TimesFM~\citep{timesfm}, Moirai 2.0~\citep{moirai,moirai2}, TiRex~\citep{tirex}, and YingLong~\citep{yinglong}.
+As baselines, we use ARIMA~\citep{autoarima} and N-BEATS~\citep{nbeats} to represent well-known parametric and neural time-series prediction alternatives to TSFMs.
+All selected TSFMs have been pretrained on various large pretraining datasets and use a quantile prediction head.
+Additionally, they all use transformers, except for TiRex which uses an xLSTM~\citep{xlstm} backbone. 
+TimesFM, Moirai 2.0, and TiRex use a decoder-only architecture with a casual attention mechanism, while Chronos-Bolt uses the encoder-decoder backbone from the T5 model~\citep{t5llm} and YingLong uses a bi-directional encoder-only architecture. 
+
+\paragraph{Autoregressive Methods}
+Autoregressive (AR) forecasting is often necessary for models with a limited forecast horizon for long-term forecasting. 
+Each model implements AR forecasting slightly differently. 
+Chronos-Bolt and TimesFM use a naive point-based AR, where only the mean or median predictions are autoregressively added to the context.
+This method while simple is known to significantly harm probabilistic forecasting due to the re-initialization of the context each iteration~\citep{tirex}.
+Improvements to the naive method typically require forecasting each time step multiple times with different AR contexts to propagate probabilistic information across forecast iterations:
+Moirai 2.0 implements a branching approach which autoregressively forecasts using a separate context for each quantile.
+The Toto TSFM~\citep{toto} uses a trajectory approach which produces $n$ (usually $\gg |Q|$) independent AR forecasts or trajectories, where each trajectory is produced similarly to the point-based approach.
+Instead of adding the mean or median forecast to the context, it adds a random sample from the predicted distribution at each time step.
+We explain these methods in more detail in Appendix~\ref{sec:appendix:ar_methods}.
+These AR methods trade off robustness for computational efficiency, where the TimesFM and Chronos-Bolt approach only forecasts each time step once, while the branching (Moirai 2.0) and trajectory approach (Toto) require $|Q|$ and $n$ forecasts per time step respectively.
+In addition to comparing these AR methods, we evaluate how larger or smaller forecast horizons affect calibration on long-term AR forecasting. 
+
+
+\subsection{Datasets}
+\label{sec:datasets}
+
+We selected evaluation datasets representing a range of tasks differing in time-step granularity, seasonality, and forecasting difficulty across a variety of domains. 
+To the best of our knowledge, these datasets were not used in the training of the foundation models (except the M5 data for the Moirai 2.0 and YingLong models). 
+Each dataset is split into a train and test set where the non-TSFMs, ARIMA and N-BEATS, are trained independently on the train set, where hyperparameters are chosen by AutoARIMA and grid search respectively. 
+All models are evaluated on the held-out test set. 
+Table~\ref{tab:dataset_info} summarizes the dataset statistics. Our results on each dataset are aggregated over multiple settings (see Section \ref{sec:metrics}), prediction steps, and all possible context-prediction combinations in the test set for each time series, i.e., effectively generating many more time series forecasts than the number of time series (see the last column in Table \ref{tab:dataset_info}). Additional details are provided in Appendix~\ref{sec:appendix:setup}.
+
+
+\begin{table}[ht]
+\centering
+\caption{Datasets used in calibration experiments.}
+\label{tab:dataset_info}
+\begin{tabular}{lccc c}
+\toprule
+ & {\# Time Series} & {Granularity} & {Time Steps per Series} & \# Total Forecasts \\
+ \midrule
+{Reviews} & {239} & {Hourly} & {13,000}& {360,490} \\
+{Shopping (M5)} & {70} & {Daily} & {1,912} & {62,160} \\
+{Glucose} & {16} & {5 Mins} & {1,686} & {13,840} \\
+{Heart-Rate} & {6} & {Second} & {744} & {1,800} \\
+{Crime} & {5} & {Daily} & {6574} & {4,110} \\
+{Patents} & {83} & {Monthly} & {408} & {10,956} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+To evaluate the effect of different prediction heads for the TSFMs, we trained prediction heads using a large diverse dataset that is comparable to those used in TSFM pretraining.
+Specifically, we selected \textbf{TSMixup} from ~\citet{chronos} as it is independent of the six datasets we use to evaluate the models.
+This allows the trained projection blocks to be an equivalent plug-in replacement to the default quantile projection heads of the selected models.
+
+
+\section{Experiments}
+\label{sec:experiments}
+
+Based on the models, datasets, and metrics outlined above, we found that foundation models exhibit competitive and often better point-forecasting performance compared to baselines, with the TSFMs often having a lower MASE than N-BEATS and ARIMA (see Figure~\ref{fig:mase_bar}). 
+The Glucose and Patents datasets have significantly higher MASE numbers than the other datasets---this may be due to the fact that for each of these datasets there appears to be little significant linear dependence beyond 1 or 2 lags (see partial autocorrelation plots in Figure \ref{fig:partial_autocorrelation} in Appendix \ref{sec:appendix:ar_plots}).
+
+TSFMs also exhibit significantly better calibration performance than baseline models.
+We discuss the main results on calibration in detail below. 
+In the Appendix, we also include additional figures and findings, where we discuss the empirical correlation of WQL, MSIS, and MASE, along with details on the calibration of tail probabilities and additional prediction heads and datasets.
+
+
+\begin{figure}[h]
+\centering
+\vskip -0.1in
+\begin{center}
+\centerline{\includegraphics[width=\columnwidth]{figures/mase_bar_plot_backbone.pdf}}
+\caption{\textbf{TSFMs offer competitive point forecasting performance compared to the baseline models, often having better accuracy than the baselines.} $y$-axis: Mean Absolute Scaled Error (MASE) measuring point accuracy error of the median prediction (lower is better), Glucose and Patents use their own $y$-axis scale (on the right). The error bars are computed as the Standard Error of the Mean (SEM) across timeseries.}
+\label{fig:mase_bar}
+\end{center}
+\vskip -0.1in
+\begin{center}
+\centerline{\includegraphics[width=\columnwidth]{figures/bar_plot_backbone.pdf}}
+\caption{\textbf{TSFMs are better calibrated than the baseline models and are not systematically over- or under-confident.} Top: Probabilistic Calibration Error (PCE) across datasets and models using the default quantile projection block. (Patents PCE uses its own $y$-axis scale (on the right)). Lower PCE values are better. Bottom: Centered Calibration Error (CCE) evaluating systematic overconfidence (positive) or under-confidence (negative).}
+\label{fig:pce_cce_bar}
+\end{center}
+\end{figure}
+
+
+\subsection{Are Foundation Models Well-Calibrated?}
+Previous works have indicated that TSFMs are well calibrated using CRPS, WQL, and MSIS~\citep{gifteval, tirex}, but as discussed in Section~\ref{sec:metrics} and in ~\citet{beyondpinball}, these metrics can be biased towards sharpness and accuracy rather than reflecting calibration per se.
+In our experiments, we evaluate directly if TSFMs are well-calibrated, focusing on the PCE metric, and \textbf{we find that, yes, TSFMs are generally better calibrated than the baseline models of N-BEATS and ARIMA}: see top plot in Figure~\ref{fig:pce_cce_bar}.   
+For a general sense of scale, PCE values below 0.05 or 5\% error relative to the quantiles can loosely be considered to be much better calibrated than values larger than say 0.15, in the context of the range of PCE being between 0 and 0.5. 
+The TSFMs are in general close to  or below 5\% in PCE error, except for the relatively difficult Patents dataset where all methods (TSFMs and baselines) have high calibration error. 
+No single TSFM significantly dominates in calibration performance over the others. 
+
+A natural additional question is how calibration performance is affected by how far in time a model prediction is from the context. 
+Naturally, as both TSFMs and baselines predict further into the future, both the point accuracy (MASE) and calibration error (PCE) degrade (see Figures~\ref{fig:mase_horizon} and~\ref{fig:pce_horizon} in the Appendix). 
+However, calibration overall remains relatively stable with TSFMs achieving PCE values close to or below 5\% even 64 time-steps out (e.g., for Reviews, M5, and Crime data),  unlike the baseline models which have a consistently high PCE over all prediction lengths.
+
+As a control experiment, we also evaluated the calibration performance of TSFMs on two synthetic datasets, one with pure IID noise $y_t=\epsilon$ and the other a noisy first-order linear process $y_t=\alpha y_{t-1} + (1-\alpha) \epsilon$, with $\epsilon \sim {\cal{N}}(0,1)$ and $\alpha=0.9$. 
+For these datasets the question of interest is whether TSFMs might overfit (for either calibration or point prediction) relative to a baseline like ARIMA (which in principle can be perfect on these datasets). 
+As shown in the lower right two plots in Figure~\ref{fig:mase_pce_scatter_aggregate} in the Appendix, the TSFMs do not overfit (they perform well on both MASE and PCE). 
+ARIMA does well on MASE but is not as well-calibrated (PCE) (nor is N-BEATS) as the TSFMs.
+
+In summary, while past works have shown that TSFMs perform well on WQL and CRPS metrics (e.g., ~\cite{gifteval,chronos,tirex}), as we discussed earlier (see Figure \ref{fig:wql_pce_mase_scatter} and further in Appendix~\ref{sec:appendix:additional_metrics}), WQL alone is not necessarily a reliable indicator of calibration performance. 
+Our results provide direct confirmation that TSFMs tend to be well-calibrated.
+
+
+\subsection{Are Foundation Models Systematically Biased in Miscalibration?}
+For image and text modalities, deep models are well-known to often be overconfident~\citep{ye2023mitigating,xiongcan,kapoor2024calibration}.
+In the context of time series, it is natural to ask if TSFMs similarly exhibit systematic biases, either towards over- or under-confidence. 
+
+To answer this, we evaluated the CCE metric across datasets and models. 
+The lower plot in Figure~\ref{fig:pce_cce_bar} shows the directionality of model confidence. 
+Except for the Patents dataset, where all models are overconfident, we find that \textbf{TSFMs tend not to be systematically over- or under-confident}. 
+In contrast, N-BEATS and ARIMA are consistently under-confident
+As shown in Figure~\ref{fig:siw_cce_scatter_backbone} in the Appendix, the interval width (SIW) and centered calibration (CCE) tend to have a negative correlation: models with wider confidence intervals tend to have a smaller CCE or are under-confident.
+
+It is noteworthy that TSFMs are not systematically overconfident, in the way that foundation models from the text and image domains tend to be.
+This can likely be explained by the fact that TSFMs are being directly trained with a calibration-aware loss (i.e., trained to minimize WQL), while text and image models are trained to minimize reconstruction or classification error.
+
+\begin{figure}[ht]
+\vskip -0.1in
+\begin{center}
+\centerline{\includegraphics[width=\columnwidth]{figures/pce_cce_scatter_heads.pdf}}
+\caption{\textbf{Gaussian prediction heads are under-confident and are in most cases outperformed by the other prediction heads.} Calibration properties of various prediction heads with Centered Calibration Error (CCE) on the $x$-axis and Probabilistic Calibration Error (PCE) on the $y$-axis. Large positive CCE values indicate overconfident predictions, while large negative CCE values show under-confidence. Background markers are the results for each head (shape) with each backbone model (color), while the larger gray centroids are the mean results across models.}
+\label{fig:pce_cce_heads}
+\end{center}
+\vskip -0.2in
+\end{figure}
+
+\subsection{How Do Prediction Heads Affect Calibration?}
+\label{sec:prediction_heads}
+
+A major design choice of TSFMs is selecting a suitable prediction head. 
+Multiple approaches have been presented in the literature, including quantile prediction heads (the default choice for all TSFMs in our experiments), parametric distribution heads (e.g., Lag-Llama~\citep{lagllama} with Student's $t$), categorical distribution heads (e.g., Chronos~\citep{chronos}), and semi-parametric mixture heads such as Toto~\citep{toto} and Moirai 1.0~\citep{moirai} which use a variety of components such as Gaussian, Student's $t$, log-normal, and negative-binomial distributions.
+
+An important question is whether the form of a prediction head for a model affects its calibration performance? 
+To address this question, we used the latent information produced by each pretrained TSFM backbone and trained different prediction heads (using TSMixup) for each, specifically: a Gaussian distribution, a Student's $t$ distribution, and a mixture distribution containing a Gaussian, Student's $t$, log-normal, and a Laplace distribution.
+We also retrained a separate quantile projection head on TSMixup as a control to compare against and found that the trained projection heads correctly learn the latent information of the original foundation model with the trained quantile heads having equivalent forecasting performance as the original quantile head.
+
+We then evaluated all combinations of models and prediction heads using the PCE and CCE metrics. 
+As shown in Figure~\ref{fig:pce_cce_heads}, the \textbf{quantile, Student's $t$, and mixture distribution heads have very similar calibration error across all datasets}, indicating that there is no significant advantage for any of the three over the others.
+On the other hand, \textbf{the Gaussian distribution's calibration results are significantly worse} than the other heads.
+In particular, the Gaussian heads are consistently under-confident with CCE scores ($x$-axis of Figure~\ref{fig:pce_cce_heads}), always lower than the other heads.
+This under-confidence also translated to consistently higher calibration error. 
+We speculate that the limited expressiveness of the Gaussian distribution results in poor calibration while the more expressive distributions are better calibrated without suffering from overfitting issues.
+
+
+\begin{figure}[ht]
+\vskip -0.1in
+\begin{center}
+\centerline{\includegraphics[width=\columnwidth]{figures/pce_ar_line_backbone.pdf}}
+\caption{\textbf{For long-term AR forecasting, increasing the horizon length and using the trajectory AR method produces better calibrated forecasts.} The figure compares Probabilistic Calibration Error (PCE) for long-term forecasting using autoregression on the $y$-axis with AR prediction horizon on the $x$-axis. The color of the line depicts the model used and the line style indicates the AR method. The pink and blue dashed horizontal lines are the PCE for TiRex and Yinglong without using AR.}
+\label{fig:pce_ar_line}
+\end{center}
+\vskip -0.2in
+\end{figure}
+
+\subsection{How Do AR Methods Affect Calibration in Long-Term Forecasting?}
+\label{sec:ar_experiments}
+
+It is well known that autoregressive (AR) models can deteriorate when making long-term predictions when the desired forecast length $L$ is much longer than the model's forecast horizon $H$~\citep{tirex}. 
+Different approaches to AR forecasting have been proposed, with different tradeoffs in terms of how errors accumulate and how much computational effort is involved. 
+An important question from a calibration perspective is how do the different AR forecasting methods affect calibration performance? 
+To investigate this, we evaluated how calibration properties of TSFMs vary as a function of horizon length $H$ and AR method. 
+We focused primarily on the Chronos-Bolt, TimesFM, and Moirai 2.0 models in these experiments given that TiRex and YingLong model architectures allow for long-term forecasting natively without requiring AR.
+
+For both the trajectory and branching AR methods, the \textbf{predictions from models with a shorter forecast horizon $H$ have poorer calibration} on a fixed forecast length $L$.
+This is more pronounced in the branching method, where forecasts with horizon lengths of 16 have notably worse PCE than with 64 or 128 as shown in Figure~\ref{fig:pce_ar_line}.
+The trajectory AR approach has generally lower PCE than the branching method when comparing with the same forecast horizon.
+The explanation for this becomes more clear when viewing CCE from Figure~\ref{fig:cce_ar_line} in the Appendix with respect to these methods.
+\textbf{All autoregressive TSFMs are consistently overconfident in long-term forecasting}.
+While both methods show that shorter forecast horizons results in more confident forecasts, the CCE values for the branching method are often greater than 0.15 for horizon lengths of 16 and 32.
+This overconfidence reduces steeply as the horizon length increases thus reducing overall calibration error.
+Although the trajectory method can be more computationally expensive than the branching approach, our results indicate that the trajectory method is better calibrated for long-term forecasting.
+The non-AR approaches of TiRex and YingLong are significantly more efficient than both AR methods, and they tend to be better calibrated and were not significantly over- or under-confident.
+Future work in long-term forecasting should prioritize models with longer forecast horizons and alternatives to AR-based approaches. 
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+Understanding the calibration properties of TSFMs closes a gap in the literature, which has primarily focused to date on point accuracy. 
+Calibration is crucial, however, to accurately quantify the inherent uncertainties associated with time-series forecasting.
+
+In this paper, we evaluated the calibration properties of current leading TSFMs and found that they are consistently well-calibrated relative to the N-BEATS and ARIMA baselines.
+Unlike the baselines, which are under-confident, the TSFMs show no signs of systematic over- or under-confidence in short-term forecasting.
+When replacing the projection heads of the TSFMs, the Gaussian prediction head results in consistently under-confident forecasts across the different model backbones, while other distribution and quantile heads are all well-calibrated without significant differences.
+For long-term forecasting using autoregression, having larger prediction horizons and using the trajectory AR approach over the branching method decrease calibration error and reduces overconfidence.
+
+A limitation of our study is that our evaluations only considered TSFMs for zero-shot univariate time series and calibration relative to a fixed set of quantiles $q \in \{0.1,\ldots,0.9\}$. 
+As such, worthwhile extensions of our work could be to investigate calibration in the context of fine-tuning, to extend multivariate data, and to examine higher-resolution quantiles. 
+Another important practical direction for future investigation is how distribution shift and non-stationarity may affect the calibration performance of both TSFMs and baselines, given the well-known sensitivity of the calibration performance of deep classification models to distribution shift \citep{ovadia2019can}.
+
+
+\subsubsection*{Acknowledgments}
+This work was supported in part by the Hasso Plattner Institute (HPI) Research Center in Machine Learning and Data Science at the University of California, Irvine, by a Google faculty award, by the National Science Foundation under award NSF RISE-2425932, and by the National Institutes of Health under awards 1R01CA297869-01 and R01-LM013344. 
+FD acknowledges funding from the National Science Foundation (NSF) through an NSF CAREER Award IIS-2047418, IIS-2007719, the NSF LEAP Center, and the Chan Zuckerberg Initiative.
+
+\newpage
+
+\bibliography{tsfm_calibration_arxiv}
+\bibliographystyle{iclr2026_conference}
+
+\clearpage
+\newpage
+\appendix
+\section{Appendix}\label{sec:appendix}
+
+\subsection{LLM Usage Statement}
+LLMs were used by the authors as a tool to assist in producing code for experiments. 
+LLMs were not used to aid in the writing of the paper or during research ideation.
+
+\subsection{Additional Details on Experimental Setup}\label{sec:appendix:setup}
+
+We report the default experiment parameters used in the main paper results in the following table, where the train/test split size varies by dataset, with train sets containing approximately 700 time steps per time series:
+
+\begin{table}[ht]
+\centering
+\caption{Experimental setup details per dataset.}
+\label{tab:dataset_exp}
+\begin{tabular}{lcccccc}
+\toprule
+ & {Prediction} & {Context} & {Seasonality} & {Train/test split}\\
+ & {Length ($L$)} & {Size ($T$)} & {(ARIMA only)} & \\
+ \midrule
+{Reviews} & {64} & {512} & {24} & {2020-01-31 23:00} \\
+{Shopping (M5)} & {64} & {512} & {7} & {2015-04-23} \\
+{Glucose} & {64} & {512} & {1} & {2020-02-16 12:43} \\
+{Heart-Rate} & {64} & {128} & {1} & {2000-01-01 00:04:59} \\
+{Crime} & {64} & {512} & {7} & {2015-01-01} \\
+{Patents} & {64} & {128} & {1} & {2004-01-01} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Prediction length is fixed at 64 time steps across all datasets for short-term forecasting experiments while long-term forecasting experiments used a desired forecast length of 256 time steps. 
+
+
+Baseline models (N-BEATS and ARIMA) use the training data (dates before train/test split column) for parameter selection and training. The train/test split was determined based on the minimal size of the train set for training N-BEATS and ARIMA models, limited by time series length. Models forecast the first 64 time steps of the test set using the end of the training set as the context. The forecast date and non-AR context are then shifted by the stride, forecasting an additional 64 time-steps. The models forecast repeatedly until the end of the time series. For a stride $d \in \{1,4,8\}$ dependent on time series length, the first forecast predicts $\hat{y}_{T+1:T+L}|y_{1:T}$ while the second forecast is shifted by the stride to $\hat{y}_{T+1+d:T+L+d}|y_{1+d:T+d}$.
+
+Seasonality is a hyperparameter for the ARIMA models, used for initialization. We limit the max lag (context) for the ARIMA model to 64 for all datasets. We train an ARIMA model with AutoARIMA on the train set and then use the selected hyperparameters to train the models for evaluation. We train a new ARIMA model each time we shift the context.
+
+For N-BEATS we perform a grid search on a variety of hyperparameters (see Table~\ref{tab:grid_search}) using the training data and select the model with the lowest WQL on the same data. 
+Quantile loss outperforms normal distribution loss on all datasets. 
+When forecasting with distribution loss in N-BEATS, we use the default 100 samples.
+We train a single N-BEATS model on each dataset, training across multiple time series and reuse the same learned parameters each time we shift the context.
+
+\begin{table}[ht]
+\centering
+\caption{N-BEATS hyperparameter grid search space.}
+\label{tab:grid_search}
+\begin{tabular}{lc}
+\toprule
+{Hyperparameter} & {Search Space} \\
+ \midrule
+{Epochs} & {\{100, 1000\}} \\
+{Learning Rate} & {\{0.001, 0.0001\}} \\
+{Early Stop Patience Steps} & {\{-1, 2\}} \\
+{Number of Blocks} & {\{(1,1,1), (3,3,3)\}} \\
+{Validation Check Steps} & {\{10, 100\}} \\
+{Loss Function} & {\{Normal Distribution Loss, Quantile Loss\}} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+We describe the AR methods in depth in the next section and used $n=100$ as the number of trajectories for the trajectory AR method.
+When sampling from the quantile heads in the trajectory method, we linearly interpolate between the quantiles to convert the quantile heads into to a continuous distribution.
+
+\subsection{Autoregressive Methods}\label{sec:appendix:ar_methods}
+
+The \textbf{naive} AR method used by TimesFM and Chronos-Bolt adds only the median or mean forecasts to the context.
+For example if the desired forecast length is $L=256$ and the model's forecast horizon is $H=64$, the model will generate a probabilistic forecast $\hat{y}_{T+1:T+64}$ given the observed context $y_{1:T}$. 
+To make the next 64-step forecast, it adds the mean or median forecast, derived from $\hat{y}_{T+1:T+64}$, to the original context.
+The result is a shifted context $y_{65:T+64}$ containing a mix of observed values and forecasted values.
+The model can then use the shifted context to produce the forecasts for $\hat{y}_{T+65:T+128}$.
+This process is repeated until all $256$ probabilistic forecasts have been completed, and the quantiles can be obtained directly from the probabilistic forecasts.
+
+The \textbf{branching} approach from Moirai 2.0 is different in that it requires the model to forecast the same time steps multiple times.
+The first 64 time steps are normal, relying only on the observed contexts and producing $|Q|$ quantile forecasts $\hat{y}^q_{T+1:T+64}$, where $q \in Q$.
+The context is duplicated or branched into $|Q|$ new extended contexts, where each context is extended by the forecasts at a specific quantile. 
+The next 64 steps $\hat{y}^q_{T+65:T+128}$ is forecasted using all $|Q|$ contexts, which requires running the model $|Q|$ times independently, once for each of the $|q|$ contexts.
+Because the model has been run $|Q|$ times and each time the model produces $|Q|$ quantiles, there will be a total of $|Q|^2$ forecasts for each time step.
+Rather than increasing the number of contexts exponentially from $|Q|$ to $|Q|^2$, the $|Q|^2$ quantile forecasts at each time step are aggregated back down to a set of $|Q|$ quantile predictions.
+This is done by taking the $Q$ quantile of the $|Q|^2$ forecasts (for each time step).
+These aggregated quantiles become the returned quantile forecasts and are used to extend and shift the corresponding $|Q|$ contexts.
+
+The Toto TSFM \citep{toto} uses a \textbf{trajectory}-based AR method where the model generates $n$ independent AR forecasts or trajectories.
+Each trajectory is produced similarly to the naive method where a single point forecast (at each time step in $H$) is added to the context for AR.
+However, instead of using the mean or median, the model samples from the predicted density and uses the samples as the point forecast (one sample for each time step).
+The model will create $n$ independent trajectories, each with separate contexts.
+The final quantile forecasts are produced by taking the quantiles of the $n$ trajectories at each time step independently.
+
+
+\subsection{Models}\label{sec:appendix:models}
+We primarily selected models with diverse backbones that were state-of-the-art on the GIFT-EVAL benchmark as of the time of writing~\citep{gifteval} and pre-trained on time series datasets.
+
+\paragraph{TimesFM} 
+TimesFM~\citep{timesfm} uses a decoder-only stacked transformer architecture, and provides probabilistic predictions at pre-trained fixed quantile heads. 
+The training objective combines mean squared error (MSE) and quantile loss~\cite{forecasttextbook,probforcasttext}. 
+The model is trained with larger output patches than inputs, and thus able to make joint predictions of forecast quantiles over lengths $H\leq128$.
+We use the \texttt{timesfm-2.0-500m-pytorch} version for our experiments. \footnote{TimesFM checkpoint on Hugging Face: \url{https://huggingface.co/google/timesfm-2.0-500m-pytorch}.}
+
+\paragraph{Moirai 2.0}
+Moirai 2.0~\citep{moirai2} is a recent update on Moirai 1.0~\citep{moirai} transitioning from an encoder-based transformer that uses a mixture distribution projection head to a decoder-only backbone with a quantile head. 
+Moirai 2.0 is implemented using AR with multi-patch forecasting support. In our experiments, we used a patch size of 16 and set the model to jointly predict 4 patches at a time for a max prediction horizon of 64. 
+We use the \texttt{moirai-2.0-R-small} version for our experiments. \footnote{Moirai 2.0 checkpoint on Hugging Face: \url{https://huggingface.co/Salesforce/moirai-2.0-R-small}}
+
+\paragraph{Chronos-Bolt} 
+Chronos-Bolt~\citep{chronos-bolt} is a foundation model with an backbone from the T5 family of encoder-decoder language models ~\cite{t5llm}. Real-valued time series is tokenized into fixed vocabularies via scaling and quantization. 
+Unlike its predecessor Chronos~\citep{chronos} which used a categorical prediction head forecasting the tokenized patches within a set vocabulary, Chronos-Bolt directly predicts quantiles using an output patch length of 64. 
+We use the \texttt{chronos-bolt-base} version for our experiments. \footnote{Chronos-Bolt checkpoint on Hugging Face: \url{https://huggingface.co/amazon/chronos-bolt-base}}
+
+\paragraph{TiRex}
+TiRex~\citep{tirex} deviates from most TSFMs by using an xLSTM~\citep{xlstm} decoder-only backbone.
+They apply contiguous patch masking during pretraining to allow for long-term forecasting without the need for AR.
+For long-term forecasts at inference time, TiRex pads and shifts the context so that the model does not need to condition on previous forecasts.
+Their implementation allows for multi-patch accelerated roll-out by using the forecasts at multiple patches in a single forward pass, rather than only using a single patch before padding the context.
+We use the base \texttt{TiRex} version for our experiments and set the accelerated roll-out to 4 patches with patch size of 32. \footnote{TiRex checkpoint on Hugging Face: \url{https://huggingface.co/NX-AI/TiRex}}
+
+\paragraph{YingLong}
+YingLong~\citep{yinglong} employs a bi-directional U-net encoder-only transformer backbone.
+This enables the model to use delayed chain-of-thought reasoning by forecasting beyond the desired forecast length.
+The desired forecast can then condition on both the observed context and the future delayed chain-of-thought for more accurate predictions.
+We use the \texttt{YingLong\_110m} version for our experiments and use an extended forecast horizon of 2048. \footnote{YingLong checkpoint on Hugging Face: \url{https://huggingface.co/qcw2333/YingLong_110m}}
+
+\paragraph{N-BEATS} 
+N-BEATS~\citep{nbeats} is a deep neural architecture that has been designed for the purposes of time series predictions. 
+Similar to TimesFM, N-BEATS jointly forecasts the entire prediction horizon in a single forward pass. 
+
+\paragraph{ARIMA} 
+We use Nixtla's \texttt{StatsForecast} implementation of AutoARIMA~\citep{autoarima} to automatically select the optimal ARIMA parameters for each time series on the training set. 
+The model is then refit on all earlier data before each forecast on the evaluation set. 
+The ARIMA implementation uses Kalman filters to recursively predict the mean and variance. 
+Quantiles are computed by fitting a normal distribution to the forecasts and using the inverse CDF (PPF) with the appropriate $z$-scores.
+
+\subsection{Prediction Heads}\label{sec:appendix:pred_heads}
+To evaluate the impact the prediction head has on calibration, we replaced the default quantile projection heads of each model with a fine-tuned version of each head we tested.
+To train each head, we cached the embeddings outputted by each model's backbones and used them as the input to each of the heads.
+Specifically, we trained an independent quantile, Gaussian, Student's $t$, and mixture distribution head.
+For the mixture head we replicate the Moirai 1.0~\citep{moirai} prediction head using a Gaussian, Student’s $t$, log-normal, and replace Negative-Binomial with the Laplace distribution due to issues related to model convergence during training.
+
+\subsection{Datasets}\label{sec:appendix:datasets}
+We evaluate models on three human behavior datasets: (i) a {\bf Reviews} dataset consisting of hourly counts of Amazon product reviews~\citep{amazonreview} and Google Places reviews~\citep{googlereview}, (ii) a modified \textbf{Shopping (M5)} dataset~\citep{m5dataset} consisting of the daily number of products being sold at different locations, and (iii) an NYC \textbf{Crime} report dataset~\citep{policedataset} aggregating daily crime occurrences. 
+
+
+For the \textbf{Reviews} ensemble dataset, we aggregated Amazon~\cite{amazonreview} and Google~\cite{googlereview} reviews by product and location category and sampled 239 of the most abundant categories from the ensemble. 
+We binned the event data as count data at an hourly granularity and trimmed the dataset to the most active time range from 2020-01-01 08:00:00 to 2021-06-25 23:00. 
+
+We aggregated the daily \textbf{Shopping (M5)}~\cite{m5dataset} dataset to reduce sparsity by binning each product by their product department and store ID, totaling 70 time series.
+
+We aggregated the NYC \textbf{Crime} reports dataset~\cite{policedataset} by number of daily reports and cutoff the dataset to only include reports between the years 2006 and 2023. We split the dataset into time series based on borough. 
+
+Many datasets used in training TSFMs are related to human behavior and natural phenomena that exhibit periodic trends (e.g., 24-hour effects). 
+As noted in ~\citet{pmlr-v259-gu25a}, the strong predictive accuracy of foundation models on many of the datasets used in machine learning evaluations does not necessarily translate into high predictive accuracy in applications such as vital sign forecasting in healthcare. 
+To analyze model performance on datasets that differ in this respect from the pre-training data, we further included datasets for \textbf{Glucose Level}~\citep{glycemicvariability} and \textbf{Heart Rate} prediction~\citep{meditationdataset}. 
+
+The \textbf{Glucose}~\cite{glycemicvariability} dataset measures interstitial glucose concentration of 16 subjects over the course of 10 days. We used the Dexcom G6 dataset measuring interstitial glucose concentration (mg/dL) every 5 minutes.
+
+The meditative \textbf{Heart-Rate} dataset~\cite{meditationdataset} records heart-rate of 14 volunteers during a 10-minute metronomic breathing meditation session, where it is recorded as relative time since the start of the meditation session.
+However, some foundation models (TimesFM) require and use timestamps for forecasting so we mapped the Heart-Rate dataset to start at 2000-01-01 00:00:00 and last 10 minutes.
+
+To evaluate models on coarser time granularities, we also use the \textbf{Patents} dataset~\citep{patentsdataset} which counts the number of US patents filed per month from 1981 to 2014. We removed sparse time series, aggregated by patent field and category, and filtered out timeseries with a minimum value of less than 100.
+
+Additional dataset statistics can be found in the partial autocorrelation plots in Figure~\ref{fig:partial_autocorrelation}.
+We did not evaluate the AR experiments on the Heart-Rate and Patents dataset as they did not contain enough data to accurately assess long-term forecasting calibration.
+
+Both synthetic noise datasets were generated as a single time series with length 4367 and the train/test split at 1440. The IID noise time series was generated using $y_t = \epsilon$ and the noisy first-order linear process $y_t = \alpha y_t-1 +(1-\alpha)\epsilon$ where $\alpha = 0.9$ and $\epsilon$ is drawn from the standard normal distribution $\mathcal{N}(0,1)$.
+
+
+\begin{figure}[ht]
+\begin{center}
+\centerline{\includegraphics[width=\columnwidth]{figures/median_dataset_partial_autocorrelation.pdf}}
+\caption{\textbf{Partial Autocorrelation Plots: Glucose and Patents datasets have limited number of lags with significant partial autocorrelation while having large correlation at the first lag.} The naive model is well suited for these two datasets which would explain the poor point forecasting performance (MASE). The specific time-series from each dataset used to generate the plots were selected based on having approximately median MASE scores in that dataset.}
+\label{fig:partial_autocorrelation}
+\end{center}
+\vskip -0.2in
+\end{figure}
+
+\clearpage
+\newpage
+\section{Additional Results and Figures}\label{sec:appendix:results}
+
+\subsection{Base Findings}\label{sec:appendix:findings}
+
+We include additional figures and findings for each of the experiments below. 
+Table~\ref{tab:forecasting_results} shows the short-term calibration and accuracy scores of each model across all of the datasets.
+
+In Figure~\ref{fig:mase_pce_scatter_backbone}, we show that across time series in the same dataset, the model point accuracy, MASE, are not correlated with model calibration.
+However, across datasets as in Figure~\ref{fig:mase_pce_scatter_aggregate}, we see a strong correlation between TSFM, MASE, and PCE with a correlation coefficient of 0.90.
+This relationship does not always hold. 
+For example, despite the TSFMs having poor point accuracy on the Glucose dataset, worse than a naive predictor with MASE greater than 1.0, they are still well calibrated with PCE less than 0.05.
+We note that for multi-step predictions ($H > 1$) that the MAE of the naive predictor in the denominator of MASE is in effect using information “from the future,” with the result that the overall MASE may take values greater than 1 even for useful models.
+In Figures~\ref{fig:mase_horizon} and~\ref{fig:pce_horizon}, as the TSFMs predict further into the future, not surprisingly the forecasts become both less accurate and less calibrated.
+We see exceptions in Reviews where the TSFMs remain equally well calibrated up to a forecast length of 64.
+However, unlike the TSFMs, the baseline models have a consistently high PCE over all prediction lengths.
+
+The TSFMs are not consistently over- nor under-confident (see Figures~\ref{fig:pce_cce_bar} and ~\ref{fig:siw_cce_scatter_backbone}).
+However among the TSFMs, YingLong is more confident with tighter intervals compared to the other TSFMs, with some indication of overconfidence on Heart-Rate and Patents datasets.
+
+\begin{table*}[ht]
+\centering
+\caption{Calibration evaluation results. Best results are highlighted in bold, and second best results are underlined.}
+\label{tab:forecasting_results}
+\vskip 0.1in
+\small
+\begin{tabular}{l l @{\hspace{4pt}}S[table-format=2.3] @{\hspace{4pt}}S[table-format=2.3] @{\hspace{4pt}}S[table-format=2.3] @{\hspace{4pt}}S[table-format=2.3] @{\hspace{4pt}}S[table-format=2.3] @{\hspace{4pt}}S[table-format=2.3] @{\hspace{4pt}}S[table-format=2.3]}
+\toprule
+& & \multicolumn{5}{c}{Foundation Models} & \multicolumn{2}{c}{Baselines} \\
+\cmidrule(lr){3-7} \cmidrule(lr){8-9}
+  &  & {Chronos-Bolt} & {Moirai 2.0} & {TimesFM} & {TiRex} & {YingLong} & {N-BEATS} & {ARIMA} \\
+\midrule
+\multirow{8}{1cm}{MASE} & {Reviews} & \underline{0.717} & {0.748} & {0.720} & \textbf{0.710} & {0.823} & {1.416} & {1.211} \\
+& {Shopping (M5)} & {0.785} & \textbf{0.727} & {0.753} & \underline{0.743} & {0.835} & {0.791} & {0.854} \\
+& {Glucose} & {6.362} & {5.986} & {6.051} & \textbf{5.841} & {6.041} & {7.326} & \underline{5.958} \\
+& {Heart-Rate} & {1.119} & {1.118} & \underline{1.104} & \textbf{1.096} & {1.257} & {1.335} & {1.120} \\
+& {Crime} & \underline{0.741} & {0.759} & {0.759} & \textbf{0.740} & {0.761} & {0.767} & {0.829} \\
+& {Patents} & \underline{11.896} & \textbf{10.639} & {12.193} & {12.510} & {21.297} & {22.814} & {14.534} \\
+& {IID Noise} & {0.706} & \underline{0.705} & {0.707} & {0.708} & {0.709} & {0.926} & \textbf{0.704} \\
+& {Linear Process} & {2.491} & {2.417} & \underline{2.210} & {2.325} & {2.322} & {2.790} & \textbf{2.166} \\
+\midrule
+\multirow{8}{1cm}{PCE} & {Reviews} & {0.015} & {0.013} & \underline{0.012} & \textbf{0.012} & {0.014} & {0.061} & {0.176} \\
+& {Shopping (M5)} & \underline{0.033} & {0.045} & {0.036} & \textbf{0.031} & {0.052} & {0.108} & {0.131} \\
+& {Glucose} & {0.036} & \underline{0.033} & {0.050} & \textbf{0.031} & {0.042} & {0.092} & {0.141} \\
+& {Heart-Rate} & {0.063} & \underline{0.051} & {0.052} & \textbf{0.048} & {0.077} & {0.121} & {0.204} \\
+& {Crime} & {0.023} & {0.035} & {0.023} & \underline{0.021} & \textbf{0.014} & {0.103} & {0.168} \\
+& {Patents} & \underline{0.176} & \textbf{0.154} & {0.206} & {0.192} & {0.259} & {0.242} & {0.247} \\
+& {IID Noise} & {0.009} & \underline{0.008} & \textbf{0.004} & {0.012} & {0.010} & {0.072} & {0.122} \\
+& {Linear Process} & {0.033} & \underline{0.015} & \textbf{0.008} & {0.022} & {0.021} & {0.138} & {0.122} \\
+\midrule
+\multirow{8}{1cm}{CCE} & {Reviews} & {-0.012} & \underline{0.007} & \textbf{0.004} & {-0.013} & {-0.024} & {-0.040} & {-0.351} \\
+& {Shopping (M5)} & \underline{0.002} & \textbf{0.000} & {0.005} & {-0.026} & {0.051} & {-0.203} & {-0.259} \\
+& {Glucose} & \textbf{-0.011} & {-0.050} & {-0.038} & \underline{-0.027} & {0.034} & {-0.172} & {-0.280} \\
+& {Heart-Rate} & {-0.061} & \underline{-0.008} & \textbf{0.001} & {-0.037} & {0.105} & {-0.243} & {-0.411} \\
+& {Crime} & {-0.030} & {-0.020} & \textbf{-0.001} & {-0.041} & \underline{0.015} & {-0.207} & {-0.337} \\
+& {Patents} & \textbf{0.028} & {0.046} & {0.089} & {0.069} & {0.201} & {0.322} & \underline{0.031} \\
+& {IID Noise} & \underline{0.007} & {-0.008} & \textbf{0.007} & {-0.012} & {0.016} & {0.111} & {-0.244} \\
+& {Linear Process} & \underline{0.006} & {-0.020} & \textbf{0.002} & {-0.021} & {0.044} & {0.256} & {-0.244} \\
+\midrule
+\multirow{8}{1cm}{SIW} & {Reviews} & {0.198} & {0.204} & {0.180} & {0.195} & {0.248} & {0.573} & {1.138} \\
+& {Shopping (M5)} & {0.240} & {0.231} & {0.241} & {0.260} & {0.233} & {0.538} & {0.644} \\
+& {Glucose} & {0.996} & {0.972} & {1.001} & {0.911} & {0.761} & {1.727} & {1.967} \\
+& {Heart-Rate} & {0.716} & {0.605} & {0.585} & {0.653} & {0.496} & {1.416} & {2.174} \\
+& {Crime} & {0.278} & {0.276} & {0.261} & {0.290} & {0.246} & {0.553} & {0.852} \\
+& {Patents} & {0.108} & {0.096} & {0.088} & {0.086} & {0.091} & {0.049} & {0.092} \\
+& {IID Noise} & {0.991} & {1.035} & {0.999} & {1.051} & {0.977} & {1.118} & {2.026} \\
+& {Linear Process} & {1.107} & {1.164} & {0.985} & {1.110} & {0.930} & {0.629} & {1.942} \\
+\midrule
+\multirow{6}{1cm}{WQL} & {Reviews} & \underline{56.732} & {59.070} & {56.929} & \textbf{56.141} & {65.569} & {98.865} & {128.830} \\
+& {Shopping (M5)} & {59.558} & \textbf{55.129} & {57.137} & {56.454} & {63.402} & \underline{56.402} & {63.618} \\
+& {Glucose} & {61.234} & {57.926} & {58.157} & \underline{56.564} & {58.398} & {64.942} & \textbf{56.257} \\
+& {Heart-Rate} & {19.410} & {19.332} & \textbf{18.967} & \underline{19.011} & {21.812} & {22.679} & {27.851} \\
+& {Crime} & \underline{39.293} & {40.129} & {40.198} & {39.426} & {40.409} & \textbf{37.809} & {47.707} \\
+& {Patents} & \underline{22.549} & \textbf{20.958} & {24.341} & {24.435} & {45.050} & {47.238} & {25.886} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{figure}[ht]
+\vskip -0.1in
+\begin{center}
+\centerline{\includegraphics[width=\columnwidth]{figures/mase_horizon_line_backbone.pdf}}
+\caption{\textbf{TSFM point accuracy gets increasingly worse the further out the model forecasts} Mean Absolute Scaled Error (MASE) as a function of prediction length across the six datasets. The dashed horizontal line is the MASE of the naive predictor ($y_t=y_{t-1}$) as a reference.}
+\label{fig:mase_horizon}
+\end{center}
+\vskip -0.2in
+\end{figure}
+
+
+\begin{figure}[ht]
+\vskip -0.1in
+\begin{center}
+\centerline{\includegraphics[width=\columnwidth]{figures/pce_horizon_line_backbone.pdf}}
+\caption{\textbf{TSFM calibration gets increasingly worse the further out the model forecasts} Probabilistic Calibration Error (PCE) as a function of prediction length across the six datasets. PCE values below the dashed horizontal line ($y=0.05$) can be considered to be well-calibrated.}
+\label{fig:pce_horizon}
+\end{center}
+\vskip -0.2in
+\end{figure}
+
+\begin{figure}[h]
+\vskip -0.1in
+\begin{center}
+\centerline{\includegraphics[width=\columnwidth]{figures/pce_mase_scatter.pdf}}
+\caption{\textbf{Aggregated across each dataset TSFMs have a correlation between point accuracy (MASE) and calibration (PCE).} Probabilistic calibration error (PCE) versus point-forecast accuracy (MASE) averaged over all time series in each dataset. }
+\label{fig:mase_pce_scatter_aggregate}
+\end{center}
+\vskip -0.2in
+\end{figure}
+
+\begin{figure}[ht]
+\vskip -0.1in
+\begin{center}
+\centerline{\includegraphics[width=\columnwidth]{figures/horizon_line_random_walk.pdf}}
+\caption{\textbf{TSFMs are well calibrated on synthetic datasets while ARIMA is under-confident predicting higher variance (SIW).} Plots calibration and accuracy metrics as a function of horizon length for synthetic datasets.}
+\label{fig:horizon_random_walk}
+\end{center}
+\vskip -0.2in
+\end{figure}
+
+\begin{figure}[ht]
+\begin{center}
+\centerline{\includegraphics[width=\columnwidth]{figures/mase_pce_scatter_backbone.pdf}}
+\caption{\textbf{TSFMs are better calibrated than the baselines. Within each dataset, there is no correlation between MASE and PCE.} Probabilistic calibration error (PCE) versus point-forecast accuracy (MASE) across the six datasets. Each dot represents model performance on an individual time series; larger centroids being the average over all time series in a dataset. PCE values below 0.05 (dotted horizontal line) are well-calibrated while MASE values less than 1.0 (dotted horizontal line) are better than the naive predictor. MASE values greater than 1.0 can still be a useful model due to the naive model using information “from the future.”}
+\label{fig:mase_pce_scatter_backbone}
+\end{center}
+\vskip -0.2in
+\end{figure}
+
+
+\begin{figure}[ht]
+\vskip -0.1in
+\begin{center}
+\centerline{\includegraphics[width=\columnwidth]{figures/siw_cce_scatter_backbone.pdf}}
+\caption{\textbf{TSFMs tend to be neither over/under-confident overall. Models with larger SIW, wider confidence intervals, were more under-confident. } Centered Calibration Error (CCE) versus Scaled Interval Width (SIW) across the six datasets. Each dot represents model performance on an individual time series; larger centroids being the average over all time series in a dataset.}
+\label{fig:siw_cce_scatter_backbone}
+\end{center}
+\vskip -0.2in
+\end{figure}
+
+
+\begin{figure}[ht]
+\vskip -0.1in
+\begin{center}
+\centerline{\includegraphics[width=\columnwidth]{figures/pce_mase_scatter_heads.pdf}}
+\caption{\textbf{All prediction heads tend to have very similar accuracy error with the Gaussian head occasionally having slightly worse error.} Calibration and accuracy properties of various prediction heads with Accuracy Error (MASE) on the $x$-axis and Probabilistic Calibration Error (PCE) on the $y$-axis. Background markers are the results for each head (shape) with each backbone model (color), while the larger gray centroids are the mean results across models.}
+\end{center}
+\vskip -0.2in
+\end{figure}
+
+
+
+\clearpage
+\newpage
+\subsection{Comparison with Additional Metrics}\label{sec:appendix:metrics}
+\label{sec:appendix:additional_metrics}
+As mentioned in the main paper, WQL, MSIS, and CRPS are common metrics for evaluating model calibration.
+Weighted Quantile Loss (WQL) is an approximation of Continuous Ranked Probability Score (CRPS) defined as the pinball (or quantile) loss $p_q$ scaled by the absolute sum of the true values:
+
+\begin{align}
+    p_q(y_t, \hat{y}^q_t) &= \begin{cases}
+                            2\cdot (1-q) \cdot (\hat{y}^q_t-y_t) & \text{if } \hat{y}^q_t \geq y_t \\
+                            2\cdot q \cdot (y_t-\hat{y}^q_t)  & \text{if } \hat{y}^q_t < y_t
+                            \end{cases} \\
+    WQL &= \frac{1}{\sum_{t=T+1}^{T+L}|y_t|} \sum_{t=T+1}^{T+L} \sum_q p_q(y_t, \hat{y}^q_t)
+\end{align}
+
+
+However, as described in ~\citet{beyondpinball}, CRPS and WQL, measure a combination of probabilistic calibration and sharpness~\cite{probforcasttext}.
+This combination leads to an imbalance often skewing to prioritize predictive sharpness~\cite{beyondpinball}.
+
+Mean Scaled Interval Score (MSIS) is a scaled version of Mean Interval Score (MIS) which is the mean difference in upper and lower bound prediction penalized with the error when the true value lies outside the bounds:
+
+\begin{align}
+    \begin{split}
+        MSIS &= \frac{1}{MAE_n}\frac{1}{L} \sum_{t=T+1}^{T+L} (\mathcal{U}_t^s - \mathcal{L}_t^s) \\
+        &\qquad\qquad\qquad\qquad+ \frac{2}{1-s} (\mathcal{L}_t^s -y_t)\mathbf{1}[y_t < \mathcal{L}_t^s] \\
+        &\qquad\qquad\qquad\qquad+ \frac{2}{1-s} (y_t - \mathcal{U}_t^s)\mathbf{1}[y_t > \mathcal{U}_t^s]
+    \end{split}
+\end{align}
+
+MSIS has the same limitations being a measure of interval size with a penalty term for observed values outside the interval~\cite{probforcasttext, forecasttextbook, scoringrules}.
+We find that these metrics were highly correlated to MASE in Figure~\ref{fig:scatter_old_correlation}.
+Therefore, when using these metrics to evaluate calibration, their values result in a measure of sharpness and accuracy that diverge from a measurement of calibration (see Figure~\ref{fig:bar_old_calibration}).
+For example, if we evaluate calibration using WQL or MSIS, we would incorrectly conclude that ARIMA is equally or better calibrated than the best foundation models on the Glucose dataset as in Figure~\ref{fig:wql_pce_mase_scatter} and~\ref{fig:bar_old_calibration}.
+
+\begin{figure}[ht]
+\vskip -0.1in
+\begin{center}
+\centerline{\includegraphics[width=\columnwidth]{figures/other_metrics_bar_backbone.pdf}}
+\caption{\textbf{WQL and MSIS incorrectly imply that N-BEATS and ARIMA are well calibrated on some datasets, while PCE indicates they are always poorly calibrated.} Top: Probabilistic Calibration Error (PCE) across datasets and models using the default quantile prediction head, Patents PCE uses the right $y$-axis scale. Upper Middle: Weighted Quantile Loss (WQL) measuring a combination of sharpness and calibration. Lower Middle: Mean Scaled Interval Score (MSIS) where Glucose and Patents use right $y$-axis scale. Bottom: Mean Absolute Scaled Error (MASE) measuring point accuracy of median prediction, Glucose and Patents use the right $y$-axis scale.}
+\label{fig:bar_old_calibration}
+\end{center}
+\vskip -0.2in
+\end{figure}
+
+\begin{figure}[ht]
+\vskip -0.1in
+\begin{center}
+\centerline{\includegraphics[width=0.95\columnwidth]{figures/other_metrics_scatter_backbone.pdf}}
+\caption{\textbf{WQL and MSIS are often highly correlated with MASE across time series within a dataset} WQL (left), MSIS (middle), and PCE (right) compared to MASE where each dot is the performance of an individual time series.}
+\label{fig:scatter_old_correlation}
+\end{center}
+\vskip -0.2in
+\end{figure}
+
+
+\clearpage
+\newpage
+\subsection{Tail Forecasting}\label{sec:appendix:tail_forecasting}
+
+In downstream tasks such as Anomaly Detection, calibration at the tail ends of probabilistic predictions is more important than at the body of a predictive distribution. 
+We evaluate the tailed calibration with a modified PCE and CCE that only considers the 0.1 and 0.9 quantile predictions rather than averaging over all the quantiles or confidence intervals.
+The Tailed PCE (TPCE) and Tailed CCE (TCCE) values are not directly comparable to their aggregate values as their scales could be slightly offset.
+Models that are in general overconfident with positive CCEs tend to be have an exaggerated overconfidence and miscalibration at the tails. 
+The opposite is true with under-confident models, having improved calibration at the tails while their under-confidence CCE is capped and reduced by being at the tail.
+In Figure~\ref{fig:bar_tail_calibration}, we find that YingLong which is overconfident with overly tight confidence intervals, are relatively poorer at the tails of the distribution compared to the other models, while ARIMA sees a relative improvement.
+For the TSFM models that are neither over nor under-confident, their calibration looks to be improved with very minor calibration error. 
+Promising future work should evaluate tailed calibration with quantiles further on the tail than 0.1 or 0.9 such as 0.001 or 0.999.
+
+\begin{figure}[H]
+\vskip 0.1in
+\centerline{\includegraphics[width=\columnwidth]{figures/tailed_pce_cce_bar_backbone.pdf}}
+\caption{\textbf{Tailed Calibration Error (TPCE) is generally smaller than Calibration Error (PCE) while Tailed Over-/Under-Confidence (TCCE) grows for overconfident models and reduces for under-confident models.} Comparison of model calibration on the entire probabilistic distribution versus calibration of the tail-ends of the distribution (0.1 and 0.9).}
+\label{fig:bar_tail_calibration}
+\end{figure}
+
+\clearpage
+\newpage
+
+\subsection{Additional Findings for AR Forecasting}\label{sec:appendix:ar_plots}
+In this section, we elaborate on two key issues that arise when choosing horizon length in autoregressive time series forecasting models (TSFMs). Compounding errors degrade accuracy, and block-wise independence introduces bias in the input for future predictions.
+
+\begin{enumerate}
+\item Autoregressive errors compound. When forecasting multiple time points autoregressively, each predicted value is fed back as input for predicting subsequent points. Even small errors in early predictions can accumulate over the horizon, leading to progressively degraded forecasts. This is exacerbated when using smaller horizons as the error can accumulate faster.
+\item Independent block modeling introduces bias. TSFMs model a block of $H$ future time points as independent given past context:
+$$
+p(x_i,\ldots,x_{i+H-1}|x_{<i}) \approx \prod_{j=i}^{i+H-1} p(x_j|x_{<i}).
+$$
+While convenient for training, this ignores any intra-block dependencies in longer horizons. During autoregressive rollouts, the next block of predictions is conditioned on samples from the previous block. Because the sampled block does not preserve the true joint dependencies, the model sees a biased context, resulting in a shift in the marginal distribution of later time points. This bias is larger for longer blocks $H$ (since then there are fewer biased inputs) and vanishes as $H \to h$ (where each time point is predicted independently in an autoregressive manner).
+\end{enumerate}
+
+
+\begin{figure}[H]
+\vskip -0.1in
+\begin{center}
+\centerline{\includegraphics[width=\columnwidth]{figures/cce_ar_line_backbone.pdf}}
+\caption{\textbf{TSFMs are consistently overconfident on long-term forecasting. The magnitude of the over confidence decreases with longer horizon lengths and when using the trajectory AR method.} The figure compares Centered Calibration Error (CCE) for long-term forecasting using autoregression on the $y$-axis with AR prediction horizon on the $x$-axis. The color of the line depicts the model used and the line style indicates the AR method. The pink and blue dashed horizontal lines are the CCE for TiRex and Yinglong without using AR.}
+\label{fig:cce_ar_line}
+\end{center}
+\vskip -0.2in
+\end{figure}
+
+\subsection{Additional Mixture Distribution Heads}\label{sec:appendix:mixture}
+In addition to the four prediction heads included in the main paper, Quantiles, Gaussian, Student's $t$, and Moirai 1.0 mixture distribution, we include experiments with two additional mixture heads: mixture of Gaussian distributions and mixture of Student's $t$ distributions. Each mixture head contains five of their respective distributions.  
+
+\begin{figure}[H]
+\vskip -0.1in
+\begin{center}
+\centerline{\includegraphics[width=\columnwidth]{figures/pce_cce_scatter_heads_mixture.pdf}}
+\caption{\textbf{Both mixtures of Gaussian and Student's $t$ distribution heads maintain a similarly low calibration error as the other non-Gaussian heads from the main paper.} Calibration properties of various prediction heads with Centered Calibration Error (CCE) on the $x$-axis and Probabilistic Calibration Error (PCE) on the $y$-axis. Large positive CCE values indicate overconfident predictions, while large negative CCE values show under-confidence. Background markers are the results for each head (shape) with each backbone model (color), while the larger gray centroids are the mean results across models.}
+\end{center}
+\vskip -0.2in
+\end{figure}
+
+\subsection{Additional Results on GIFT-EVAL}\label{sec:appendix:gifteval}
+To further supplement our experiments, we evaluated the TSFMs on a subset of the GIFT-EVAL dataset~\citep{gifteval}. Due to the GIFT-EVAL dataset containing heterogeneous data with inconsistent time series lengths and unbalanced sub-datasets, we filtered out time series with lengths less than 768 points (512 context and 256 prediction length) and sampled a max of 1024 time series from each sub-dataset. In Figure~\ref{fig:gifteval_bar}, we show that the calibration results on this subset of the GIFT-EVAL dataset align with the results from the datasets included in the main paper.
+
+\begin{figure}[H]
+\vskip -0.1in
+\begin{center}
+\centerline{\includegraphics[width=\columnwidth]{figures/bar_gifteval_plot_backbone.pdf}}
+\caption{\textbf{The TSFMs have a significantly reduced calibration error compared to the baseline methods on the GIFT-EVAL dataset similar to the other datasets.} Top: Mean Absolute Scaled Error (MASE) measuring point accuracy error of the median prediction (lower is better), Glucose and Patents use their own $y$-axis scale (on the right). Middle: Probabilistic Calibration Error (PCE) across datasets and models using the default quantile projection block. (Patents PCE uses its own $y$-axis scale (on the right)). Lower PCE values are better. Bottom: Centered Calibration Error (CCE) evaluating systematic overconfidence (positive) or under-confidence (negative).}
+\label{fig:gifteval_bar}
+\end{center}
+\vskip -0.2in
+\end{figure}
+
+\end{document}

@@ -1,0 +1,95 @@
+
+
+\section{Settings and Assumptions}
+\label{sec: settings and assumptions}
+Below, we show how to view model-free learning in stochastic and hybrid MDPs as learning in $\Phi$-restricted environments (\pref{def: restricted env}), and introduce the assumptions used in the paper.  
+%\paragraph{Model-free learning in stochastic MDPs}  
+
+\subsection{The Stochastic Setting}
+
+\begin{definition}[Stochastic setting]\label{def: stochastic sett}
+    In the stochastic setting, the environment commits to $M^\star$ at the beginning of the game and sets $M_t=M^\star$ in every round $t$. 
+\end{definition}
+For model-free learning in the stochastic setting, we assume the following: 
+\begin{assumption}[$\Phi$ for model-free learning in stochastic MDPs]\label{assum: function approximation stochastic}
+In the stochastic setting, in addition to $(\calM,\Pi, \calO, V)$ in the DMSO framework (\pref{sec:pre}), the learner is provided with a function set~$\calF$. Each model $M\in \calM$ \emph{induces} a function $f\in\calF$. Assume that models inducing the same $f$ have the same $Q^\star$ function and hence the same optimal policy $\pi_M$ (for example, an $\calF$ that contains all possible $Q^\star$ functions satisfies this, though $\calF$ could also provide additional information). With this, $\Phi$ is created by partitioning $\calM$ according to the function they induces: Define $\Phi=\{\phi_f: f\in\calF\}$ where $\phi_f=\{(M,\pi_M): M\text{~induces~}f\}$.  With abuse of notation, we write $M\in\phi$ to indicate that $(M, \pi_M)\in \phi$.  We denote by $\pi_\phi$ the common optimal policy for all $M\in\phi$, and by $f_\phi(s,a)$ the $Q^\star$ function induced by $M\in\phi$, i.e., $f_\phi(s,a)=Q^\star(s,a; M)$ for all $M\in\phi$. Define $f_\phi(s)=\max_{a} f_\phi(s,a)$. We also use $V_\phi(\pi_\phi):=f_\phi(s_1)$ to denote the value of policy $\pi_\phi$ under any model in $\phi$.   
+%    Let $\Phi$ satisfy \pref{def: infoset}. For any $\phi\in\Phi$ and any $(M,\pi_\phi), (M', \pi_\phi)\in\phi$, it holds that $Q^\star(s,a; M)=Q^\star(s,a; M')$ for all $s,a$ and $\pi_M=\pi_{M'}=\pi_\phi$. In other words, every infoset $\phi$ only contain models that induce the same $Q^\star$ function, and $\pi_\phi$ is the optimal policy under this $Q^\star$. We use $f_\phi(s,a)$ to denote this common $Q^\star$ function, i.e., $f_\phi(s,a)=Q^\star(s,a; M)=Q^\star(s,a; M')$ for any $(M,\pi_\phi), (M', \pi_\phi)\in\phi$. With abuse of notation, we write $M\in\phi$ if $(M,\pi_\phi)\in\phi$. Define $f_\phi(s)=\max_{a} f_\phi(s,a)$. We also use the notation $V_\phi(\pi_\phi):=f_\phi(s_1)$ to denote the value of policy $\pi_\phi$ predicted by any model in $\phi$.  
+\end{assumption}
+
+
+%In words, $\Phi$ partitions the model space in a certain way such that within each $\phi\in\Phi$, the models all induce the same $Q^\star$ function. This does not mean that the partition can only be based on $Q^\star$. For example, the partitioning might \emph{additionally} be based on the state-action occupancy of $\pi_\phi$. In \pref{sec: sto bilinear} and \pref{sec: sto BC}, we will apply this framework to two canonical settings. 
+
+%On the other hand, the hybrid setting is defined as the following: 
+
+\subsection{The Hybrid Setting}
+\begin{definition}[Hybrid setting]\label{def: hybrid sett} In the hybrid setting, the environment commits to $P^\star\in\calP$ at the beginning of the game. In every round, the environment selects $R_t\in\calR$ arbitrarily based on the history and sets $M_t=(P^\star, R_t)$. 
+\end{definition}
+For model-free learning in the hybrid setting, the definition of $\Phi$ becomes more involved as it partitions over three dimensions $(\Pi, \calP, \calR)$ in different ways. Formally, the partition should satisfy the following \pref{assum: function approximation hybrid}. We provide an illustration in \pref{fig: illustrate} in \pref{app: illustrate} to help the reader understand this assumption. 
+%As shown in \pref{fig: illustrate}, each $\phi\in\Phi$ corresponds to a single policy (which we denote as $\pi_\phi$), all rewards, and a subset of transitions. 
+%The partition over the transitions needs not be the same for different policies.
+
+
+\begin{assumption}[$\Phi$ for learning in hybrid MDPs \citep{liu2025decision}]\label{assum: function approximation hybrid}
+     The learner is provided with a function set $\calF^\pi$ for every $\pi\in\Pi$. For any fixed $\pi$, each transition $P\in\calP$ induces a function $f\in\calF^\pi$. $\Phi$ is created by partitioning $\calP\times \calR\times \Pi$ firstly according to $\pi$, and then according to the $f$ the transition induces in $\calF^\pi$: Define $\Phi=\{\phi_{\pi, f}:  \pi\in\Pi, f\in\calF^\pi\}$, where $\phi_{\pi, f}=\{(P, R, \pi): P \text{\ induces\ } f \text{\ in\ }\calF^\pi, R\in\calR\}$. We write $P\in\phi$ if there exists $R, \pi$ such that $(P, R, \pi)\in\phi$, and write $M=(P,R)\in\phi$ if $P\in\phi$. We denote by $\pi_\phi$ the unique $\pi\in\Pi$ defining $\phi\in\Phi$.      
+     %For any $\phi\in\Phi$ and any $((P,R), \pi_\phi)\in\phi$, it holds that $((P,R'), \pi_\phi)\in\phi$ for any $R'\in\calR$. That is, $\Phi$ only partitions $\calM\times\Pi$ over transitions and policies, but not over rewards (see \pref{fig: illustrate}). With abuse of notation, we denote $P\in\phi$ if there exists $R$ such that $((P,R), \pi_\phi)\in\phi$. 
+\end{assumption}
+% every partitin $\phi_{\pi, f} = \{(P,R,\pi): \theta_{P, R}^\pi = f, R \in \mathcal{R}\}$.}
+
+% \textcolor{blue}{Note that for each aggregation  $\phi_{\pi, f}$ in  \pref{assum: function approximation hybrid}, $\pi$ may be any policy and need not be related to $f$ \cw{$f$ is modeling $\pi$'s $Q$-function, no? }.  A belief over this partition therefore induces a joint belief over $\mathcal{F} \times \Pi$ whose marginal over $\Pi$ captures the uncertainty about the optimal comparator policy in hindsight. Our algorithm leverages this joint belief to track changes in the comparator policy across rounds, thereby achieving low regret even in environments with nonstationary rewards.}  \cw{I don't think this explanation helps.  We have not talked about any algorithm at this point, and you further introduce addition concept such as `belief'.   Just give an example, like linear MDP, here.  }
+
+
+
+%\textcolor{blue}{Note that for each aggregation  $\phi_{\pi, f}$ in  \pref{assum: function approximation hybrid}, $\pi$ may be any policy. We take linear MDPs with $R_{\theta}(s,a) = z(s,a)^\top \theta$ as an example to illustrate the partition, where $z \in \mathbb{R}^d$ is a known feature with $\|z(s,a)\|_2 \le 1$ for any $s,a$. For any $s \in \mathcal{S}_h$, we have $Q^\pi(s,a; (P,R_{\theta})) = \left(z(s,a) + \sum_{h' = h+1}^H\mathbb{E}_{(s,a) \sim d_{P, h'}^\pi}\left[z(s,a)\right]\right)^\top\theta$ where $d_{P, h'}^\pi$ is the occupancy measure of transition $P$ on step $h'$ with policy $\pi$. Thus, two transition $P_1$ and $P_2$ induce the same $Q^\pi$ if and only of $\mathbb{E}_{(s,a) \sim d_{P_1, h}^\pi}\left[z(s,a)\right] = \mathbb{E}_{(s,a) \sim d_{P_2, h}^\pi}\left[z(s,a)\right]$ for any $h$. We consider an $\epsilon$-covering $\mathcal{E}$ of space $\{\E_{(s,a)\sim d_{P,h}^\pi}\left[z(s,a)\right]\}_{\pi \in \Pi, P \in \mathcal{P}, h \in [H]}$ which has size $\mathcal{O}\left(\left(\frac{1}{\epsilon}\right)^d\right)$. Now $\calF^\pi = \{Q^\pi(\cdot, \cdot; (P, \cdot))~\mid~ P \in \mathcal{P}\}$ with $|\calF^\pi| = \mathcal{O}\left(\left(\frac{1}{\epsilon}\right)^{dH}\right)$ for any $\pi$ because every $Q^\pi(\cdot, \cdot; (P, \cdot))$ is corresponding to $H$ elements in $\mathcal{E}$. In this case, the partition is equivalent to $\phi_{\pi, e_{1:H}} = \{(P,R,\pi): \|\mathbb{E}_{(s,a) \sim d_{P, h}^\pi}\left[z(s,a)\right] - e_h\|_2 \le \epsilon , R \in \mathcal{R}\}$ where $\pi \in \Pi$ and $e_{1:H} \in \mathcal{E}$.}
+
+%\HL{Move this to Appenfix B can ensure 10 pages.}
+
+
+The next assumption describes the requirement for the function set in our work. 
+%How to partition the transition varies from setting to settings. In this section, as a warm-up, we consider the scheme in \cite{liu2025decision}:  
+\begin{assumption}[Unique reward to value mapping given $\phi$ \citep{liu2025decision}]\label{assum: unique mapping}
+    Let $\Phi$ satisfy \pref{assum: function approximation hybrid}. Assume that for any fixed $\phi$ and $P, P'\in \phi$, it holds that $Q^{\pi_\phi}(s,a; (P, R)) = Q^{\pi_\phi}(s,a; (P', R))$ for any $s, a, R$. We denote $f_\phi(s,a; R) = Q^{\pi_\phi}(s,a; (P, R))$ for any $P\in\phi$, and define $f_\phi(s; R) = \E_{a\sim \pi_\phi(\cdot|s)}[f_\phi(s,a; R)]$. We also use $V_{\phi, R}(\pi_\phi) = f_\phi(s_1; R)$ to denote the value of policy $\pi_\phi$ under $(P, R)$ for any $P\in \phi$.  
+    
+    
+    %For any $\phi\in\Phi$ and any $P, P' \in \phi$, we have $Q^{\pi_\phi}(s,a; (P,R))=Q^{\pi_\phi}(s,a; (P',R))$ for all $s,a, R$. We denote by $f_\phi(s,a; R) = $ the common  That is, every infoset is associated with a ternary function $f_\phi: \calS\times\calA\times \calR\to [0,1]$ such that $f_\phi(s,a;R)=Q^{\pi_\phi}(s,a; (P,R))$ for any $P\in\phi$. Define $f_\phi(s; R) = \E_{a\sim \pi_\phi(\cdot|s)}[f_\phi(s,a; R)]$. We write $V_{\phi, R}(\pi_\phi):=f_\phi(s_1; R)$ to denote the value of policy $\pi_\phi$ predicted by any transition in $\phi$ under reward function $R$. 
+\end{assumption}
+
+To understand \pref{assum: function approximation hybrid} and \pref{assum: unique mapping} better, we take adversarial linear MDP \cite{liu2023towards} for example. In adversarial linear MDPs, the learner is given a known feature mapping $\varphi(s,a)\in\mathbb{R}^d$, such that the reward function can be represented as $R(s,a)=\varphi(s,a)^\top \theta_R$ and the transition as $P(s'|s,a) = \varphi(s,a)^\top \omega_P(s')$. In this case, one can show that for any $\pi$, $Q^\pi(s,a; P_1,R) = Q^\pi(s,a; P_2,R)$ $\forall s,a,R$ if and only if $\E^{\pi,P_1}[\phi(s_h,a_h)] = \E^{\pi,P_2}[\phi(s_h,a_h)]$ for all $h$. Based on \pref{assum: unique mapping}, we would like to put such $P_1$ and $P_2$ in the same partition under $\pi$ (see \pref{fig: illustrate} for an illustration).   In other words, in \pref{assum: function approximation hybrid}, each $f\in\calF^\pi$ corresponds to a unique value of $(\E^{\pi,P}[\phi(s_h,a_h)])_{h\in[H]}\in\mathbb{R}^{dH}$, and as long as two $P$'s share this value, they both belong to $\phi_{\pi,f}$.    
+
+We remark that while \pref{assum: unique mapping} is a reasonable generalization of \pref{assum: function approximation stochastic} to the hybrid setting, it does not capture all learnable hybrid MDPs we are aware of. For example, if the transition space is partitioned according to \pref{assum: unique mapping} for hybrid low-rank MDPs with \emph{unknown reward feature}, then $\log|\Phi|$ will scale \emph{polynomially} with the number of possible feature mappings. In contrast, the work of \cite{liu2024beating} handles this case with the regret scaling only \emph{logarithmically} with the number of possible feature mappings. There is still technical difficulty in handling this case in our framework, and we leave it as future work.\footnote{The algorithm of \cite{liu2024beating} begins with reward-free exploration to learn a feature mapping, followed by online learning over that fixed feature mapping. While this two-phase approach could potentially be integrated into our DEC framework in special cases, our goal is to explore approaches that avoid such design to address more general scenarios.} We also remark that the previous work by \cite{liu2025decision} has the same limitation even in the full-information case. 
+
+Therefore, in this work, for the hybrid setting, we consider linear reward with \emph{known} features, formally stated in the next assumption. 
+
+%To help the reader understand \pref{assum: function approximation hybrid}, we provide a figure to illustrate it in \pref{app: illustrate}. 
+
+
+%\begin{definition}[Value function approximation for the hybrid setting \cite{liu2025decision}]\label{def: func approx}
+%    Assume for each policy $\pi\in\Pi$, there is a function class $\calF^\pi$. Each function $f\in\calF^\pi$ is a ternary function mapping $\calS \times \calA \times \calR\to \mathbb{R}$. We say a transition $P$ \textbf{induces} $f\in\calF^\pi$ if $Q^{\pi}(s,a;(P,R)) = f(s,a, R)$ for any $s, a, R$. %, where $Q_P^{\pi}(\cdot, \cdot; P,R)$ is the $Q$-function for model $(P,R)$ and policy $\pi$. 
+%    With abuse of notation, for any $\pi\in\Pi$ and $f\in\calF^\pi$, we write $f(\pi; R) = f(s_0, \pi(s_0), R)$, indicating that it is the value of policy $\pi$ predicted by function $f$ under reward $R$. Define $\calF =  \cup_{\pi\in\Pi} \calF^{\pi}$. We assume $f(\pi, R) \in [0,1]$ for any $f, \pi, R$, which matches the assumption on value function $V_M$.
+%\end{definition}
+%Unlike model-free learning in stochastic setting where $Q$-function is generated by model $M = (P,R)$ and is a binary function mapping $\calS \times \calA \rightarrow \mathbb{R}$, the $Q$-function counterpart in the hybrid setting is only generated by transition $P$ and reward function is regarded as the input of $Q$-function, resulting in a ternary mapping 
+%$\calS \times \calA \times \calR \rightarrow \mathbb{R}$. For model-free learning in hybrid settings with function class $\calF$ defined in \pref{def: func approx}, we consider partition set $\Phi =  \left\{\phi_{\pi, f}: \pi \in \Pi, f \in \calF^\pi\right\}$ where $\phi_{\pi, f} = \{(R, P, \pi): R \in \calR, P \text{ induces } f\}$. The bilinear class for the hybrid setting is defined in \pref{def:adv bilinear}.
+
+
+% For any $\phi \in \Phi_{\Pi, \calF}$, we use $\pi_{\phi}$ and $f_{\phi}$ to denote its corresponding policy and function.
+
+%Unlike \pref{assum: function approximation stochastic} which assumes that the function class realizes $Q^\star$, \pref{assum: function approximation hybrid} assumes that the function class realizes $Q^\pi$ for all $\pi$, which is necessary in the hybrid case.  
+%\pref{assum: unique mapping}  implies that $(\phi, R)$ suffice to determine the value function $Q^{\pi_\phi}$, and hence it is valid to write $f_\phi(s,a;R)$ or $V_{\phi, R}(\pi_\phi)$. Unfortunately, this strong requirement limits its applicability to simpler reward function set $\calR$ because otherwise $\log|\Phi|$ would be overly large. For example, \pref{assum: unique mapping} covers linear reward function with \emph{known} feature, but cannot capture the case with \emph{unknown} feature. Here in the main text, however, we assume \pref{assum: unique mapping} and known reward feature (\pref{assum: known feature}) for notational and conceptual simplicity. We handle the more general reward structure without these assumptions in \pref{app: low-raml}. %  For the hybrid setting, we still instantiate \pref{alg:general} with \pref{eq: our divergence}
+% \begin{align}
+%     D^\pi(\nu\|\rho) = \E_{(P,R) \sim \nu}\E_{o \sim M_{P,R}(\cdot|\pi)}\left[\KL\left(\nu_{\bo{\phi}}(\cdot|\pi, o), \rho\right) + \E_{\phi\sim \rho}\left[\tilD^\pi(\phi||P)\right]\right], \label{eq: our divergence hybrid}
+% \end{align}
+%for different divergence $\tilD$ chosen later for different cases.
+
+
+% where $M_{P,R}$ is the MDP model with transition $P$ and reward $R$. \pref{eq: our divergence hybrid} is almost same as \pref{eq: our divergence}, except that the divergence $\tilD$ is between $\phi$ and $P$, which only estimates the discrepancy between infoset $\phi$ and transition $P$. This is reasonable as an infoset $\phi$ in the hybrid setting (\pref{assum: function approximation hybrid}) only contains information about the transition but not reward. 
+
+\begin{assumption}[Linear reward with known feature]\label{assum: known feature}
+    %A reward function class $\calR$ is linear with known feature 
+    There exists a feature mapping $\varphi: \calS\times\calA\to \mathbb{R}^d$ known to the learner such that for any $R\in\calR$, $R(s_h,a_h) = \varphi(s_h,a_h)^\top \theta_h(R)$ for all  $(s_h,a_h)\in\calS_h\times \calA$ for some $\theta_h(R)\in\mathbb{R}^d$.
+\end{assumption}
+
+While the stochastic setting (\pref{def: stochastic sett}) and the hybrid setting (\pref{def: hybrid sett}) are special cases of $\Phi$-restricted environments (\pref{def: restricted env}), the adversary in these special cases has additional restriction: for example, in the stochastic setting, the adversary is allowed to choose $M^\star\in\phi^\star$ at the beginning of the game, but has to stick to $M^\star$ throughout interactions. Similarly, $P^\star$ has to be fixed in the hybrid setting. This is different from the general $\Phi$-restricted setting where the adversary is allowed to choose $M_t\in\phi^\star$ arbitrarily in every round. However, using such a ``coarser'' partition $\Phi$ to model these settings is crucial for obtaining an improved estimation error that only scales with the size of the value function set. 
+
+%In this work, we study settings and algorithms where the environment is $\Phi_{\text{adv}}$-constrained, but the algorithm might use a coarser aggregation $\Phi$. This distinction is crucial for obtaining $o(T)$ bounds for hybrid settings with bandit feedback.
+%each value function may correspond to multiple models, so the value function class $\calF$ can be much smaller than the model class $\calM$.  \cite{liu2025decision} constructs $\Phi$ by partitioning models based on the value functions: letting $\Phi=\{\phi_f: f\in\calF\}$ where $\phi_f=\{(M,\pi_M): M\text{~induces~}f\}$. Note that model-free learning in stochastic MDPs is \emph{easier} than the $\Phi$-restricted environment (\pref{def: restricted env}) defined with this $\Phi$, because in the former case the environment does not vary the underlying model over time.  Still, learning over $\Phi$ instead of 
+%   $\calM$ allows the learner to only incur the value estimation complexity $\log|\Phi|=\log|\calF|$ (\pref{thm: air phi}) but not the model estimation complexity $\log|\calM|$. While this comes with the price of increased decision-making complexity, it remains bounded in some special cases. For example, \cite{liu2025decision} used this idea to achieve the state-of-the-art regret bound for linear $Q^\star/V^\star$ MDPs.  
+

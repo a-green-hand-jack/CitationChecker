@@ -1,0 +1,53 @@
+\begin{table}
+\centering            % always nice to centre floats
+\scriptsize         % <── was \small; try \footnotesize or \scriptsize
+\setlength{\tabcolsep}{3pt}
+% \begin{adjustbox}{width=\textwidth}
+\caption{\textbf{A summary of the monolingual scaling laws for each language}
+The columns are: the language, the language family, the language script, its number of unique tokens $|D|$ in \madlad{} (with the percentage of unique tokens as compared to English), and the derived scaling law. 
+}
+\begin{tabular}{l|lll|l}
+\toprule
+\textsc{Language} & \textsc{Family} & \textsc{Script} & \textsc{$|D|$ (\% EN)} &
+\textsc{Scaling Law} \\
+\midrule
+\multicolumn{5}{c}{\textsc{\emph{Monolingual Vocabulary, Monolingual Training}}} \\
+\midrule
+      
+English & Indo-european & Latin & 2.8T (100.0\%) & $\,0.67\;+\;\frac{e^{6.18}}{N^{0.41}}\;+\;\frac{e^{8.25}}{D^{0.41}}\,$ \\[2mm]
+French & Indo-european & Latin & 363B (13.01\%) & $\,0.76\;+\;\frac{e^{10.11}}{N^{0.64}}\;+\;\frac{e^{13.24}}{D^{0.64}}\,$ \\[2mm]
+Russian & Indo-european & Cyrillic & 705B (25.26\%) & $\,0.82\;+\;\frac{e^{10.07}}{N^{0.63}}\;+\;\frac{e^{13.28}}{D^{0.63}}\,$ \\[2mm]
+Chinese & Sino-tibetan & Hans & 125B (4.48\%) & $\,1.08\;+\;\frac{e^{8.20}}{N^{0.46}}\;+\;\frac{e^{10.37}}{D^{0.46}}\,$ \\[2mm]
+Hindi & Indo-european & Devanagari & 7.9B (0.28\%) & $\,0.52\;+\;\frac{e^{6.03}}{N^{0.39}}\;+\;\frac{e^{8.03}}{D^{0.39}}\,$ \\[2mm]
+Swahili & Niger-congo: atlantic congo & Latin & 770M (0.03\%) & $\,0.00\;+\;\frac{e^{4.13}}{N^{0.26}}\;+\;\frac{e^{5.51}}{D^{0.26}}\,$ \\[2mm]
+
+
+\midrule
+\multicolumn{5}{c}{\textsc{\emph{Multilingual Vocabulary, Monolingual Training}}} \\
+\midrule
+
+English & Indo-european & Latin & 2.8T (100.0\%) & $\,0.83\;+\;\frac{e^{9.91}}{N^{0.63}}\;+\;\frac{e^{13.06}}{D^{0.63}}\,$ \\[2mm]
+French & Indo-european & Latin & 363B (13.01\%) & $\,0.66\;+\;\frac{e^{7.12}}{N^{0.45}}\;+\;\frac{e^{8.94}}{D^{0.45}}\,$ \\[2mm]
+Russian & Indo-european & Cyrillic & 705B (25.26\%) & $\,0.76\;+\;\frac{e^{7.97}}{N^{0.49}}\;+\;\frac{e^{9.91}}{D^{0.49}}\,$ \\[2mm]
+Chinese & Sino-tibetan & Hans & 125B (4.48\%) & $\,1.18\;+\;\frac{e^{8.87}}{N^{0.49}}\;+\;\frac{e^{10.90}}{D^{0.49}}\,$ \\[2mm]
+Hindi & Indo-european & Devanagari & 7.9B (0.28\%) & $\,0.63\;+\;\frac{e^{6.99}}{N^{0.43}}\;+\;\frac{e^{8.69}}{D^{0.43}}\,$ \\[2mm]
+Swahili & Niger-congo: atlantic congo & Latin & 770M (0.03\%) & $\,0.00\;+\;\frac{e^{4.99}}{N^{0.30}}\;+\;\frac{e^{6.43}}{D^{0.30}}\,$ \\[2mm]
+
+\midrule
+\multicolumn{5}{c}{\textsc{\emph{Multilingual Vocabulary, Unimax Training}}} \\
+\midrule
+
+English & Indo-european & Latin & 2.8T (100.0\%) & $\,0.00\;+\;\frac{e^{3.03}}{N^{0.16}}\;+\;\frac{e^{3.15}}{D^{0.16}}\,$ \\[2mm]
+French & Indo-european & Latin & 363B (13.01\%) & $\,0.00\;+\;\frac{e^{3.63}}{N^{0.19}}\;+\;\frac{e^{3.94}}{D^{0.19}}\,$ \\[2mm]
+Russian & Indo-european & Cyrillic & 705B (25.26\%) & $\,0.00\;+\;\frac{e^{3.90}}{N^{0.20}}\;+\;\frac{e^{4.28}}{D^{0.20}}\,$ \\[2mm]
+Chinese & Sino-tibetan & Hans & 125B (4.48\%) & $\,0.39\;+\;\frac{e^{4.58}}{N^{0.21}}\;+\;\frac{e^{5.47}}{D^{0.21}}\,$ \\[2mm]
+Hindi & Indo-european & Devanagari & 7.9B (0.28\%) & $\,0.00\;+\;\frac{e^{3.46}}{N^{0.18}}\;+\;\frac{e^{3.89}}{D^{0.18}}\,$ \\[2mm]
+Swahili & Niger-congo: atlantic congo & Latin & 770M (0.03\%) & $\,0.00\;+\;\frac{e^{3.52}}{N^{0.18}}\;+\;\frac{e^{3.74}}{D^{0.18}}\,$ \\[2mm]
+
+\bottomrule
+\end{tabular}
+% \end{adjustbox}
+% \vspace{1mm}
+\label{tab:mono-scaling-laws}
+% \vspace{-5mm}
+\end{table}

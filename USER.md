@@ -35,24 +35,25 @@ Optional provider keys for RefChecker and paper-search-mcp stay in their normal 
 Prefer LaTeX source when available:
 
 ```bash
-citationchecker check ./latex-project --provider <provider> --model <model>
+citationchecker check ./latex-project
 ```
 
 or:
 
 ```bash
-citationchecker check ./latex-project/main.tex --provider <provider> --model <model>
+citationchecker check ./latex-project/main.tex
 ```
 
 When only PDF is available:
 
 ```bash
-citationchecker check manuscript.pdf --provider <provider> --model <model>
+citationchecker check manuscript.pdf
 ```
 
 CitationChecker converts PDF-only input to `manuscript.md` with PyMuPDF4LLM before launching Pi. It does not perform this conversion for LaTeX inputs.
 
-You can omit provider/model if Pi already has suitable defaults.
+Development defaults are `apex-deepseek/deepseek-v4-flash`. Use `--provider` and
+`--model` to override them.
 
 For a no-execution preview:
 
@@ -88,13 +89,17 @@ citationchecker verify /path/to/citation-report.md
 
 This only checks the report contract. It does not re-judge scientific correctness.
 
-## Run the bundled micro benchmark
+## Run the controlled benchmark
 
-CitationChecker ships with 12 tiny single-citation tasks under `benchmark/tasks/`. To run them all:
+CitationChecker ships with 40 controlled LaTeX citation cards derived from ten
+real ICLR 2026 papers. The original arXiv TeX sources and compiled PDFs are
+stored under `benchmark/corpus/`. To run all cases with the development model:
 
 ```bash
-python benchmark/run.py --provider <provider> --model <model>
+python benchmark/run.py --workers 8
 python benchmark/evaluate.py benchmark/runs/predictions.jsonl
 ```
 
-Use `--limit 2` for a quick end-to-end smoke test. The benchmark is diagnostic only; it is intentionally too small for broad performance claims.
+Use `--limit 4` for one mutation of each type and `--workers 1` for a serial
+run. The benchmark is controlled and diagnostic; it is not a broad performance
+estimate.

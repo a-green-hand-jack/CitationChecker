@@ -1,0 +1,24 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k}{class}\PYG{+w}{ }\PYG{n+nc}{TransitionIn}\PYG{p}{:}
+  \PYG{n}{state}\PYG{p}{:} \PYG{n+nb}{int}
+  \PYG{n}{head\PYGZus{}symbol}\PYG{p}{:} \PYG{n+nb}{int}
+
+\PYG{k}{class}\PYG{+w}{ }\PYG{n+nc}{Move}\PYG{p}{(}\PYG{n}{enum}\PYG{o}{.}\PYG{n}{Enum}\PYG{p}{):}
+  \PYG{n}{LEFT} \PYG{o}{=} \PYG{n}{enum}\PYG{o}{.}\PYG{n}{auto}\PYG{p}{()}
+  \PYG{n}{RIGHT} \PYG{o}{=} \PYG{n}{enum}\PYG{o}{.}\PYG{n}{auto}\PYG{p}{()}
+
+\PYG{k}{class}\PYG{+w}{ }\PYG{n+nc}{TransitionOut}\PYG{p}{:}
+  \PYG{n}{state}\PYG{p}{:} \PYG{n+nb}{int}
+  \PYG{n}{symbol}\PYG{p}{:} \PYG{n+nb}{int} \PYG{o}{|} \PYG{k+kc}{None}
+  \PYG{n}{move}\PYG{p}{:} \PYG{n}{Move} \PYG{o}{|} \PYG{k+kc}{None}
+  \PYG{n}{halt}\PYG{p}{:} \PYG{n+nb}{bool} \PYG{o}{=} \PYG{k+kc}{False}
+
+\PYG{n}{TransitionFn} \PYG{o}{=} \PYG{n}{Callable}\PYG{p}{[[}\PYG{n}{TransitionIn}\PYG{p}{],} \PYG{n}{TransitionOut}\PYG{p}{]}
+
+\PYG{k}{class}\PYG{+w}{ }\PYG{n+nc}{MachineSpec}\PYG{p}{:}
+  \PYG{n}{transition\PYGZus{}fn}\PYG{p}{:} \PYG{n}{TransitionFn}  \PYG{c+c1}{\PYGZsh{} Turing machine transition function.}
+  \PYG{n}{num\PYGZus{}states}\PYG{p}{:} \PYG{n+nb}{int}  \PYG{c+c1}{\PYGZsh{} Turing machine number of states.}
+  \PYG{n}{num\PYGZus{}symbols}\PYG{p}{:} \PYG{n+nb}{int}  \PYG{c+c1}{\PYGZsh{} Number of tape symbols.}
+  \PYG{n}{num\PYGZus{}steps}\PYG{p}{:} \PYG{n+nb}{int}  \PYG{c+c1}{\PYGZsh{} Time resource bound.}
+  \PYG{n}{num\PYGZus{}registers}\PYG{p}{:} \PYG{n+nb}{int}  \PYG{c+c1}{\PYGZsh{} Space resource bound.}
+\end{MintedVerbatim}

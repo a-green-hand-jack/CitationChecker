@@ -1,0 +1,33 @@
+
+
+
+
+
+\section{Comparison with Prior Complexities in Stochastic MDPs}\label{sec: compare DEC} 
+Compared with $\mfdec_\eta^{\Phi, \tilD}$ in \pref{eq: digdec} achieved by our algorithm, the complexity of optimistic E2D  \citep{foster2024model} defined for the stochastic setting is
+\begin{align}
+    \odec_\eta^{\Phi, \tilD} = \max_{\rho\in\Delta(\Phi)} \min_{p\in\Delta(\Pi)} \max_{\nu\in \Delta(\Psi)} \E_{\pi\sim p}\E_{M\sim \nu}\E_{\phi \sim \rho}\left[ V_\phi(\pi_\phi) - V_M(\pi) - \frac{1}{\eta} \tilD^\pi(\phi\|M)\right] \label{eq: odec high level}  
+\end{align}
+for the same choices of $\tilD$. 
+Another model-free DEC in \cite{liu2025decision} is 
+\begin{align*}
+    \dec_\eta^\Phi = \max_{\rho\in\Delta(\Phi)} \min_{p\in\Delta(\Pi)} \max_{\nu\in \Delta(\Psi)}  \E_{\pi\sim p}\E_{(M,\pi^\star)\sim \nu}\left[ V_M(\pi^\star) - V_M(\pi) - \frac{1}{\eta}\E_{o\sim M(\cdot|\pi)}\left[\KL(\nu_{\bo{\phi}}(\cdot|\pi, o), \rho)\right] \right].   
+\end{align*}
+It is clear that $\mfdec_\eta^{\Phi,\tilD}\leq \dec_\eta^{\Phi}$ for any non-negative divergence $\tilD$. Furthermore, we have 
+
+\begin{theorem}\label{thm: improvement}
+    In the stochastic setting, $\mfdec_\eta^{\Phi,\tilD}\leq \odec_\eta^{\Phi,\tilD} + \eta$ for any $\tilD$.  
+\end{theorem}
+Since DECs with parameter $\eta$ is usually of order $(\eta d)^\alpha$ for some intrinsic dimension $d$ and exponent $\alpha\leq 1$, \pref{thm: improvement} implies that for any setting that can be handled by optimistic E2D with a certain $\tilD$, it can also be covered by our algorithm with the same $\tilD$. Compared to optimistic DEC (\pref{eq: odec high level}), \decname (\pref{eq: digdec}) has an extra KL term $\E_{\pi\sim p}\E_{M\sim \nu}\E_{o\sim M(\cdot|\pi)}[\KL(\nu_{\bo{\phi}}(\cdot|\pi,o), \rho)]$ that can be further decomposed into two terms $\KL(\nu_{\bo{\phi}}, \rho) + \E_{\pi\sim p}\E_{M\sim \nu}\E_{o\sim M(\cdot|\pi)}[\KL(\nu_{\bo{\phi}}(\cdot|\pi,o), \nu_{\bo{\phi}})]$. They have different purposes: The first term $\KL(\nu_{\bo{\phi}}, \rho)$ is for \emph{regularization}, which makes the marginal distribution of $\nu$ not overly distant from $\rho$. This is the key that allows us to avoid the optimism mechanism in \cite{foster2024model} (i.e., the $V_\phi(\pi_\phi)$ in \pref{eq: odec high level}). We remark that by \emph{regularization only}, we can \emph{recover} the bounds achieved by optimistic DEC in the stochastic setting (this can be seen from the proof of \pref{thm: improvement}), though it is unclear whether it can give \emph{strict improvement}. However, the removal of optimism turns out to be important in the hybrid setting (\pref{sec:hybrid}) as it avoids explicit construction of the reward estimator. The second term $\E_{\pi\sim p}\E_{M\sim \nu}\E_{o\sim M(\cdot|\pi)}[\KL(\nu_{\bo{\phi}}(\cdot|\pi,o), \nu_{\bo{\phi}})]$ is an \emph{information gain} that allows Dig-DEC to \emph{strictly improve} over optimistic DEC even in the stochastic setting. This is because all common choices of $\tilD$ such as bilinear divergence and squared Bellman error are mean-based and ignore distributional differences, and the KL information gain term can capture them. 
+%Conversely, due to the additional $\KL$ term in \decname, our algorithm could be significantly better in certain cases. Specifically, both $D_{\bi}$ and $D_{\sbe}$ are mean-based information gain, and thus may not be able to capture the information gain from the difference in distributions, in which case the KL term in \decname may help. 
+We give a toy example in the next theorem to show this, with a detailed proof provided in \pref{app:compare DEC}.  
+\begin{theorem}\label{thm:lower bound}
+There exists a $3$-armed bandit instance where for any $T\geq 1$ and $\eta \le 1$, the algorithm in \cite{foster2024model} suffers $\max_a \E[\Reg(a)] \ge \Omega(\sqrt{T})$, while our algorithm achieves $\max_a \E[\Reg(a)] \leq 1$. 
+%    \item Our \pref{alg:MF-S} has  $\Reg \le  O(1)$.
+%\begin{itemize}
+%    \item The algorithm in \cite{foster2024model} (\pref{eq:opt-dec-p} and \pref{eq:opt-rho}) suffers $\Reg \ge \sqrt{T}$.
+%    \item Our \pref{alg:MF-S} has  $\Reg \le  O(1)$.
+%\end{itemize}
+%\label{thm:lower bound}
+\end{theorem}
+

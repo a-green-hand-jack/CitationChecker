@@ -1,0 +1,28 @@
+% \input{macros}
+% ------------------------------------------------------------------
+%  Experiment grid
+% ------------------------------------------------------------------
+\begin{table}[h]
+\centering\small
+\caption{\textbf{An overview of experiment configurations in this work}. We enumerate the experiment types: \textbf{\textless Lang\textgreater} for monolingual scaling, \textbf{Unimax} as a massively multilingual baseline, \textbf{Language Pairs} to measure language-to-language transfer, \textbf{Capacity} to measure the curse of multilinguality, or model capacity constraints on learning new languages, and \textbf{Finetunes} to understand how finetuning from a massively multilingual model compares to pretraining from scratch.
+We use a mix of Monolingual and Multilingual vocabularies, and training data. 
+In the \textsc{Languages} and \textsc{Scales} columns we use parentheses to show the number of language mixtures and number of scales run.
+Symbols such as \Lmono\ and \Sfull\ are defined above.}
+\begin{tabular}{@{} l c c l l c @{}}
+\toprule
+\textsc{Experiment Tag}            & \textsc{Vocab.} & \textsc{Train-data} & \textsc{Languages}            & \textsc{Scales}    & \textsc{\# Exps} \\ \midrule
+\textbf{Mono \textless Lang\textgreater} & Monolingual  & Monolingual  & \Lmono              & \Sfull   & $7\times20=140$ \\
+\textbf{Unimax}                 & Multilingual & Multilingual & $\mathcal{L}_{\text{unimax}}$ & \Sfull   & $20$ \\
+\textbf{Multi \textless Lang\textgreater}                  & Multilingual & Monolingual  & \Lmono              & \Spart   & $10\times7=70$ \\
+\textbf{Language Pairs}                  & Multilingual & Monolingual  & \Leval              & $34$     & $50$ \\
+\textbf{Language Pairs}                  & Multilingual & Bilingual & \Lpairs             & $34$     & $90$ \\
+\textbf{Language Pairs}                  & Multilingual & Bilingual & \Ltarget            & \Spart   & $10\times15=150$ \\
+\textbf{Capacity}                   & Multilingual & Uniform Sampling  & \Scap               & \Spart   & $10\times12=120$ \\
+\textbf{Finetunes}                       & Multilingual & Monolingual  & \Leval              & $34$     & $50$ \\
+\textbf{Finetunes}                      & Multilingual & Monolingual  & \Lmono$\cup$\Lpairs & \Smin    & $7\times12=84$ \\ \midrule
+\multicolumn{5}{r}{\textbf{Total}} & $774$ \\
+\bottomrule
+\end{tabular}
+% \vspace{1mm}
+\label{tab:experiment-summary}
+\end{table}

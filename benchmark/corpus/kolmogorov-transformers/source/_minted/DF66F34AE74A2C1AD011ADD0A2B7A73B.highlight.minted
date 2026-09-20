@@ -1,0 +1,21 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{n}{InputSequence} \PYG{o}{=} \PYG{n+nb}{list}\PYG{p}{[}\PYG{n+nb}{int}\PYG{p}{]}
+\PYG{n}{Logits} \PYG{o}{=} \PYG{n+nb}{list}\PYG{p}{[}\PYG{n+nb}{float}\PYG{p}{]}
+\PYG{n}{ModelFunction} \PYG{o}{=} \PYG{n}{Callable}\PYG{p}{[[}\PYG{n}{InputSequence}\PYG{p}{],} \PYG{n}{Logits}\PYG{p}{]}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{zmap}\PYG{p}{(}\PYG{n}{machine\PYGZus{}spec}\PYG{p}{:} \PYG{n}{PrefixMachineSpec}\PYG{p}{,}
+         \PYG{n}{program\PYGZus{}prefix}\PYG{p}{:} \PYG{n+nb}{list}\PYG{p}{[}\PYG{n+nb}{int}\PYG{p}{])} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{TransformerParameters}\PYG{p}{:}
+  \PYG{n}{alta\PYGZus{}program\PYGZus{}spec} \PYG{o}{=} \PYG{n}{build\PYGZus{}prefix\PYGZus{}turing\PYGZus{}machine\PYGZus{}program\PYGZus{}spec}\PYG{p}{(}
+      \PYG{n}{machine\PYGZus{}spec}\PYG{p}{,} \PYG{n}{program\PYGZus{}prefix}\PYG{p}{)}
+  \PYG{k}{return} \PYG{n}{alta\PYGZus{}compiler}\PYG{p}{(}\PYG{n}{alta\PYGZus{}program\PYGZus{}spec}\PYG{p}{)}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{mapping\PYGZus{}fn}\PYG{p}{(}
+    \PYG{n}{machine\PYGZus{}spec}\PYG{p}{:} \PYG{n}{PrefixMachineSpec}\PYG{p}{,}
+    \PYG{n}{params}\PYG{p}{:} \PYG{n}{TransformerParameters}\PYG{p}{,}
+\PYG{p}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{ModelFunction}\PYG{p}{:}
+  \PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{model\PYGZus{}fn}\PYG{p}{(}\PYG{n}{input\PYGZus{}tokens}\PYG{p}{:} \PYG{n}{InputSequence}\PYG{p}{)} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{Logits}\PYG{p}{:}
+    \PYG{c+c1}{\PYGZsh{} Prepend prompt and add special tokens.}
+    \PYG{n}{transformer\PYGZus{}input} \PYG{o}{=} \PYG{n}{preprocess\PYGZus{}input}\PYG{p}{(}\PYG{n}{machine\PYGZus{}spec}\PYG{p}{,} \PYG{n}{input\PYGZus{}tokens}\PYG{p}{)}
+    \PYG{k}{return} \PYG{n}{run\PYGZus{}transformer}\PYG{p}{(}\PYG{n}{params}\PYG{p}{,} \PYG{n}{machine\PYGZus{}spec}\PYG{p}{,} \PYG{n}{transformer\PYGZus{}input}\PYG{p}{)}
+  \PYG{k}{return} \PYG{n}{model\PYGZus{}fn}
+\end{MintedVerbatim}

@@ -1,0 +1,80 @@
+\section{Lower Bounds for Supervised Learning Dataset Distillation}
+\label{sec:lowerbounds}
+$D^{\sf sup}_{\tn{train}} = \{(\bx_i, y_i) \in \mc{B}(d, B) \times [-b, b]\}_{i=1}^n$ is the given training dataset consisting of feature-vector and real-valued label pairs for a regression task and our goal is to find the synthetic dataset $D^{\sf sup}_{\tn{syn}} = \{(\bz_i, \hat{y}_i)\in \mc{B}(d,B) \times [-b,b]\}_{i=1}^m$. 
+ For ease of notation in the proof of this theorem we shall drop the concatenation operator $\zeta$ and instead use vectors to denote the data point with the feature-vector and label concatenated. Further, we let $q := d+1$ represent the dimensionality so that the domain of $\mc{F}$ is $\R^q$. With this notation,  $D^{\sf sup}_{\tn{train}} = \{\bx_i \in \mc{B}(q-1,B)\times [-b,b]\}_{i=1}^n$ is the given training dataset. We use an analogous notation for the datapoints of the synthetic datasets in the analysis below.
+
+We begin by fixing $f \in \mc{F}$ s.t. 
+\begin{equation}
+    f(\bx) := \hat{c}\bu^{\sf T}\bx \tn{ for some } \bu \in \R^q \tn{ s.t. } \|\bu\|_2 = 1 \tn{ and } \hat{c} \in [1,2] \nonumber
+\end{equation}
+and, $D^{\sf sup}_{\tn{syn}} = \{{\bz}_i \in \mc{B}(q-1, B) \times [-b, b]\}_{i=1}^s$ for some $s \in \mathbb{Z}^+$. Further, let us also define $\bX = [\bx_1, \bx_2 , \dots, \bx_n] \in \mathbb{R}^{q\times n}$ and $\bZ = [\bz_1, \bz_2 , \dots, \bz_m] \in \mathbb{R}^{q \times m}$. 
+
+Using this, we have
+\begin{align}
+    L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}},  D_{\textnormal{syn}}^{\textnormal{sup}}, f) =& \left(\frac{1}{n}\sum_{i=1}^n(\hat{c}\bu^{\sf T}\bx_i)^2-\frac{1}{m}\sum_{i=1}^m(\hat{c}\bu^{\sf T}{\bz}_i)^2\right)^2  \nonumber \\
+    =& \hat{c}^4\left(\frac{1}{n}\sum_{i=1}^n\bu^{\sf T}\bx_i \bx_i^{\sf T} \bu -\frac{1}{m}\sum_{i=1}^m\bu^{\sf T}{\bz}_i{\bz}_i^{\sf T}\bu\right)^2 \nonumber \\
+    =& \hat{c}^4\left(\bu^{\sf T}\left(\frac{1}{n}\sum_{i=1}^n\bx_i \bx_i^{\sf T}\right) \bu -\bu^{\sf T}\left(\frac{1}{m}\sum_{i=1}^m{\bz}_i{\bz}_i^{\sf T}\right)\bu\right)^2 \nonumber \\
+    =& \hat{c}^4\left(\bu^{\sf T}\left(\frac{1}{n}\sum_{i=1}^n\bx_i \bx_i^{\sf T}-\frac{1}{m}\sum_{i=1}^m{\bz}_i{\bz}_i^{\sf T}\right)\bu\right)^2 \nonumber \\
+    =& \hat{c}^4\left(\bu^{\sf T}\left(\frac{\bX\bX^{\sf T}}{n}-\frac{\bZ\bZ^{\sf T}}{m}\right)\bu\right)^2 \label{eqn:vecform}
+\end{align}
+
+\begin{lemma}
+Let $\bZ \in \mathbb{R}^{q \times m}$ have columns $\bz_j = (\bu_j, s_j)$ with $\bu_j \in \mathbb{R}^{q-1}$, $s_j \in \mathbb{R}$, satisfying $\|\bu_j\|_2 \le B$ and $|s_j| \le b$ for all $j$. Let $\overline{\bZ} \in \mathbb{R}^{q \times q}$ have columns $\overline{\bz}_i = (\bv_i, t_i)$ and satisfy $\frac{1}{m} \bZ\bZ^\top = \frac{1}{q} \overline{\bZ}\,\overline{\bZ}^\top$. Then for all $i$, $\|\bv_i\|_2 \le \sqrt{q}\,B$ and $|t_i| \le \sqrt{q}\,b$.
+\end{lemma}
+\begin{proof}
+Write the block decomposition $\frac{1}{m} \bZ\bZ^\top = \frac{1}{q} \overline{\bZ}\,\overline{\bZ}^\top = \begin{pmatrix} \bA & \bc \\ \bc^\top & \alpha \end{pmatrix}$ with $\bA = \frac{1}{m}\sum_{j=1}^m \bu_j \bu_j^\top$ and $\alpha = \frac{1}{m}\sum_{j=1}^m s_j^2$. Let $\bV \in \mathbb{R}^{(q-1)\times q}$ have columns $\bv_i$. Then $\frac{1}{q} \bV\bV^\top = \bA$, so $\|\bV\|_2^2 \le q \operatorname{tr}(\bA) \le q B^2$, giving $\|\bv_i\|_2 \le \sqrt{q}\,B$, for all $i = 1, \dots, q$. Similarly, for $t = (t_1,\dots,t_q)$ we have $\frac{1}{q}\sum_i t_i^2 = \alpha \le b^2$, giving $|t_i| \le \sqrt{q}\,b$, for all $i = 1, \dots, q$.
+\end{proof}
+
+
+As $\bZ\bZ^{\sf T} \in \mathbb{R}^{q \times q}$ is a positive semi-definite matrix, we observe that by using the Cholesky factorization the synthetic data $D_{\textnormal{syn}}^{\textnormal{sup}}$ (corresponding to $\bZ \in \mathbb{R}^{q \times m}$) can always be replaced by another dataset $\ol{D}$ (corresponding to $\ol{\bZ} \in \mathbb{R}^{q \times q}$) of size $q$ such that $\bZ\bZ^{\sf T}/m = \ol{\bZ}\ol{\bZ}^{\sf T}/q$ without any change in the loss. Together with the norm bounds on the data points of $\ol{D}$ from the lemma above, this leads to the following lemma which we use in Appendix~\ref{sec:Mainpfthm1}:
+
+\begin{lemma}\label{lem:subsetreplace}
+    For any $D_{\textnormal{syn}}^{\textnormal{sup}} \in (\mc{B}(d, B) \times [-b, b])^m$ and  $D_{\textnormal{train}}^{\textnormal{sup}} \in (\mc{B}(d, B) \times [-b, b]\})^n$, there exists a dataset $\ol{D}\in (\mc{B}(d, B\sqrt{d+1}) \times [-b\sqrt{d+1}, b\sqrt{d+1}])^q$ of size $d+1$ such that $L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}},  D_{\textnormal{syn}}^{\textnormal{sup}}, f) = L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, \ol{D}, f)$ for any $f \in \mathcal{F}$.
+\end{lemma}
+
+\subsection{Lower bound on the size of synthetic data} 
+Given a parameter $\eps$ and a dataset $D_{\textnormal{train}}^{\textnormal{sup}}$ (corresponding to $\bX \in \mathbb{R}^{q \times n}$), the objective of the supervised learning dataset distillation problem to find a synthetic dataset $D_{\textnormal{syn}}^{\textnormal{sup}}$ (corresponding to $\bZ \in \mathbb{R}^{q \times m}$) such that $L_{\textnormal{mse}}^{\textnormal{err}}(D_{\textnormal{train}}^{\textnormal{sup}}, D_{\textnormal{syn}}^{\textnormal{sup}}, f) \leq \eps$ for all $f \in \mathcal{F}$, as stated in (\ref{eqn:errMSEloss}). 
+
+This means that in equation~(\ref{eqn:vecform}), we need to have $L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, D_{\textnormal{syn}}^{\textnormal{sup}}, f) = \hat{c}^4\left(\bu^{\sf T}\left(\frac{\bX\bX^{\sf T}}{n}-\frac{\bZ\bZ^{\sf T}}{s}\right)\bu\right)^2 \leq \eps$ for all unit vectors $\bu \in \mathbb{R}^q$. This implies that the matrix corresponding to synthetic dataset $Z$ should satisfy $\|\frac{\bX\bX^{\sf T}}{n}-\frac{\bZ\bZ^{\sf T}}{s}\|_2 \leq \frac{\sqrt{\eps}}{\hat{c}^2}$.
+
+Using the low rank approximation theorem stated in (\ref{eqn:lora}), we can say that $m$ needs to be at least the number of eigenvalues of $\frac{\bX\bX^{\sf T}}{n}$ larger than $\frac{\sqrt{\eps}}{\hat{c}^2}$ or more formally the size of the synthetic dataset $m\geq \#\{\lambda_i(\bX\bX^{\sf T} > \frac{\sqrt{\eps}}{\hat{c}^2}\}= \#\{\sigma_i(\bX) > \frac{{\eps}^{1/4}}{\hat{c}}\}$, where $\#$ denotes the size of a set and $\lambda, \sigma$ denote the eigenvalues and singular values of a matrix.
+
+In the worst case choice of $D_{\textnormal{train}}^{\textnormal{sup}}$ (corresponding to $\bX \in \mathbb{R}^{q \times n}$), we get a lower bound of $m\geq q = d+1$ on the size of $D_{\textnormal{syn}}^{\textnormal{sup}}$ when all $d+1$ singular values of $\zeta(D_{\textnormal{train}}^{\textnormal{sup}})$ are larger than $\frac{{\eps}^{1/4}}{2}$.
+
+\subsection{Proof of Theorem~\ref{thm:lbnumber}} \label{sec:lbnumber-proof}
+We begin with the following lemma.
+\begin{lemma}\label{lem:nonzero-quadratic}
+Let $d\ge 1$, $q = d+1$. For any $\bv_1,\dots,\bv_T\in\mathbb{R}^q$ with $T< \frac{q(q+1)}{2}$ there exists a non-zero symmetric matrix $\bA\in\mathbb{R}^{q\times q}$ that satisfies \begin{equation}\label{eq:constraints-lbnumber}
+\bv_t^{\sf T}\bA \bv_t = 0\qquad\text{for }t=1,\dots,T.
+\end{equation}
+
+\end{lemma}
+\begin{proof}
+Note that $\bv_t^{\sf T}\bA \bv_t = \left\langle \bA, \bv_t\bv_t^{\sf T}\right\rangle$. Further, the set of $q\times q$ symmetric matrices is a $q(q+1)/2$ dimensional linear subspace of $\R^{q\times q}$. Since $T < q(q+1)/2$, there exists a non-zero symmetric matrix  in the orthogonal complement of the linear span of $\left\{\bv_t\bv_t^{\sf T} \right\}_{t=1}^T$ which can be taken to be the required matrix $\bA$. \end{proof}
+
+To complete the proof of Theorem~\ref{thm:lbnumber} we first choose $D^{\sf sup}_{\tn{train}} = \{\mb{e}_1, \dots, \mb{e}_q\}$ where $\mb{e}_i$ is the vector with $1$ in the $i$th coordinate and zero otherwise i.e., it is the $i$th coordinate basis vector. It is easy to see that 
+\begin{equation}\label{eqn:lbnumber-1}
+L_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, f) = (1/q)\bv^{\sf T}\mb{I}\bv = (1/q) \|\bv\|_2^2,
+\end{equation}
+when $f(\bz) := \bv^{\sf T}\bz$ for all $\bv \in \R^q$. 
+Now, let $f_1, \dots, f_T$ be the regressors as in the statement of Theorem \ref{thm:lbnumber}. Applying Lemma \ref{lem:nonzero-quadratic} we obtain the symmetric matrix $\bA$ which, by scaling, can be assumed to have largest magnitude eigenvalue i.e., its operator norm be $1/2$.
+
+We now construct $D^{\sf sup}_{\tn{syn}}$ as follows. Consider the $\mb{B} = (\mb{I} + \mb{A})$. Since the operator norm of $\mb{A}$ is $1/2$, $\mb{B}$ is psd with maximum eigenvalue at most $3/2$ and minimum eigenvalue at least $1/2$. The eigen-decomposition of $\mb{B}$ implies that 
+\begin{equation}
+    \mb{B} = \sum_{i=1}^q (\sqrt{\lambda_i}\bu_i)(\sqrt{\lambda_i}\bu_i)^{\sf T}
+\end{equation}
+where $\max_{i=1,\dots, q}\lambda_i \leq 3/2$, $\min_{i=1,\dots, q}\lambda_i \geq 1/2$, and $\|\bu_i\|_2 = 1$ for $i=1,\dots, d$. We take $D^{\sf sup}_{\tn{syn}} := \{\sqrt{\lambda_i}\bu_i\}_{i=1}^d$, so that its points have Euclidean norm at most $\sqrt{3/2} \leq 2$. 
+Using \eqref{eq:constraints-lbnumber} we have that,
+\begin{equation}\label{eqn:lbnumber-2}
+L_{\tn{mse}}(D^{\sf sup}_{\tn{syn}}, f_t) = (1/q)\bv^{\sf T}\mb{B}\bv_t = (1/q) (\|\bv_t\|_2^2 + \bv^{\sf T}\mb{A}\bv_t) = (1/q) \|\bv_t\|_2^2, \quad t = 1, \dots, T.
+\end{equation} 
+The first condition in \eqref{eqn:thm:lbnumber} directly follows from \eqref{eqn:lbnumber-1} and \eqref{eqn:lbnumber-2}. To see the second condition, choose $\bv_0$ to be the eigenvector of $\mb{A}$ corresponding to its maximum magnitude eigenvalue which is $1/2$. Then,  
+\begin{equation}
+    L_{\tn{mse}}(D^{\sf sup}_{\tn{syn}}, f_0) = (1/q) (\|\bv_0\|_2^2 + \bv_0^{\sf T}\mb{A}\bv_0)
+\end{equation}
+which along with \eqref{eqn:lbnumber-1} implies that 
+\begin{equation*}
+    L^{\tn{err}}_{\tn{mse}}(D^{\sf sup}_{\tn{train}}, D^{\sf sup}_{\tn{syn}}, f_0) = \left((1/q) \|\bv_0\|_2^2 - (1/q) (\|\bv_0\|_2^2 + \bv_0^{\sf T}\mb{A}\bv_0)\right)^2 = (1/q^2)(\bv_0^{\sf T}\mb{A}\bv_0)^2 \geq 1/(4q^2).
+\end{equation*}
+proving the second condition of \eqref{eqn:thm:lbnumber} as well.
+

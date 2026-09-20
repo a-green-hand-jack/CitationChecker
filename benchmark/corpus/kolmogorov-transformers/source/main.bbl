@@ -1,0 +1,498 @@
+\begin{thebibliography}{95}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Abbe et~al.(2023)Abbe, Bengio, Lotfi, and Rizk]{abbe2023generalization}
+Emmanuel Abbe, Samy Bengio, Aryo Lotfi, and Kevin Rizk.
+\newblock Generalization on the unseen, logic reasoning and degree curriculum.
+\newblock In \emph{International Conference on Machine Learning}, pp.\  31--60. PMLR, 2023.
+
+\bibitem[Abudy et~al.(2025)Abudy, Well, Chemla, Katzir, and Lan]{abudy2025minimum}
+Matan Abudy, Orr Well, Emmanuel Chemla, Roni Katzir, and Nur Lan.
+\newblock A minimum description length approach to regularization in neural networks.
+\newblock \emph{arXiv preprint arXiv:2505.13398}, 2025.
+
+\bibitem[Achille et~al.(2021)Achille, Paolini, Mbeng, and Soatto]{achille2021information}
+Alessandro Achille, Giovanni Paolini, Glen Mbeng, and Stefano Soatto.
+\newblock The information complexity of learning tasks, their structure and their distance.
+\newblock \emph{Information and Inference: A Journal of the IMA}, 10\penalty0 (1):\penalty0 51--72, 2021.
+
+\bibitem[Achterhold et~al.(2018)Achterhold, Koehler, Schmeink, and Genewein]{achterhold2018variational}
+Jan Achterhold, Jan~Mathias Koehler, Anke Schmeink, and Tim Genewein.
+\newblock Variational network quantization.
+\newblock In \emph{International Conference on Learning Representations}, 2018.
+\newblock URL \url{https://openreview.net/forum?id=ry-TW-WAb}.
+
+\bibitem[Akinwande et~al.(2024)Akinwande, Jiang, Sam, and Kolter]{akinwande2024understanding}
+Victor Akinwande, Yiding Jiang, Dylan Sam, and J~Zico Kolter.
+\newblock Understanding prompt engineering may not require rethinking generalization.
+\newblock In \emph{The Twelfth International Conference on Learning Representations}, 2024.
+\newblock URL \url{https://openreview.net/forum?id=a745RnSFLT}.
+
+\bibitem[Anil et~al.(2022)Anil, Wu, Andreassen, Lewkowycz, Misra, Ramasesh, Slone, Gur-Ari, Dyer, and Neyshabur]{anil2022exploring}
+Cem Anil, Yuhuai Wu, Anders Andreassen, Aitor Lewkowycz, Vedant Misra, Vinay Ramasesh, Ambrose Slone, Guy Gur-Ari, Ethan Dyer, and Behnam Neyshabur.
+\newblock Exploring length generalization in large language models.
+\newblock \emph{Advances in Neural Information Processing Systems}, 35:\penalty0 38546--38556, 2022.
+
+\bibitem[Ba et~al.(2016)Ba, Kiros, and Hinton]{ba2016layer}
+Jimmy~Lei Ba, Jamie~Ryan Kiros, and Geoffrey~E Hinton.
+\newblock Layer normalization.
+\newblock \emph{arXiv preprint arXiv:1607.06450}, 2016.
+
+\bibitem[Barron(1985)]{barron1985logically}
+Andrew~R Barron.
+\newblock \emph{Logically smooth density estimation}.
+\newblock PhD thesis, Stanford University, 1985.
+
+\bibitem[Barron \& Cover(1991)Barron and Cover]{barron1991minimum}
+Andrew~R Barron and Thomas~M Cover.
+\newblock Minimum complexity density estimation.
+\newblock \emph{IEEE transactions on information theory}, 37\penalty0 (4):\penalty0 1034--1054, 1991.
+
+\bibitem[Bhattamishra et~al.(2020)Bhattamishra, Ahuja, and Goyal]{bhattamishra2020ability}
+Satwik Bhattamishra, Kabir Ahuja, and Navin Goyal.
+\newblock On the ability and limitations of transformers to recognize formal languages.
+\newblock \emph{arXiv preprint arXiv:2009.11264}, 2020.
+
+\bibitem[Bhattamishra et~al.(2023)Bhattamishra, Patel, Kanade, and Blunsom]{bhattamishra2023simplicity}
+Satwik Bhattamishra, Arkil Patel, Varun Kanade, and Phil Blunsom.
+\newblock Simplicity bias in transformers and their ability to learn sparse boolean functions.
+\newblock In \emph{The 61st Annual Meeting Of The Association For Computational Linguistics}, 2023.
+
+\bibitem[Blier \& Ollivier(2018)Blier and Ollivier]{blier2018description}
+L{\'e}onard Blier and Yann Ollivier.
+\newblock The description length of deep learning models.
+\newblock \emph{arXiv preprint arXiv:1802.07044}, 2018.
+
+\bibitem[Blundell et~al.(2015)Blundell, Cornebise, Kavukcuoglu, and Wierstra]{blundell2015weight}
+Charles Blundell, Julien Cornebise, Koray Kavukcuoglu, and Daan Wierstra.
+\newblock Weight uncertainty in neural network.
+\newblock In \emph{International conference on machine learning}, pp.\  1613--1622. PMLR, 2015.
+
+\bibitem[Bornschein et~al.(2023)Bornschein, Li, and Hutter]{bornschein2023sequential}
+Jorg Bornschein, Yazhe Li, and Marcus Hutter.
+\newblock Sequential learning of neural networks for prequential {MDL}.
+\newblock In \emph{The Eleventh International Conference on Learning Representations}, 2023.
+\newblock URL \url{https://openreview.net/forum?id=dMMPUvNSYJr}.
+
+\bibitem[Bradbury et~al.(2018)Bradbury, Frostig, Hawkins, Johnson, Leary, Maclaurin, Necula, Paszke, Vander{P}las, Wanderman-{M}ilne, and Zhang]{jax2018github}
+James Bradbury, Roy Frostig, Peter Hawkins, Matthew~James Johnson, Chris Leary, Dougal Maclaurin, George Necula, Adam Paszke, Jake Vander{P}las, Skye Wanderman-{M}ilne, and Qiao Zhang.
+\newblock {JAX}: composable transformations of {P}ython+{N}um{P}y programs, 2018.
+\newblock URL \url{http://github.com/jax-ml/jax}.
+
+\bibitem[Chaitin(1969)]{chaitin1969length}
+Gregory~J Chaitin.
+\newblock On the length of programs for computing finite binary sequences: statistical considerations.
+\newblock \emph{Journal of the ACM (JACM)}, 16\penalty0 (1):\penalty0 145--159, 1969.
+
+\bibitem[Chen et~al.(2024)Chen, Shwartz-Ziv, Cho, Leavitt, and Saphra]{chen2024sudden}
+Angelica Chen, Ravid Shwartz-Ziv, Kyunghyun Cho, Matthew~L Leavitt, and Naomi Saphra.
+\newblock Sudden drops in the loss: Syntax acquisition, phase transitions, and simplicity bias in {MLM}s.
+\newblock In \emph{The Twelfth International Conference on Learning Representations}, 2024.
+\newblock URL \url{https://openreview.net/forum?id=MO5PiKHELW}.
+
+\bibitem[Chiang \& Cholak(2022)Chiang and Cholak]{chiang2022overcoming}
+David Chiang and Peter Cholak.
+\newblock Overcoming a theoretical limitation of self-attention.
+\newblock \emph{arXiv preprint arXiv:2202.12172}, 2022.
+
+\bibitem[Chiang et~al.(2023)Chiang, Cholak, and Pillay]{chiang2023tighter}
+David Chiang, Peter Cholak, and Anand Pillay.
+\newblock Tighter bounds on the expressivity of transformer encoders.
+\newblock In \emph{International Conference on Machine Learning}, pp.\  5544--5562. PMLR, 2023.
+
+\bibitem[Cinquin et~al.(2021)Cinquin, Immer, Horn, and Fortuin]{cinquin2021pathologies}
+Tristan Cinquin, Alexander Immer, Max Horn, and Vincent Fortuin.
+\newblock Pathologies in priors and inference for bayesian transformers.
+\newblock In \emph{I (Still) Can't Believe It's Not Better! NeurIPS 2021 Workshop}, 2021.
+
+\bibitem[Cover \& Thomas(2006)Cover and Thomas]{cover2006elements}
+Thomas~M. Cover and Joy~A. Thomas.
+\newblock \emph{Elements of Information Theory}.
+\newblock Wiley-Interscience, 2nd edition, 2006.
+
+\bibitem[Dehghani et~al.(2019)Dehghani, Gouws, Vinyals, Uszkoreit, and Kaiser]{dehghani2019universal}
+Mostafa Dehghani, Stephan Gouws, Oriol Vinyals, Jakob Uszkoreit, and Lukasz Kaiser.
+\newblock Universal transformers.
+\newblock In \emph{International Conference on Learning Representations}, 2019.
+
+\bibitem[Del{\'e}tang et~al.(2022)Del{\'e}tang, Ruoss, Grau-Moya, Genewein, Wenliang, Catt, Cundy, Hutter, Legg, Veness, et~al.]{deletang2022neural}
+Gr{\'e}goire Del{\'e}tang, Anian Ruoss, Jordi Grau-Moya, Tim Genewein, Li~Kevin Wenliang, Elliot Catt, Chris Cundy, Marcus Hutter, Shane Legg, Joel Veness, et~al.
+\newblock Neural networks and the {C}homsky hierarchy.
+\newblock \emph{arXiv preprint arXiv:2207.02098}, 2022.
+
+\bibitem[Deletang et~al.(2024)Deletang, Ruoss, Duquenne, Catt, Genewein, Mattern, Grau-Moya, Wenliang, Aitchison, Orseau, Hutter, and Veness]{deletang2024language}
+Gregoire Deletang, Anian Ruoss, Paul-Ambroise Duquenne, Elliot Catt, Tim Genewein, Christopher Mattern, Jordi Grau-Moya, Li~Kevin Wenliang, Matthew Aitchison, Laurent Orseau, Marcus Hutter, and Joel Veness.
+\newblock Language modeling is compression.
+\newblock In \emph{The Twelfth International Conference on Learning Representations}, 2024.
+\newblock URL \url{https://openreview.net/forum?id=jznbgiynus}.
+
+\bibitem[DeMoss et~al.(2025)DeMoss, Sapora, Foerster, Hawes, and Posner]{demoss2025complexity}
+Branton DeMoss, Silvia Sapora, Jakob Foerster, Nick Hawes, and Ingmar Posner.
+\newblock The complexity dynamics of grokking.
+\newblock \emph{Physica D: Nonlinear Phenomena}, pp.\  134859, 2025.
+
+\bibitem[Dettmers et~al.(2023)Dettmers, Pagnoni, Holtzman, and Zettlemoyer]{dettmers2023qlora}
+Tim Dettmers, Artidoro Pagnoni, Ari Holtzman, and Luke Zettlemoyer.
+\newblock Qlora: Efficient finetuning of quantized llms.
+\newblock \emph{Advances in neural information processing systems}, 36:\penalty0 10088--10115, 2023.
+
+\bibitem[Devlin et~al.(2019)Devlin, Chang, Lee, and Toutanova]{devlin2019bert}
+Jacob Devlin, Ming-Wei Chang, Kenton Lee, and Kristina Toutanova.
+\newblock Bert: Pre-training of deep bidirectional transformers for language understanding.
+\newblock In \emph{Proceedings of the 2019 conference of the North American chapter of the association for computational linguistics: human language technologies, volume 1 (long and short papers)}, pp.\  4171--4186, 2019.
+
+\bibitem[Dwivedi et~al.(2023)Dwivedi, Singh, Yu, and Wainwright]{dwivedi2023revisiting}
+Raaz Dwivedi, Chandan Singh, Bin Yu, and Martin Wainwright.
+\newblock Revisiting minimum description length complexity in overparameterized models.
+\newblock \emph{Journal of Machine Learning Research}, 24\penalty0 (268):\penalty0 1--59, 2023.
+
+\bibitem[Elhage et~al.(2021)Elhage, Nanda, Olsson, Henighan, Joseph, Mann, Askell, Bai, Chen, Conerly, et~al.]{elhage2021mathematical}
+Nelson Elhage, Neel Nanda, Catherine Olsson, Tom Henighan, Nicholas Joseph, Ben Mann, Amanda Askell, Yuntao Bai, Anna Chen, Tom Conerly, et~al.
+\newblock A mathematical framework for transformer circuits.
+\newblock \emph{Transformer Circuits Thread}, 2021.
+\newblock URL \url{https://transformer-circuits.pub/2021/framework/index.html}.
+
+\bibitem[Fehr \& Henderson(2024)Fehr and Henderson]{fehr2024nonparametric}
+Fabio~James Fehr and James Henderson.
+\newblock Nonparametric variational regularisation of pretrained transformers.
+\newblock In \emph{First Conference on Language Modeling}, 2024.
+\newblock URL \url{https://openreview.net/forum?id=Zu8OWNUC0u}.
+
+\bibitem[Feng et~al.(2023)Feng, Zhang, Gu, Ye, He, and Wang]{feng2023towards}
+Guhao Feng, Bohang Zhang, Yuntian Gu, Haotian Ye, Di~He, and Liwei Wang.
+\newblock Towards revealing the mystery behind chain of thought: A theoretical perspective.
+\newblock In \emph{Thirty-seventh Conference on Neural Information Processing Systems}, 2023.
+\newblock URL \url{https://openreview.net/forum?id=qHrADgAdYu}.
+
+\bibitem[Gal \& Ghahramani(2016)Gal and Ghahramani]{gal2016dropout}
+Yarin Gal and Zoubin Ghahramani.
+\newblock Dropout as a bayesian approximation: Representing model uncertainty in deep learning.
+\newblock In \emph{international conference on machine learning}, pp.\  1050--1059. PMLR, 2016.
+
+\bibitem[Giannou et~al.(2023)Giannou, Rajput, Sohn, Lee, Lee, and Papailiopoulos]{giannou2023looped}
+Angeliki Giannou, Shashank Rajput, Jy-yong Sohn, Kangwook Lee, Jason~D Lee, and Dimitris Papailiopoulos.
+\newblock Looped transformers as programmable computers.
+\newblock In \emph{International Conference on Machine Learning}, pp.\  11398--11442. PMLR, 2023.
+
+\bibitem[Goldblum et~al.(2023)Goldblum, Finzi, Rowan, and Wilson]{goldblum2023no}
+Micah Goldblum, Marc Finzi, Keefer Rowan, and Andrew~Gordon Wilson.
+\newblock The no free lunch theorem, kolmogorov complexity, and the role of inductive biases in machine learning.
+\newblock \emph{arXiv preprint arXiv:2304.05366}, 2023.
+
+\bibitem[Grau-Moya et~al.(2024)Grau-Moya, Genewein, Hutter, Orseau, Deletang, Catt, Ruoss, Wenliang, Mattern, Aitchison, and Veness]{grau-moya2024learning}
+Jordi Grau-Moya, Tim Genewein, Marcus Hutter, Laurent Orseau, Gregoire Deletang, Elliot Catt, Anian Ruoss, Li~Kevin Wenliang, Christopher Mattern, Matthew Aitchison, and Joel Veness.
+\newblock Learning universal predictors.
+\newblock In \emph{Forty-first International Conference on Machine Learning}, 2024.
+\newblock URL \url{https://openreview.net/forum?id=B1ajnQyZgK}.
+
+\bibitem[Graves(2011)]{graves2011practical}
+Alex Graves.
+\newblock Practical variational inference for neural networks.
+\newblock \emph{Advances in neural information processing systems}, 24, 2011.
+
+\bibitem[Grunwald(2004)]{grunwald2004tutorial}
+Peter Grunwald.
+\newblock A tutorial introduction to the minimum description length principle.
+\newblock \emph{arXiv preprint math/0406077}, 2004.
+
+\bibitem[Grunwald \& Vitanyi(2008)Grunwald and Vitanyi]{grunwald2008algorithmic}
+Peter~D Grunwald and Paul Vitanyi.
+\newblock Algorithmic information theory.
+\newblock \emph{arXiv preprint arXiv:0809.2754}, 2008.
+
+\bibitem[Hahn(2020)]{hahn2020theoretical}
+Michael Hahn.
+\newblock Theoretical limitations of self-attention in neural sequence models.
+\newblock \emph{Transactions of the Association for Computational Linguistics}, 8:\penalty0 156--171, 2020.
+
+\bibitem[Hamzi et~al.(2024)Hamzi, Hutter, and Owhadi]{hamzi2024bridging}
+Boumediene Hamzi, Marcus Hutter, and Houman Owhadi.
+\newblock Bridging algorithmic information theory and machine learning: A new approach to kernel learning.
+\newblock \emph{Physica D: Nonlinear Phenomena}, 464:\penalty0 134153, 2024.
+
+\bibitem[Han et~al.(2016)Han, Mao, and Dally]{han2016deep}
+Song Han, Huizi Mao, and William~J Dally.
+\newblock Deep compression: Compressing deep neural network with pruning, trained quantization and huffman coding.
+\newblock In \emph{ICLR}, 2016.
+
+\bibitem[He et~al.(2015)He, Zhang, Ren, and Sun]{he2015delving}
+Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun.
+\newblock Delving deep into rectifiers: Surpassing human-level performance on imagenet classification.
+\newblock In \emph{Proceedings of the IEEE international conference on computer vision}, pp.\  1026--1034, 2015.
+
+\bibitem[Hinton \& Van~Camp(1993)Hinton and Van~Camp]{hinton1993keeping}
+Geoffrey~E Hinton and Drew Van~Camp.
+\newblock Keeping the neural networks simple by minimizing the description length of the weights.
+\newblock In \emph{Proceedings of the sixth annual conference on Computational learning theory}, pp.\  5--13, 1993.
+
+\bibitem[Honkela \& Valpola(2004)Honkela and Valpola]{honkela2004variational}
+Antti Honkela and Harri Valpola.
+\newblock Variational learning and bits-back coding: an information-theoretic view to bayesian learning.
+\newblock \emph{IEEE transactions on Neural Networks}, 15\penalty0 (4):\penalty0 800--810, 2004.
+
+\bibitem[Hu et~al.(2022)Hu, Shen, Wallis, Allen-Zhu, Li, Wang, Wang, Chen, et~al.]{hu2022lora}
+Edward~J Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li, Shean Wang, Lu~Wang, Weizhu Chen, et~al.
+\newblock Lora: Low-rank adaptation of large language models.
+\newblock \emph{ICLR}, 1\penalty0 (2):\penalty0 3, 2022.
+
+\bibitem[Hutter(2000)]{hutter2000theory}
+Marcus Hutter.
+\newblock A theory of universal artificial intelligence based on algorithmic complexity.
+\newblock \emph{arXiv preprint cs/0004001}, 2000.
+
+\bibitem[Hutter(2005)]{hutter2005universal}
+Marcus Hutter.
+\newblock \emph{Universal artificial intelligence: Sequential decisions based on algorithmic probability}.
+\newblock Springer Science \& Business Media, 2005.
+
+\bibitem[Jang et~al.(2017)Jang, Gu, and Poole]{jang2017categorical}
+Eric Jang, Shixiang Gu, and Ben Poole.
+\newblock Categorical reparameterization with gumbel-softmax.
+\newblock In \emph{International Conference on Learning Representations}, 2017.
+
+\bibitem[Jiang et~al.(2020)Jiang, Neyshabur, Mobahi, Krishnan, and Bengio]{jiang2020fantastic}
+Yiding Jiang, Behnam Neyshabur, Hossein Mobahi, Dilip Krishnan, and Samy Bengio.
+\newblock Fantastic generalization measures and where to find them.
+\newblock In \emph{International Conference on Learning Representations}, 2020.
+\newblock URL \url{https://openreview.net/forum?id=SJgIPJBFvH}.
+
+\bibitem[Kingma \& Ba(2014)Kingma and Ba]{kingma2014adam}
+Diederik~P. Kingma and Jimmy Ba.
+\newblock Adam: A method for stochastic optimization.
+\newblock \emph{arXiv preprint arXiv:1412.6980}, 2014.
+
+\bibitem[Kingma \& Welling(2014)Kingma and Welling]{kingma2014auto}
+Diederik~P Kingma and Max Welling.
+\newblock Auto-encoding variational bayes.
+\newblock In \emph{International Conference on Learning Representations}, 2014.
+
+\bibitem[Kingma et~al.(2015)Kingma, Salimans, and Welling]{kingma2015variational}
+Diederik~P. Kingma, Tim Salimans, and Max Welling.
+\newblock Variational dropout and the local reparameterization trick.
+\newblock \emph{Advances in neural information processing systems}, 28, 2015.
+
+\bibitem[Kolmogorov(1965)]{kolmogorov1965three}
+A~Kolmogorov.
+\newblock Three approaches to the quantitative definition of information.
+\newblock \emph{Problems of Information Transmission}, 1:\penalty0 3--11, 1965.
+
+\bibitem[Lattimore \& Hutter(2013)Lattimore and Hutter]{lattimore2013no}
+Tor Lattimore and Marcus Hutter.
+\newblock No free lunch versus occam’s razor in supervised learning.
+\newblock In \emph{Algorithmic Probability and Friends. Bayesian Prediction and Artificial Intelligence: Papers from the Ray Solomonoff 85th Memorial Conference, Melbourne, VIC, Australia, November 30--December 2, 2011}, pp.\  223--235. Springer, 2013.
+
+\bibitem[Levin(1973)]{levin1973universal}
+Leonid~A Levin.
+\newblock Universal sequential search problems.
+\newblock \emph{Problems of information transmission}, 9\penalty0 (3):\penalty0 265--266, 1973.
+
+\bibitem[Li et~al.(2018)Li, Farkhoor, Liu, and Yosinski]{li2018measuring}
+Chunyuan Li, Heerad Farkhoor, Rosanne Liu, and Jason Yosinski.
+\newblock Measuring the intrinsic dimension of objective landscapes.
+\newblock In \emph{International Conference on Learning Representations}, 2018.
+
+\bibitem[Li \& Vit{\'a}nyi(2008)Li and Vit{\'a}nyi]{li2008introduction}
+Ming Li and Paul Vit{\'a}nyi.
+\newblock \emph{An introduction to Kolmogorov complexity and its applications}, volume~3.
+\newblock Springer, 2008.
+
+\bibitem[Li \& Wang(2025)Li and Wang]{li2025constant}
+Qian Li and Yuyi Wang.
+\newblock Constant bit-size transformers are turing complete.
+\newblock In \emph{The Thirty-ninth Annual Conference on Neural Information Processing Systems}, 2025.
+\newblock URL \url{https://openreview.net/forum?id=RBWnyDEBKf}.
+
+\bibitem[Lindner et~al.(2023)Lindner, Kram{\'a}r, Farquhar, Rahtz, McGrath, and Mikulik]{lindner2024tracr}
+David Lindner, J{\'a}nos Kram{\'a}r, Sebastian Farquhar, Matthew Rahtz, Tom McGrath, and Vladimir Mikulik.
+\newblock Tracr: Compiled transformers as a laboratory for interpretability.
+\newblock \emph{Advances in Neural Information Processing Systems}, 36, 2023.
+
+\bibitem[Lotfi et~al.(2022)Lotfi, Finzi, Kapoor, Potapczynski, Goldblum, and Wilson]{lotfi2022pac}
+Sanae Lotfi, Marc Finzi, Sanyam Kapoor, Andres Potapczynski, Micah Goldblum, and Andrew~G Wilson.
+\newblock Pac-bayes compression bounds so tight that they can explain generalization.
+\newblock \emph{Advances in Neural Information Processing Systems}, 35:\penalty0 31459--31473, 2022.
+
+\bibitem[Lotfi et~al.(2024)Lotfi, Finzi, Kuang, Rudner, Goldblum, and Wilson]{lotfi2024non}
+Sanae Lotfi, Marc Finzi, Yilun Kuang, Tim~GJ Rudner, Micah Goldblum, and Andrew~Gordon Wilson.
+\newblock Non-vacuous generalization bounds for large language models.
+\newblock In \emph{Proceedings of the 41st International Conference on Machine Learning}, pp.\  32801--32818, 2024.
+
+\bibitem[Louizos et~al.(2017)Louizos, Ullrich, and Welling]{louizos2017bayesian}
+Christos Louizos, Karen Ullrich, and Max Welling.
+\newblock Bayesian compression for deep learning.
+\newblock \emph{Advances in neural information processing systems}, 30, 2017.
+
+\bibitem[Maddison et~al.(2017)Maddison, Mnih, and Teh]{maddison2017concrete}
+Chris~J Maddison, Andriy Mnih, and Yee~Whye Teh.
+\newblock The concrete distribution: A continuous relaxation of discrete random variables.
+\newblock In \emph{International Conference on Learning Representations}, 2017.
+
+\bibitem[Martens \& Grosse(2015)Martens and Grosse]{martens2015optimizing}
+James Martens and Roger Grosse.
+\newblock Optimizing neural networks with kronecker-factored approximate curvature.
+\newblock In \emph{Proceedings of the 32nd International Conference on International Conference on Machine Learning-Volume 37}, pp.\  2408--2417, 2015.
+
+\bibitem[Merrill \& Sabharwal(2024{\natexlab{a}})Merrill and Sabharwal]{merrill2024expressive}
+William Merrill and Ashish Sabharwal.
+\newblock The expressive power of transformers with chain of thought.
+\newblock In \emph{The Twelfth International Conference on Learning Representations}, 2024{\natexlab{a}}.
+
+\bibitem[Merrill \& Sabharwal(2024{\natexlab{b}})Merrill and Sabharwal]{merrill2024little}
+William Merrill and Ashish Sabharwal.
+\newblock A little depth goes a long way: The expressive power of log-depth transformers.
+\newblock In \emph{NeurIPS 2024 Workshop on Mathematics of Modern Machine Learning}, 2024{\natexlab{b}}.
+
+\bibitem[Mingard et~al.(2025)Mingard, Rees, Valle-P{\'e}rez, and Louis]{mingard2025deep}
+Chris Mingard, Henry Rees, Guillermo Valle-P{\'e}rez, and Ard~A Louis.
+\newblock Deep neural networks have an inbuilt occam’s razor.
+\newblock \emph{Nature Communications}, 16\penalty0 (1):\penalty0 220, 2025.
+
+\bibitem[Nakkiran(2021)]{nakkiran2021turing}
+Preetum Nakkiran.
+\newblock Turing-universal learners with optimal scaling laws.
+\newblock \emph{arXiv preprint arXiv:2111.05321}, 2021.
+
+\bibitem[Nikankin et~al.(2025)Nikankin, Reusch, Mueller, and Belinkov]{nikankin2025arithmetic}
+Yaniv Nikankin, Anja Reusch, Aaron Mueller, and Yonatan Belinkov.
+\newblock Arithmetic without algorithms: Language models solve math with a bag of heuristics.
+\newblock In \emph{The Thirteenth International Conference on Learning Representations}, 2025.
+\newblock URL \url{https://openreview.net/forum?id=O9YTt26r2P}.
+
+\bibitem[Nowak et~al.(2024)Nowak, Svete, Butoi, and Cotterell]{nowak2024representational}
+Franz Nowak, Anej Svete, Alexandra Butoi, and Ryan Cotterell.
+\newblock On the representational capacity of neural language models with chain-of-thought reasoning.
+\newblock In \emph{Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)}, pp.\  12510--12548, 2024.
+
+\bibitem[Nowlan \& Hinton(1992)Nowlan and Hinton]{nowlan1992simplifying}
+Steven~J Nowlan and Geoffrey~E Hinton.
+\newblock Simplifying neural networks by soft weight-sharing.
+\newblock \emph{Neural Computation}, 4\penalty0 (4):\penalty0 473--493, 1992.
+
+\bibitem[Papadimitriou(1994)]{papadimitriou1994computational}
+Christos~H. Papadimitriou.
+\newblock \emph{Computational complexity}.
+\newblock Addison-Wesley, 1994.
+\newblock ISBN 978-0-201-53082-7.
+
+\bibitem[P{\'e}rez et~al.(2021)P{\'e}rez, Barcel{\'o}, and Marinkovic]{perez2021attention}
+Jorge P{\'e}rez, Pablo Barcel{\'o}, and Javier Marinkovic.
+\newblock Attention is turing-complete.
+\newblock \emph{Journal of Machine Learning Research}, 22\penalty0 (75):\penalty0 1--35, 2021.
+
+\bibitem[Raffel et~al.(2020)Raffel, Shazeer, Roberts, Lee, Narang, Matena, Zhou, Li, and Liu]{raffel2020exploring}
+Colin Raffel, Noam Shazeer, Adam Roberts, Katherine Lee, Sharan Narang, Michael Matena, Yanqi Zhou, Wei Li, and Peter~J Liu.
+\newblock Exploring the limits of transfer learning with a unified text-to-text transformer.
+\newblock \emph{Journal of machine learning research}, 21\penalty0 (140):\penalty0 1--67, 2020.
+
+\bibitem[Rathmanner \& Hutter(2011)Rathmanner and Hutter]{rathmanner2011philosophical}
+Samuel Rathmanner and Marcus Hutter.
+\newblock A philosophical treatise of universal induction.
+\newblock \emph{Entropy}, 13\penalty0 (6):\penalty0 1076--1136, 2011.
+
+\bibitem[Rissanen(1978)]{rissanen1978modeling}
+Jorma Rissanen.
+\newblock Modeling by shortest data description.
+\newblock \emph{Automatica}, 14\penalty0 (5):\penalty0 465--471, 1978.
+
+\bibitem[Romera-Paredes et~al.(2024)Romera-Paredes, Barekatain, Novikov, Balog, Kumar, Dupont, Ruiz, Ellenberg, Wang, Fawzi, et~al.]{romera2024mathematical}
+Bernardino Romera-Paredes, Mohammadamin Barekatain, Alexander Novikov, Matej Balog, M~Pawan Kumar, Emilien Dupont, Francisco~JR Ruiz, Jordan~S Ellenberg, Pengming Wang, Omar Fawzi, et~al.
+\newblock Mathematical discoveries from program search with large language models.
+\newblock \emph{Nature}, 625\penalty0 (7995):\penalty0 468--475, 2024.
+
+\bibitem[Ruoss et~al.(2023)Ruoss, Del{\'e}tang, Genewein, Grau-Moya, Csord{\'a}s, Bennani, Legg, and Veness]{ruoss2023randomized}
+Anian Ruoss, Gr{\'e}goire Del{\'e}tang, Tim Genewein, Jordi Grau-Moya, R{\'o}bert Csord{\'a}s, Mehdi Bennani, Shane Legg, and Joel Veness.
+\newblock Randomized positional encodings boost length generalization of transformers.
+\newblock In \emph{Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 2: Short Papers)}, pp.\  1889--1903, 2023.
+
+\bibitem[Sankararaman et~al.(2022)Sankararaman, Wang, and Fang]{sankararaman2022bayesformer}
+Karthik~Abinav Sankararaman, Sinong Wang, and Han Fang.
+\newblock Bayesformer: Transformer with uncertainty estimation.
+\newblock \emph{arXiv preprint arXiv:2206.00826}, 2022.
+
+\bibitem[Schmidhuber(1997)]{schmidhuber1997discovering}
+J{\"u}rgen Schmidhuber.
+\newblock Discovering neural nets with low kolmogorov complexity and high generalization capability.
+\newblock \emph{Neural Networks}, 10\penalty0 (5):\penalty0 857--873, 1997.
+
+\bibitem[Schuurmans(2023)]{schuurmans2023memory}
+Dale Schuurmans.
+\newblock Memory augmented large language models are computationally universal.
+\newblock \emph{arXiv preprint arXiv:2301.04589}, 2023.
+
+\bibitem[Shaw et~al.(2018)Shaw, Uszkoreit, and Vaswani]{shaw2018self}
+Peter Shaw, Jakob Uszkoreit, and Ashish Vaswani.
+\newblock Self-attention with relative position representations.
+\newblock In \emph{Proceedings of the 2018 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 2 (Short Papers)}, pp.\  464--468, 2018.
+
+\bibitem[Shaw et~al.(2021)Shaw, Chang, Pasupat, and Toutanova]{shaw2021compositional}
+Peter Shaw, Ming-Wei Chang, Panupong Pasupat, and Kristina Toutanova.
+\newblock Compositional generalization and natural language variation: Can a semantic parsing approach handle both?
+\newblock In \emph{Proceedings of the 59th Annual Meeting of the Association for Computational Linguistics and the 11th International Joint Conference on Natural Language Processing (Volume 1: Long Papers)}, pp.\  922--938, 2021.
+
+\bibitem[Shaw et~al.(2024)Shaw, Cohan, Eisenstein, Lee, Berant, and Toutanova]{shaw2024alta}
+Peter Shaw, James Cohan, Jacob Eisenstein, Kenton Lee, Jonathan Berant, and Kristina Toutanova.
+\newblock Alta: Compiler-based analysis of transformers.
+\newblock \emph{arXiv preprint arXiv:2410.18077}, 2024.
+
+\bibitem[Solomonoff(1964)]{solomonoff1964formal}
+Ray~J Solomonoff.
+\newblock A formal theory of inductive inference.
+\newblock \emph{Information and control}, 7\penalty0 (1):\penalty0 1--22,224--254, 1964.
+
+\bibitem[Tsoy \& Konstantinov(2024)Tsoy and Konstantinov]{tsoy2024simplicity}
+Nikita Tsoy and Nikola Konstantinov.
+\newblock Simplicity bias of two-layer networks beyond linearly separable data.
+\newblock \emph{arXiv preprint arXiv:2405.17299}, 2024.
+
+\bibitem[Ullrich et~al.(2017)Ullrich, Meeds, and Welling]{ullrich2017soft}
+Karen Ullrich, Edward Meeds, and Max Welling.
+\newblock Soft weight-sharing for neural network compression.
+\newblock In \emph{International Conference on Learning Representations}, 2017.
+
+\bibitem[Vaswani et~al.(2017)Vaswani, Shazeer, Parmar, Uszkoreit, Jones, Gomez, Kaiser, and Polosukhin]{vaswani2017attention}
+Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan~N Gomez, {\L}ukasz Kaiser, and Illia Polosukhin.
+\newblock Attention is all you need.
+\newblock \emph{Advances in neural information processing systems}, 30, 2017.
+
+\bibitem[Voita \& Titov(2020)Voita and Titov]{voita2020information}
+Elena Voita and Ivan Titov.
+\newblock Information-theoretic probing with minimum description length.
+\newblock In \emph{Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP)}, pp.\  183--196, 2020.
+
+\bibitem[Weiss et~al.(2021)Weiss, Goldberg, and Yahav]{weiss2021thinking}
+Gail Weiss, Yoav Goldberg, and Eran Yahav.
+\newblock Thinking like transformers.
+\newblock In \emph{International Conference on Machine Learning}, pp.\  11080--11090. PMLR, 2021.
+
+\bibitem[Yun et~al.(2020)Yun, Bhojanapalli, Rawat, Reddi, and Kumar]{yun2020are}
+Chulhee Yun, Srinadh Bhojanapalli, Ankit~Singh Rawat, Sashank Reddi, and Sanjiv Kumar.
+\newblock Are transformers universal approximators of sequence-to-sequence functions?
+\newblock In \emph{International Conference on Learning Representations}, 2020.
+\newblock URL \url{https://openreview.net/forum?id=ByxRM0Ntvr}.
+
+\bibitem[Zhang et~al.(2017)Zhang, Bengio, Hardt, Recht, and Vinyals]{zhang2017understanding}
+Chiyuan Zhang, Samy Bengio, Moritz Hardt, Benjamin Recht, and Oriol Vinyals.
+\newblock Understanding deep learning requires rethinking generalization.
+\newblock In \emph{International Conference on Learning Representations}, 2017.
+\newblock URL \url{https://openreview.net/forum?id=Sy8gdB9xx}.
+
+\bibitem[Zhou et~al.(2022)Zhou, Nova, Larochelle, Courville, Neyshabur, and Sedghi]{zhou2022teaching}
+Hattie Zhou, Azade Nova, Hugo Larochelle, Aaron Courville, Behnam Neyshabur, and Hanie Sedghi.
+\newblock Teaching algorithmic reasoning via in-context learning.
+\newblock \emph{arXiv preprint arXiv:2211.09066}, 2022.
+
+\bibitem[Zhou et~al.(2023)Zhou, Bradley, Littwin, Razin, Saremi, Susskind, Bengio, and Nakkiran]{zhou2023algorithms}
+Hattie Zhou, Arwen Bradley, Etai Littwin, Noam Razin, Omid Saremi, Josh Susskind, Samy Bengio, and Preetum Nakkiran.
+\newblock What algorithms can transformers learn? a study in length generalization.
+\newblock \emph{arXiv preprint arXiv:2310.16028}, 2023.
+
+\bibitem[Zhu et~al.(2025)Zhu, Chen, He, LeCun, and Liu]{zhu2025transformers}
+Jiachen Zhu, Xinlei Chen, Kaiming He, Yann LeCun, and Zhuang Liu.
+\newblock Transformers without normalization.
+\newblock In \emph{Proceedings of the Computer Vision and Pattern Recognition Conference}, pp.\  14901--14911, 2025.
+
+\end{thebibliography}

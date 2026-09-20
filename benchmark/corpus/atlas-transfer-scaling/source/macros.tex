@@ -1,0 +1,80 @@
+\usepackage{lscape}
+\usepackage{pifont}% http://ctan.org/pkg/pifont
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+
+% \newcommand{\versionnumber}{1.5}
+% \newcommand{\versiondate}{October 14, 2023}
+% \newcommand{\embargotime}{October 18, 2023 at 9:00AM ET / 6:00AM PT}
+% \newcommand{\materialsUrl}{{\url{https://www.github.com/stanford-crfm/fmti}}}
+% \newcommand{\indexUrl}{{\url{https://crfm.stanford.edu/fmti}}}
+
+% the emoji package requires lualatex
+% \newcommand{\emoji}[1]{\includegraphics[height=1em]{emojis/#1}}
+
+
+% Custom commands for authors
+\newcommand{\TODO}[1]{\textcolor{red}{[\textbf{TODO:} #1]}}
+\newcommand{\shayne}[1]{\textcolor{magenta}{[shayne: #1]}}
+\newcommand{\sayash}[1]{\textcolor{olive}{[SK: #1]}}
+
+
+
+% Outline: each paragraph should have a tldr
+\newcommand\tldr[1]{\textcolor{gray}{\textit{[#1]} \\}}
+\newcommand\tldrDone[1]{}
+% \newcommand\todo[1]{\textcolor{red}{[TODO: #1]}}
+\newcommand\todocite[1]{\textcolor{green}{[Add cite: #1]}}
+
+% Styling: consistent styling 
+\newcommand\eg{e.g.\xspace}
+\newcommand\ie{i.e.\xspace}
+\newcommand\cf{cf.\xspace}
+\newcommand\dash{\xspace---\xspace}
+
+\newcommand\fas{Finetuning Adaptation Score}
+\newcommand\fasabb{FAS}
+\newcommand\bts{Bilingual Transfer Score}
+\newcommand\btsabb{BTS}
+\newcommand\unimax{Unimax}
+\newcommand\madlad{\textsc{MADLAD-400}}
+\newcommand\ourscl{\textsc{Adaptive Transfer Scaling Law}}
+\newcommand\basicscl{\textsc{Chinchilla Scaling Law}}
+\newcommand\dcsl{\textsc{Data-Constrained Scaling Law}}
+\newcommand\mscl{\textsc{Multilingual Scaling Law}}
+
+\newcommand\oursclabb{\textsc{ATLAS}}
+\newcommand\basicsclabb{\textsc{CSL}}
+\newcommand\dcslabb{\textsc{DCSL}}
+\newcommand\msclabb{\textsc{MSL}}
+
+
+
+
+\definecolor{mono}{HTML}{1F77B4}   % target / monolingual
+\definecolor{multi}{HTML}{FF7F0E}  % multilingual extension
+\definecolor{trans}{HTML}{2CA02C}  % selected high‑transfer sources
+\definecolor{other}{HTML}{D62728}  % remainder bucket
+\definecolor{ptgt}{HTML}{9467BD}   % target proportion p_t
+
+\definecolor{d_target}{HTML}{1A6399}   % darker blue (was 1F77B4)
+\definecolor{d_other}{HTML}{B92224}  % darker red (was D62728)
+\definecolor{d_transfer}{HTML}{2A8F2A}  % forest green
+\definecolor{comp2}{HTML}{E07B20}  % burnt orange
+\definecolor{comp3}{HTML}{8C4A8C}  % purple
+\definecolor{comp4}{HTML}{7F7F00}  % olive/golden
+
+
+% \usepackage{array,booktabs,multirow,graphicx} % already have most of these
+% Rotated row label helper (no makecell needed)
+\newcommand{\rowgroup}[2]{%
+  \multirow{#1}{*}{\rotatebox[origin=c]{90}{\footnotesize\textsc{\shortstack{#2}}}}%
+}
+
+
+\newcommand{\inlineatlas}{%
+  \raisebox{-0.2ex}{\includegraphics[height=1.15em]{figures/atlas-1.pdf}}%
+}
+
+\newcommand{\given}[1]{\textcolor{blue}{#1}}      % observed / fixed
+\newcommand{\learned}[1]{\textcolor{red}{#1}}    % learned parameters
