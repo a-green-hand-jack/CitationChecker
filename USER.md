@@ -1,115 +1,48 @@
-# CitationChecker User Guide
+# CitationChecker SDK quick start
 
-## 1. Install prerequisites
-
-Configure Pi first, then install the two scholarly CLIs:
+This branch does not use Pi. Install with Python 3.11+ on Linux/macOS:
 
 ```bash
-pip install "academic-refchecker[llm]"
+python -m pip install -e .
+python -m pip install 'academic-refchecker[llm]'
 uv tool install paper-search-mcp
-```
-
-Install CitationChecker. This also installs PyMuPDF4LLM for PDF-only inputs:
-
-```bash
-pip install -e .
-```
-
-## 2. Check your environment
-
-```bash
 citationchecker doctor
 ```
 
-The check covers:
-
-- `pi`
-- `academic-refchecker`
-- `paper-search`
-- Python package `pymupdf4llm`
-
-Optional provider keys for RefChecker and paper-search-mcp stay in their normal environment/configuration. CitationChecker does not store credentials.
-
-## 3. Choose the best manuscript input
-
-Prefer LaTeX source when available:
-
-```bash
-citationchecker check ./latex-project
-```
-
-or:
-
-```bash
-citationchecker check ./latex-project/main.tex
-```
-
-When only PDF is available:
-
-```bash
-citationchecker check manuscript.pdf
-```
-
-CitationChecker converts PDF-only input to `manuscript.md` with PyMuPDF4LLM before launching Pi. It does not perform this conversion for LaTeX inputs.
-
-Development defaults are `apex-deepseek/deepseek-v4-flash`. Use `--provider` and
-`--model` to override them.
-
-For a no-execution preview:
-
-```bash
-citationchecker check manuscript.pdf --dry-run
-```
-
-Bounded runs accept `--max-steps`, `--max-tokens`, `--max-output-tokens`, and
-`--timeout`. `--disable-paper-search` is the paired ablation mode. A run is
-accepted only when `receipt.json` says `stop_reason=completed`; inspect
-`trajectory.jsonl` for the redacted replayable event log.
-
-## 4. Inspect staging metadata
+Keep API credentials in local environment variables. Set `CITATIONCHECKER_BASE_URL`
+for your compatible endpoint and `OPENAI_API_KEY` locally, or use the documented
+provider-specific variables in [README.md](README.md). Do not commit secrets.
 
 ```bash
 citationchecker inspect ./latex-project
-citationchecker inspect manuscript.pdf
+citationchecker check ./latex-project --provider <provider> --model <model>
+citationchecker check paper.pdf --provider <provider> --model <model>
+citationchecker check main.tex --dry-run
 ```
 
-Each run writes `workspace/input/manifest.json`, which tells Pi whether it should read LaTeX directly or the normalized Markdown.
+Prefer a complete LaTeX project directory when the manuscript has included files.
+A single `.tex` stages sibling bibliographies; PDF-only input is converted into
+Markdown. RefChecker still checks the original staged PDF or bibliography.
 
-## 5. Read the result
+Use `--max-steps`, `--max-tokens`, `--max-output-tokens`, and `--timeout` to bound a
+run. `--max-tokens 0` explicitly disables only the cumulative token cap. Returned
+usage may cross the cap on the last request; such a response cannot execute tools.
+With a cap enabled, missing usage stops as `usage_unknown`.
 
-The important files are:
-
-```text
-workspace/output/citation-report.md
-workspace/output/citation-report.json
-```
-
-The Markdown report is for humans. The JSON report contains the same citation-level labels for scripts or grading.
-
-## 6. Verify output structure
+The two reports are under `workspace/output/`. A successful run requires
+`receipt.json` to say `completed`, `verified: true`, and runner exit code zero.
+An `INSUFFICIENT_EVIDENCE` citation is not necessarily a failed run: it is an
+explicit abstention when the source could not be adequately checked.
 
 ```bash
-citationchecker verify /path/to/citation-report.md
+citationchecker verify runs/<run>/workspace/output/citation-report.md
+python benchmark/ablate.py --per-mutation 1 --out benchmark/runs/sdk-ablation-new
 ```
 
-This only checks the report contract. It does not re-judge scientific correctness.
+Use a new output directory for each experiment. Existing published results are
+historical Pi runs; fresh SDK results have not been supplied by the repair.
+`--thinking` is optional and maps to the endpoint's `reasoning_effort` parameter.
+Omit it when your endpoint does not support that parameter.
 
-## Run the controlled benchmark
-
-CitationChecker ships with 40 controlled LaTeX citation cards derived from ten
-real ICLR 2026 papers. The original arXiv TeX sources and compiled PDFs are
-stored under `benchmark/corpus/`. To run all cases with the development model:
-
-```bash
-python benchmark/run.py --workers 8
-python benchmark/evaluate.py benchmark/runs/predictions.jsonl
-```
-
-Use `--limit 4` for one mutation of each type and `--workers 1` for a serial
-run. To run the paired mechanism comparison:
-
-```bash
-python benchmark/ablate.py --per-mutation 1
-```
-
-The benchmark is controlled and diagnostic; it is not a broad performance estimate.
+Before sharing trajectories, review manuscript privacy and the automated redaction.
+Mechanical report validation is not a guarantee that scientific claims are correct.

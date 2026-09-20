@@ -1,12 +1,15 @@
 # Coding-agent rules
 
-1. Keep CitationChecker a small course-project agent.
-2. Do not reimplement RefChecker, paper-search-mcp, or PyMuPDF4LLM.
-3. Prefer LaTeX source when available; only convert PDF when source is unavailable.
-4. Keep citation methodology in `SKILL.md` and `references/`.
-5. Keep Python runtime deterministic; no in-process LLM calls.
-6. PyMuPDF4LLM may be called by staging only for input conversion, never for citation judgment.
-7. Do not execute manuscript code.
-8. Do not persist model/provider credentials.
-9. Preserve the two required final artifacts: `citation-report.md` and `citation-report.json`.
-10. Keep the public CLI commands stable: `doctor`, `inspect`, `check`, `verify`.
+Keep this branch a small Python SDK agent; do not reintroduce Pi or a high-level
+agent framework. Reuse RefChecker, paper-search-mcp, and PyMuPDF4LLM.
+
+Keep scientific methodology in the Skill/reference guide and loop policy in
+Python. Preserve original assistant messages and linked tool results, append
+code-derived state before requests, validate bounded tool arguments, and require
+verified artifacts before completion. Never replace a manuscript's bibliography
+with the cited paper itself during fallback.
+
+Do not execute manuscript code, persist credentials, fabricate evaluations, or
+relabel historical Pi results as SDK results. Preserve `doctor`, `inspect`,
+`check`, `verify`, and both final report artifacts. Run offline regressions after
+changing protocol, usage, state, budget, or tool-dispatch behavior.

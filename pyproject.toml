@@ -13,6 +13,7 @@ authors = [{name = "CitationChecker contributors"}]
 dependencies = [
   "pymupdf4llm>=0.0.17",
   "openai>=1.50.0",
+  "jsonschema>=4.23.0",
 ]
 
 [project.scripts]

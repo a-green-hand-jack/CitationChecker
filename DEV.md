@@ -1,97 +1,55 @@
-# Development Guide
+# Development — explicit SDK loop
 
-CitationChecker is intentionally split into two planes.
+Keep the implementation small. `SKILL.md` and `references/` define the citation
+method; `sdk_worker.py` owns the loop; `sdk_tools.py` owns validated CLI adapters;
+`runner.py` owns staging, worker lifetime and final acceptance. The SDK is only
+an API client. Preserve the four public CLI commands.
 
-## Product definition
+## Invariants
 
-- `src/citation_checker/SKILL.md`
-- `src/citation_checker/references/`
+1. Use `build_system_prompt()` once during staging. The worker consumes the exact
+   persisted system/user prompt; do not log a substitute prompt.
+2. Before each request, append a code-generated state snapshot to the tail.
+   Preserve assistant messages and original argument strings/call IDs. Do not
+   insert state between an assistant tool call and its tool result.
+3. Validate arguments against exported JSON schemas before executing tools.
+   Enforce bounds in code; no shell interpolation or unrestricted network tool.
+4. TeX-to-bibliography fallback must preserve the original `.bib` contents and
+   checking target. Never change `--paper` to a cited arXiv ID.
+5. Missing usage is unknown. Sum only per-request events, once per step; stop
+   events contain cumulative `usage_total`. Cache reads are a subset of prompt
+   tokens. Disable hidden SDK retries so attempts remain explicit.
+6. Check the token budget again before dispatching a response's tool calls.
+   After completion, block remaining calls in the same response but retain their
+   paired observations. Recheck artifacts and coverage in the parent runner.
+7. `--disable-paper-search` removes the tool from both the schemas and dispatcher.
+   It is an execution gate, not just a prompt. RefChecker still exposes its normal
+   bibliography observations; document those when interpreting an ablation.
+8. Redact producer events, logs, state, and saved tool text. Original in-memory
+   messages are used for the next model request, not redacted reconstructions.
 
-These files define how the agent audits citations.
-
-## Deterministic runtime
-
-- `runtime/staging.py`: detect source type, stage LaTeX, or convert PDF to Markdown with PyMuPDF4LLM; freeze skill
-- `runtime/doctor.py`: detect OpenAI SDK, RefChecker, paper-search, and PyMuPDF4LLM
-- `runtime/runner.py`: launch the OpenAI SDK worker headlessly, enforce budgets, clean up process groups, and write receipts
-- `runtime/trajectory.py`: normalize SDK JSONL events into a replayable redacted trajectory
-- `runtime/verify.py`: validate final artifact shape and summary counts
-- `runtime/sdk_worker.py`: isolated OpenAI Chat Completions tool-calling loop
-- `runtime/sdk_tools.py`: Python schemas and dispatchers for staged inspection, RefChecker, paper-search, and report submission
-- `runtime/sdk_protocol.py`: JSONL worker event protocol
-- `runtime/main.py`: CLI parser
-
-Do not move scientific judgment into Python. If the definition of `SUPPORTED` or how evidence should be retrieved changes, change the skill/reference guide.
-
-PyMuPDF4LLM is allowed in Python because it is a deterministic input-conversion dependency, not a scientific verifier.
-
-## Staging contract
-
-Every run writes:
-
-```text
-workspace/input/manifest.json
-```
-
-Each run also writes `trajectory.jsonl`, `state.json`, `tool-contracts.json`,
-and a schema-3 `receipt.json`. Receipt usage covers SDK model requests;
-external tool activity remains in its saved artifacts.
-
-Important fields include:
-
-- `source_type`
-- `refchecker_target`
-- `reading_mode`
-- `main_tex` for LaTeX, when applicable
-- `normalized_markdown` for PDF, when applicable
-
-For a LaTeX project directory, the original project structure is copied under `workspace/input/source/`, excluding common VCS/build/cache directories and LaTeX build artifacts.
-
-## Local checks
+## Testing
 
 ```bash
-python -m compileall src
-PYTHONPATH=src python -m citation_checker.runtime.main --help
-PYTHONPATH=src python -m citation_checker.runtime.main doctor
-pytest
+python -m pip install -e . pytest
+python -m pytest tests/test_sdk_regressions.py tests/test_runtime.py -q
+python -m pytest -q
+python -m compileall -q src
 ```
 
-`doctor` may return nonzero on development machines that do not have the OpenAI SDK or external scholarly tools installed; that is expected.
+The repair was checked offline with fake model/tool responses and local subprocess
+fixtures. It did not run a paid model benchmark or download the scholarly corpus.
+A successful unit test is not evidence that a live provider accepts every optional
+parameter; `--thinking` is now forwarded as `reasoning_effort` rather than ignored.
 
-## Benchmark development
+## Artifacts and evaluation
 
-`benchmark/corpus/manifest.json` pins ten ICLR 2026 OpenReview records to exact
-arXiv versions and records the PDF/source hashes. Verify the materialized corpus
-with:
+Receipts identify `agent_backend: openai-sdk`. Request/response/tool logs are
+redacted application-level replays, not byte-for-byte HTTP captures. Unknown
+usage must remain null in aggregate metrics. Re-run SDK ablations in a fresh
+output directory; never edit historical Pi predictions or silently mix backends.
+The four variants from one paper are not four independent source papers.
 
-```bash
-python benchmark/download_corpus.py --verify-only
-```
-
-`benchmark/cases.jsonl` is the gold source of truth. It contains 40 cases (four
-per paper): a valid self-reference, a wrong-year mutation, a fabricated
-reference, and a swap to another real corpus paper. The claim text is a short,
-manually selected sentence from the pinned arXiv abstract. Rebuild the LaTeX
-fixtures with:
-
-```bash
-python benchmark/create_cases.py
-python benchmark/generate_tasks.py --clean
-```
-
-Generated model-visible task directories use neutral `case-0001` IDs and the
-`ref_a` citation key; mutation labels remain evaluator-side. Do not execute manuscript code. The benchmark task fixtures are citation cards;
-the full TeX source and compiled PDF remain available under `benchmark/corpus/`
-for provenance and future full-paper fixtures.
-
-Run evaluator checks with:
-
-```bash
-pytest tests/test_benchmark.py
-python benchmark/evaluate.py benchmark/example_predictions.jsonl
-python benchmark/ablate.py --per-mutation 1
-```
-
-Development benchmark runs default to `apex-deepseek/deepseek-v4-flash`; pass
-`--provider` and `--model` only when intentionally testing another route.
-Use `--workers` to control parallel provider-backed cases.
+Process-group cancellation targets POSIX platforms. PDF conversion remains a
+preprocessing dependency, not a model-initiated third scholarly tool. Bibliography
+extraction, retrieval coverage, and scientific judgment remain fallible.

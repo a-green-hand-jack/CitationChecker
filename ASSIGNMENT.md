@@ -1,67 +1,53 @@
-# Assignment 1 evidence
+# Assignment 1 evidence — SDK implementation
 
-This checkout uses Pi 0.85.1 as a low-level provider/session harness. The
-course boundary was confirmed for this implementation by the project owner on
-2026-09-20: Pi is not treated as a high-level agent framework. CitationChecker
-owns the domain tools, state, request budget, stop reasons, report validation,
-and trajectory receipt; Pi supplies the provider protocol and extension hook.
+This branch implements its own loop in `runtime/sdk_worker.py`. The official
+OpenAI Python SDK transports requests to a compatible model endpoint; no Pi,
+Node.js, Agents SDK, or high-level agent framework drives the loop.
 
-The adapter is [pi_extension.ts](src/citation_checker/pi_extension.ts). It
-registers typed `inspect_workspace`, `verify_references`, `retrieve_paper`, and
-`write_report` tools. The first three delegate to existing CLIs or bounded
-staged-file reads; it does not reimplement RefChecker, paper-search, or PDF
-conversion. `write_report` persists both required artifacts and calls the
-mechanical verifier before accepting the run.
+| Requirement | Implementation / evidence |
+| --- | --- |
+| Native roles and system instruction | One frozen system prompt is written to `task.json`, consumed by the worker, and logged; actual requests contain native system/user/assistant/tool messages. |
+| At least two typed tools | RefChecker and paper-search adapters plus staged-file inspection and report submission; exported contracts, runtime JSON-schema validation, bounded observations. |
+| Multi-step loop | Original assistant messages are preserved, results reference their call IDs, and the next request depends on tool observations. |
+| Code-maintained task state | Bounded snapshots are appended at the tail before every request; full state is persisted separately. |
+| Stopping conditions | Step, cumulative token, per-response output, and wall-clock limits; post-response checks block tool execution after budget exhaustion. A completion claim must pass report/coverage checks. |
+| Error handling | Malformed arguments become observations, deterministic failures open a circuit on an unchanged retry, CLI timeouts/missing executables have actionable errors, and exits leave receipts. |
+| Trajectory logging | Actual request payloads, full SDK response objects, linked tool observations, latency, state, and stop events; credential-shaped content is redacted. |
+| Small evaluation and ablation | Existing controlled tasks and paired full/no-paper-search runner are retained. New SDK provider-backed results must be produced separately from the historical Pi results. |
 
-Each model request receives a code-generated `citation_state` custom message.
-The state includes registered and processed citation IDs, pending IDs, tool
-counts, errors, usage, and remaining budgets. `trajectory.jsonl` stores the
-original Pi JSONL events plus normalized role, call ID, latency, tool, usage,
-state, and stop records. Credentials are redacted before persistence.
-
-The stable CLI remains `doctor`, `inspect`, `check`, and `verify`. `check`
-adds `--max-steps`, `--max-tokens`, `--max-output-tokens`,
-`--disable-paper-search`, and the existing wall-clock `--timeout`. Receipts
-distinguish `completed`, `step_limit`, `token_limit`, `timeout`,
-`tool_failure`, `provider_error`, `invalid_report`, and setup/protocol errors.
-Timeout cleanup kills the Pi process group. Provider usage arrives after a
-request, so a token-limit run can exceed the cap by the final in-flight
-request; the receipt preserves the actual reported total.
-
-The benchmark task directories use neutral `case-0001` identifiers and
-`ref_a` citation keys. Gold mutation labels remain in `cases.jsonl`, which is
-read only by the evaluator. `benchmark/ablate.py` runs the same fixed neutral
-task set in `full` and `no-paper-search` modes and records paired predictions,
-receipts, trajectories, token totals, latency, tool counts, failures, and
-metrics.
-
-## Reproducible evidence commands
+## Offline checks
 
 ```bash
-.venv/bin/python -m pytest -q
-.venv/bin/citationchecker doctor --json
-.venv/bin/citationchecker check benchmark/tasks/case-0001/main.tex \
-  --provider apex-deepseek --model deepseek-v4-flash \
-  --max-steps 10 --max-tokens 90000 --timeout 600
-.venv/bin/python benchmark/ablate.py --per-mutation 1 \
-  --provider apex-deepseek --model deepseek-v4-flash
+python -m pip install -e . pytest
+python -m pytest tests/test_sdk_regressions.py tests/test_runtime.py -q
+python -m compileall -q src
 ```
 
-The last two commands require the configured real provider and external
-scholarly CLIs. A run is accepted only when its receipt says `completed`, its
-two reports pass `verify`, and its trajectory and tool artifacts are present.
+The regression suite exercises state injection, assistant replay, malformed and
+blocked tool calls, usage accounting, unknown usage, schema/path boundaries,
+RefChecker fallback, report rejection, and subprocess timeout behavior. Fake
+providers/tools prove control flow, not citation accuracy.
 
-The paired real result is recorded in
-[`benchmark/results/issue1-ablation-20260920/`](benchmark/results/issue1-ablation-20260920/).
-Its full mode scored 1.0 reference / 1.0 support / 1.0 joint exact on the four
-fixed cases; the no-paper-search mode scored 1.0 / 0.5 / 0.5. The raw ignored
-runs retain all eight trajectories and external-tool artifacts.
+## Fresh provider-backed evidence to collect
 
-[`budget-trace.json`](benchmark/results/issue1-ablation-20260920/budget-trace.json)
-is a current provider-backed `token_limit` run: it is non-verified, records the
-known usage and trajectory, and demonstrates that budget exhaustion is not
-reported as success.
+```bash
+citationchecker check benchmark/tasks/case-0001/main.tex \
+  --provider <provider> --model <model> --out runs/sdk-demo-new \
+  --max-steps 10 --max-tokens 90000 --timeout 600
+python benchmark/ablate.py --per-mutation 1 \
+  --provider <provider> --model <model> --out benchmark/runs/sdk-ablation-new
+```
 
-[`ASSIGNMENT_SLIDES.md`](ASSIGNMENT_SLIDES.md) is a seven-slide submission
-outline with the architecture, evidence, ablation, reproduction command, and
-limitations.
+Retain the exact commit, configuration, task IDs, both modes' predictions,
+receipts, tool artifacts, and sanitized success/budget-stop trajectories. Keep
+missing predictions in the denominator. Do not relabel `issue1-ablation-20260920`
+or the older 40-case result as SDK measurements.
+
+## Limits
+
+Token limits are checked using returned usage and may be exceeded by the last
+in-flight request. Unknown usage stops a capped run; it is not reported as zero.
+Only SDK request tokens are included, not calls made internally by external CLIs.
+Report validation checks format and registered-ID coverage, not truth or complete
+manuscript parsing. The current fixtures are small abstract-derived citation
+cards with some obvious synthetic negatives, not a full-paper benchmark.

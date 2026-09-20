@@ -32,7 +32,9 @@ def test_sdk_loop_records_tool_result_and_final_response(tmp_path: Path):
     result = run_agent_loop(FakeClient(), model="fake", system="system", prompt="audit", tools=TOOL_SCHEMAS, context=context, max_steps=3, max_tokens=100, max_output_tokens=20)
     assert result["text"] == "final"
     assert context.state["tool_counts"]["inspect_workspace"] == 1
-    assert result["usage"]["total"] == 4
+    # One bounded repair turn follows the first unverified plain response.
+    assert result["usage"]["total"] == 6
+    assert result["stop_reason"] == "invalid_report"
 
 
 def test_sdk_loop_malformed_arguments_is_reported(tmp_path: Path):

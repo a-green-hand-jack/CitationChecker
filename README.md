@@ -1,250 +1,111 @@
-# CitationChecker
+# CitationChecker — SDK branch
 
-CitationChecker is a small **OpenAI SDK citation-auditing agent** for a course project.
-It checks two questions in an already-written academic manuscript:
+A small citation-auditing agent with an explicit Python model/tool loop. The
+OpenAI Python SDK is the API client, **not an agent framework**. This branch
+requires neither Pi nor Node.js. The model judges claims; Python owns execution,
+state, budgets, and mechanical report acceptance.
 
-1. **Is each cited reference real and correctly identified?**
-2. **Does the cited paper actually support the claim made in the manuscript?**
+The agent checks two separate questions: whether a reference is real and correctly
+identified, and whether the retrieved work supports the manuscript's claim.
+It reuses [RefChecker](https://github.com/markrussinovich/refchecker) and
+[paper-search-mcp](https://github.com/openags/paper-search-mcp) through their CLIs.
+PyMuPDF4LLM converts PDF-only input; LaTeX is read directly.
 
-It deliberately reuses existing tools instead of rebuilding them:
+## Install and run
 
-- [RefChecker](https://github.com/markrussinovich/refchecker) for reference existence and metadata validation.
-- [paper-search-mcp](https://github.com/openags/paper-search-mcp) through its `paper-search` CLI for paper discovery, abstract/full-text retrieval, and evidence access.
-- [PyMuPDF4LLM](https://github.com/pymupdf/pymupdf4llm) for **PDF-only manuscript normalization** into LLM-readable Markdown.
-
-The official OpenAI Python SDK runs the model/tool loop in an isolated worker. The deterministic runner owns staging, state, budgets, report acceptance, and receipts.
-
-## Architecture
-
-```text
-                       manuscript input
-                    /                    \
-          LaTeX source/project          PDF only
-                  |                        |
-                  |                  PyMuPDF4LLM
-                  |                        |
-                  +-----------+------------+
-                              |
-                       staged manuscript
-                              |
-                              v
-                      OpenAI SDK worker / SKILL.md
-                         /         \
-                        /           \
-                RefChecker        paper-search
-             existence/metadata   evidence retrieval
-                        \           /
-                         \         /
-                      claim-support judgment
-                              |
-                 citation-report.md + .json
-```
-
-The design principle is:
-
-```text
-CLI          = deterministic orchestration and input staging
-Skill        = citation-auditing methodology
-OpenAI SDK   = agent reasoning and tool selection
-PyMuPDF4LLM  = PDF-only input conversion
-RefChecker   = bibliographic verification
-paper-search = cited-paper evidence retrieval
-```
-
-## Installation
-
-Prerequisites:
-
-- Python 3.11+
-- OpenAI-compatible provider configured through environment variables
-- RefChecker CLI (`academic-refchecker`)
-- paper-search-mcp CLI (`paper-search`)
-
-Install the scholarly tools:
+Python 3.11+ and a POSIX environment are required for process-group cleanup.
 
 ```bash
-pip install "academic-refchecker[llm]"
+python -m pip install -e .
+python -m pip install 'academic-refchecker[llm]'
 uv tool install paper-search-mcp
-```
-
-Install CitationChecker from this checkout. PyMuPDF4LLM is installed as a normal package dependency:
-
-```bash
-pip install -e .
-```
-
-Or:
-
-```bash
-./install.sh
-```
-
-The `--provider` value is a logical provider name. Configure an OpenAI-compatible
-endpoint with `CITATIONCHECKER_BASE_URL` (or the provider-specific
-`CITATIONCHECKER_<PROVIDER>_BASE_URL`) and use the corresponding device-local
-API-key environment variable; credentials are never written to run artifacts.
-
-Check the machine:
-
-```bash
 citationchecker doctor
+citationchecker check ./latex-project --provider <provider> --model <model>
+citationchecker check manuscript.pdf --provider <provider> --model <model>
 ```
 
-`doctor` verifies the OpenAI SDK, RefChecker, paper-search, and PyMuPDF4LLM.
+Configure a compatible endpoint with `CITATIONCHECKER_BASE_URL` and a local
+`OPENAI_API_KEY`. Provider-specific `CITATIONCHECKER_<PROVIDER>_BASE_URL` and
+`CITATIONCHECKER_<PROVIDER>_API_KEY` take precedence; replace hyphens with underscores
+and uppercase the provider name. Existing Apex/DeepSeek environment aliases remain
+supported. Do not put credentials in the repository. `--thinking`, when supplied,
+is forwarded as `reasoning_effort`; omit it for endpoints that do not support it.
 
-## Usage
-
-### LaTeX project — preferred
-
-When source is available, pass the project directory:
+The stable commands are `doctor`, `inspect`, `check`, and `verify`.
 
 ```bash
-citationchecker check ./my-paper
+citationchecker check manuscript.tex --dry-run
+citationchecker check manuscript.tex --max-steps 10 --max-tokens 90000 \
+  --max-output-tokens 4096 --timeout 600
+citationchecker verify runs/<run>/workspace/output/citation-report.md
 ```
 
-CitationChecker finds the likely main `.tex`, stages the project, and the SDK worker reads LaTeX directly. No PDF conversion is performed.
-
-You can also pass a single file:
-
-```bash
-citationchecker check ./my-paper/main.tex
-```
-
-For a single `.tex`, sibling `.bib` files are staged automatically.
-
-### PDF-only manuscript
-
-```bash
-citationchecker check paper.pdf
-```
-
-For PDF-only input, CitationChecker uses PyMuPDF4LLM once during staging:
+## Small explicit architecture
 
 ```text
-paper.pdf -> manuscript.md
+LaTeX or PDF -> staging (+ PDF conversion only when needed)
+            -> SDK worker: system/user -> model -> typed tool -> observation -> repeat
+            -> report validation -> receipt
 ```
 
-The SDK worker reads `manuscript.md` for citation contexts, while RefChecker still receives the original PDF.
+Four registered tools have JSON schemas and runtime validation:
+`inspect_workspace`, `verify_references`, `retrieve_paper`, and `write_report`.
+There is no general shell tool. External CLIs receive argument lists, not shell
+strings. Text observations are bounded (default 6,000, maximum 12,000 characters),
+with saved artifacts for additional reading.
 
-### Inspect or dry-run
+Before every model request, code appends a bounded state snapshot to the message
+tail. The frozen system prefix and original assistant messages are retained.
+Tool results use the original `tool_call_id`; malformed/blocked calls are logged
+as observations. A plain completion claim gets at most one corrective turn.
+
+Budgets are checked before requests **and after responses, before tool execution**.
+An exhausted budget cannot submit a successful report. Missing usage is `null`,
+not zero; with a token cap enabled it stops the run as `usage_unknown`. Provider
+usage arrives after a request, so the final request can exceed the threshold.
+Only per-request usage is summed; final totals are never added again. Cached
+prompt tokens are not counted twice. External CLI model usage is excluded.
+
+RefChecker fallback preserves the checking target: a failed TeX extraction may
+retry its single staged sibling `.bib`, preserving all original metadata. It
+never substitutes the cited paper's arXiv ID. Multiple bibliographies require an
+explicit selection. A report requires a successful RefChecker observation, not
+merely an attempted call.
+
+## Artifacts and labels
+
+Each run contains frozen instructions, `task.json`, `tool-contracts.json`,
+`state.json`, `response.txt`, `trajectory.jsonl`, and `receipt.json`. The trajectory
+records the actual request payloads, SDK responses, tool IDs/results, state,
+latencies, and stop reason, with credential-shaped content redacted. Model-facing
+history is not rewritten from the redacted log. Treat manuscripts/evidence as
+sensitive and review artifacts before publishing.
+
+Final outputs are `workspace/output/citation-report.md` and `.json`.
+Reference labels: `VERIFIED`, `METADATA_MISMATCH`, `NOT_FOUND`, `UNVERIFIABLE`.
+Support labels: `SUPPORTED`, `PARTIALLY_SUPPORTED`, `UNSUPPORTED`,
+`INSUFFICIENT_EVIDENCE`. Mechanical validation is not a proof of scientific truth
+or exhaustive citation extraction.
+
+## Tests and evaluation provenance
 
 ```bash
-citationchecker inspect ./my-paper
-citationchecker inspect paper.pdf
-citationchecker check paper.pdf --dry-run
+python -m pip install pytest
+python -m pytest tests/test_sdk_regressions.py tests/test_runtime.py -q
+python -m pytest -q
 ```
 
-## Run layout
+The controlled corpus still contains 40 citation cards from ten papers; neutral
+fixture IDs do not eliminate all synthetic clues or establish full-paper accuracy.
+The tracked 40-case results and `issue1-ablation-20260920` results are **historical
+Pi runs**, not measurements of this SDK implementation. They remain unchanged.
+No new provider-backed score is claimed by this repair.
 
-A PDF run contains:
-
-```text
-runs/<timestamp>-<paper>/
-├── task.json
-├── inventory.json
-├── skill/
-├── workspace/
-│   ├── input/
-│   │   ├── manifest.json
-│   │   ├── paper.pdf
-│   │   └── manuscript.md
-│   └── output/
-│       ├── refchecker-report.json
-│       ├── citation-report.md
-│       ├── citation-report.json
-│       └── papers/
-├── response.txt
-├── trajectory.jsonl
-├── state.json
-└── receipt.json
-```
-
-A LaTeX-project run instead stages the source tree under `workspace/input/source/` and records the selected main file in `manifest.json`.
-
-Verify an existing report mechanically:
+For a fresh SDK paired evaluation, use a new output directory:
 
 ```bash
-citationchecker verify runs/.../workspace/output/citation-report.md
+python benchmark/ablate.py --per-mutation 1 --out benchmark/runs/sdk-ablation-new
 ```
 
-`check` also accepts explicit loop controls: `--max-steps`, `--max-tokens`,
-`--max-output-tokens`, `--timeout`, and `--disable-paper-search` for the
-paired ablation. A completed run has `stop_reason=completed`; budget,
-provider, tool, timeout, and report failures remain non-success receipts.
-`trajectory.jsonl` is the replayable event log and `state.json` is the
-code-maintained task state. Receipts identify `agent_backend: "openai-sdk"` and include SDK usage, tool counts, provider, model, and stop reason.
-
-## Why this is an agent rather than a fixed pipeline
-
-Input normalization is deterministic: use LaTeX directly when available; otherwise convert the PDF with PyMuPDF4LLM.
-
-The citation audit itself is conditional. RefChecker is used first. The SDK worker only escalates to `paper-search` when a real or recoverable cited paper needs semantic support checking. It can stop at the abstract when that is sufficient, or escalate to full text for quantitative or scope-sensitive claims.
-
-The Python runtime does **not** decide whether a citation is scientifically valid.
-
-## Output labels
-
-Reference status:
-
-- `VERIFIED`
-- `NOT_FOUND`
-- `METADATA_MISMATCH`
-- `UNVERIFIABLE`
-
-Claim support:
-
-- `SUPPORTED`
-- `PARTIALLY_SUPPORTED`
-- `UNSUPPORTED`
-- `INSUFFICIENT_EVIDENCE`
-
-Evidence depth:
-
-- `FULLTEXT`
-- `ABSTRACT`
-- `METADATA`
-- `NONE`
-
-## Supported manuscript inputs
-
-- LaTeX project directory — preferred
-- `.tex`
-- `.pdf`
-- `.md`
-- `.txt`
-
-The PDF conversion stage is intentionally isolated and replaceable. It does not make citation judgments.
-
-## Controlled benchmark
-
-The repository includes a controlled benchmark under `benchmark/` built from ten
-real ICLR 2026 papers. Each paper has a version-pinned arXiv TeX source archive,
-compiled PDF, extracted source tree, and SHA-256 provenance manifest. Every paper
-has four manually specified citation cases: a valid self-reference, a wrong-year
-mutation, a fabricated reference, and a swap to another real but irrelevant paper.
-
-The model-visible task directories use neutral `case-0001` identifiers and
-`ref_a` citation keys; gold mutation labels stay in the evaluator-side
-`cases.jsonl`:
-
-```bash
-python benchmark/run.py --workers 1 --limit 4
-python benchmark/evaluate.py benchmark/runs/predictions.jsonl
-python benchmark/ablate.py --per-mutation 1
-```
-
-Use `--workers 1` for a serial run, or change the worker count to match the
-provider quota. Use `--provider` and `--model` to override the development default. See
-[`benchmark/README.md`](benchmark/README.md) for corpus verification, task
-generation, case semantics, and provenance. The latest tracked DeepSeek run is
-published in
-[`benchmark/results/iclr2026-deepseek-v4-flash-2026-09-20/`](benchmark/results/iclr2026-deepseek-v4-flash-2026-09-20/).
-
-The Assignment 1 paired result is recorded in
-[`benchmark/results/issue1-ablation-20260920/`](benchmark/results/issue1-ablation-20260920/),
-with sanitized receipts and checksums; raw trajectories stay in the ignored
-run directory named by the result README.
-
-## Scope
-
-This is intentionally a small course-project agent. It does not implement a new search engine, embedding database, RAG framework, custom NLI model, or web UI.
+See [ASSIGNMENT.md](ASSIGNMENT.md) for the submission evidence checklist and
+[DEV.md](DEV.md) for the execution contracts and test scope.
