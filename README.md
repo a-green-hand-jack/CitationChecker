@@ -219,7 +219,9 @@ python benchmark/evaluate.py benchmark/runs/predictions.jsonl
 Use `--workers 1` for a serial run, or change the worker count to match the
 provider quota. Use `--provider` and `--model` to override the development default. See
 [`benchmark/README.md`](benchmark/README.md) for corpus verification, task
-generation, case semantics, and provenance.
+generation, case semantics, and provenance. The latest tracked DeepSeek run is
+published in
+[`benchmark/results/iclr2026-deepseek-v4-flash-2026-09-20/`](benchmark/results/iclr2026-deepseek-v4-flash-2026-09-20/).
 
 ## Scope
 

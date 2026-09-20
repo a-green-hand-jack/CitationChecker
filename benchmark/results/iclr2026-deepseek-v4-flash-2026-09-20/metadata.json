@@ -1,0 +1,13 @@
+{
+  "generated_at_utc": "2026-09-20T12:29:51.734653+00:00",
+  "benchmark_commit": "81fae30bffc4435965598907b94845a0c5b074b3",
+  "cases_source": "benchmark/cases.jsonl",
+  "run_command": "python3 benchmark/run.py --workers 8 --thinking medium --out benchmark/runs/deepseek-40-fixed",
+  "workers": 8,
+  "thinking": "medium",
+  "provider": "apex-deepseek",
+  "model": "deepseek-v4-flash",
+  "case_count": 40,
+  "corpus_manifest": "benchmark/corpus/manifest.json",
+  "raw_run_directory": "benchmark/runs/deepseek-40-fixed (ignored; not part of this tracked result package)"
+}

@@ -79,6 +79,11 @@ The evaluator reports reference-status accuracy, support-label accuracy, exact
 match, and exact match by mutation type. These are controlled diagnostic cases,
 not a broad estimate of citation-checking performance.
 
+The latest tracked real run is published under
+[`results/iclr2026-deepseek-v4-flash-2026-09-20/`](results/iclr2026-deepseek-v4-flash-2026-09-20/).
+It contains the predictions, sanitized receipts, score summary, evaluator
+output, and checksums without duplicating the raw downloaded evidence cache.
+
 ## Provenance
 
 The conference decision/status comes from the public ICLR 2026 OpenReview record

@@ -1,0 +1,21 @@
+tasks: 40
+predictions found: 40
+reference-status accuracy: 1.000 (40/40)
+support-label accuracy:    1.000 (40/40)
+overall exact match:       1.000 (40/40)
+
+by mutation type (exact match):
+  hallucinated_reference     1.000 (10/10)
+  metadata_corruption        1.000 (10/10)
+  none                       1.000 (10/10)
+  reference_swap             1.000 (10/10)
+
+reference confusion (gold -> predicted):
+  METADATA_MISMATCH -> METADATA_MISMATCH: 10
+  NOT_FOUND -> NOT_FOUND: 10
+  VERIFIED -> VERIFIED: 20
+
+support confusion (gold -> predicted):
+  INSUFFICIENT_EVIDENCE -> INSUFFICIENT_EVIDENCE: 10
+  SUPPORTED -> SUPPORTED: 20
+  UNSUPPORTED -> UNSUPPORTED: 10

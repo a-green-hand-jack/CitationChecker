@@ -1,0 +1,43 @@
+{
+  "task_count": 40,
+  "prediction_count": 40,
+  "receipt_count": 40,
+  "all_receipts_verified": true,
+  "reference_status_accuracy": {
+    "correct": 40,
+    "total": 40,
+    "value": 1.0
+  },
+  "support_label_accuracy": {
+    "correct": 40,
+    "total": 40,
+    "value": 1.0
+  },
+  "exact_match_accuracy": {
+    "correct": 40,
+    "total": 40,
+    "value": 1.0
+  },
+  "by_mutation_type": {
+    "hallucinated_reference": {
+      "correct": 10,
+      "total": 10,
+      "value": 1.0
+    },
+    "metadata_corruption": {
+      "correct": 10,
+      "total": 10,
+      "value": 1.0
+    },
+    "none": {
+      "correct": 10,
+      "total": 10,
+      "value": 1.0
+    },
+    "reference_swap": {
+      "correct": 10,
+      "total": 10,
+      "value": 1.0
+    }
+  }
+}
