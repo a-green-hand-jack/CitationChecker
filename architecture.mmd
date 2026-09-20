@@ -2,30 +2,21 @@ flowchart LR
     User[User] --> CLI[citationchecker check]
     Tex[LaTeX source/project] --> CLI
     PDF[PDF only] --> CLI
-
-    subgraph Runtime[Deterministic Python runtime]
+    subgraph Runtime[Deterministic Python runner]
       Detect[Detect source type]
       Convert[PyMuPDF4LLM\nPDF -> Markdown]
       Stage[Stage manuscript]
       Freeze[Freeze SKILL.md + references]
       Gate[Verify final artifact schema]
     end
-
     CLI --> Detect
     Detect -->|LaTeX| Stage
     Detect -->|PDF only| Convert --> Stage
     Stage --> Freeze
-    Freeze --> Pi[Pi harness]
-    Pi --> Skill[CitationChecker skill]
-
-    Skill --> Ref[RefChecker CLI]
-    Ref -->|existence + metadata| Pi
-
-    Skill --> Search[paper-search CLI]
-    Search -->|search / abstract / full text| Pi
-
-    Pi --> Judge[Claim-support reasoning]
-    Judge --> Report[citation-report.md]
-    Judge --> JSON[citation-report.json]
+    Freeze --> Worker[OpenAI SDK worker]
+    Worker --> Tools[Python tool dispatch]
+    Tools --> Ref[RefChecker CLI]
+    Tools --> Search[paper-search CLI]
+    Worker --> Judge[Claim-support reasoning]
+    Judge --> Report[citation-report.md + .json]
     Report --> Gate
-    JSON --> Gate

@@ -12,11 +12,13 @@ These files define how the agent audits citations.
 ## Deterministic runtime
 
 - `runtime/staging.py`: detect source type, stage LaTeX, or convert PDF to Markdown with PyMuPDF4LLM; freeze skill
-- `runtime/doctor.py`: detect Pi, RefChecker, paper-search, and PyMuPDF4LLM
-- `runtime/runner.py`: launch pinned Pi headlessly, enforce budgets, clean up process groups, and write receipts
-- `runtime/trajectory.py`: normalize Pi JSONL events into a replayable redacted trajectory
+- `runtime/doctor.py`: detect OpenAI SDK, RefChecker, paper-search, and PyMuPDF4LLM
+- `runtime/runner.py`: launch the OpenAI SDK worker headlessly, enforce budgets, clean up process groups, and write receipts
+- `runtime/trajectory.py`: normalize SDK JSONL events into a replayable redacted trajectory
 - `runtime/verify.py`: validate final artifact shape and summary counts
-- `pi_extension.ts`: thin typed-tool adapter for staged inspection, RefChecker, paper-search, and report submission
+- `runtime/sdk_worker.py`: isolated OpenAI Chat Completions tool-calling loop
+- `runtime/sdk_tools.py`: Python schemas and dispatchers for staged inspection, RefChecker, paper-search, and report submission
+- `runtime/sdk_protocol.py`: JSONL worker event protocol
 - `runtime/main.py`: CLI parser
 
 Do not move scientific judgment into Python. If the definition of `SUPPORTED` or how evidence should be retrieved changes, change the skill/reference guide.
@@ -32,7 +34,7 @@ workspace/input/manifest.json
 ```
 
 Each run also writes `trajectory.jsonl`, `state.json`, `tool-contracts.json`,
-and a schema-2 `receipt.json`. Receipt usage covers Pi model requests;
+and a schema-3 `receipt.json`. Receipt usage covers SDK model requests;
 external tool activity remains in its saved artifacts.
 
 Important fields include:
@@ -54,7 +56,7 @@ PYTHONPATH=src python -m citation_checker.runtime.main doctor
 pytest
 ```
 
-`doctor` may return nonzero on development machines that do not have Pi or the external scholarly tools installed; that is expected.
+`doctor` may return nonzero on development machines that do not have the OpenAI SDK or external scholarly tools installed; that is expected.
 
 ## Benchmark development
 

@@ -17,18 +17,18 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--version", action="version", version=__version__)
     sub = parser.add_subparsers(dest="command", required=True)
 
-    p = sub.add_parser("doctor", help="Check Pi and all three external tools")
+    p = sub.add_parser("doctor", help="Check the OpenAI SDK and external tools")
     p.add_argument("--json", action="store_true")
 
     p = sub.add_parser("inspect", help="Inspect a PDF, TeX file, or LaTeX project without running the agent")
     p.add_argument("manuscript", type=Path)
     p.add_argument("--json", dest="json_out", type=Path)
 
-    p = sub.add_parser("check", help="Run a citation audit in Pi")
+    p = sub.add_parser("check", help="Run a citation audit with the OpenAI SDK")
     p.add_argument("manuscript", type=Path)
     p.add_argument("--out", type=Path)
-    p.add_argument("--provider", default=DEFAULT_PROVIDER, help=f"Pi provider (default: {DEFAULT_PROVIDER})")
-    p.add_argument("--model", default=DEFAULT_MODEL, help=f"Pi model (default: {DEFAULT_MODEL})")
+    p.add_argument("--provider", default=DEFAULT_PROVIDER, help=f"Logical provider name (default: {DEFAULT_PROVIDER})")
+    p.add_argument("--model", default=DEFAULT_MODEL, help=f"Model name (default: {DEFAULT_MODEL})")
     p.add_argument("--thinking")
     p.add_argument("--timeout", type=int, default=1800)
     p.add_argument("--max-steps", type=int, default=12, help="Maximum model requests")

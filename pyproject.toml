@@ -5,13 +5,14 @@ build-backend = "hatchling.build"
 [project]
 name = "citation-checker-agent"
 version = "0.1.0"
-description = "A lightweight Pi-based agent for auditing academic citations with RefChecker, paper-search-mcp, and PyMuPDF4LLM."
+description = "A lightweight OpenAI SDK agent for auditing academic citations with RefChecker, paper-search-mcp, and PyMuPDF4LLM."
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
 authors = [{name = "CitationChecker contributors"}]
 dependencies = [
   "pymupdf4llm>=0.0.17",
+  "openai>=1.50.0",
 ]
 
 [project.scripts]

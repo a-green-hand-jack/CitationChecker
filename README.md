@@ -1,6 +1,6 @@
 # CitationChecker
 
-CitationChecker is a small **Pi-based citation-auditing agent** for a course project.
+CitationChecker is a small **OpenAI SDK citation-auditing agent** for a course project.
 It checks two questions in an already-written academic manuscript:
 
 1. **Is each cited reference real and correctly identified?**
@@ -12,10 +12,7 @@ It deliberately reuses existing tools instead of rebuilding them:
 - [paper-search-mcp](https://github.com/openags/paper-search-mcp) through its `paper-search` CLI for paper discovery, abstract/full-text retrieval, and evidence access.
 - [PyMuPDF4LLM](https://github.com/pymupdf/pymupdf4llm) for **PDF-only manuscript normalization** into LLM-readable Markdown.
 
-Pi 0.85.1 is the low-level provider/session harness; it is not treated as a
-high-level agent framework for this assignment. The model decides when to call
-the registered scholarly tools, while the adapter and Python runtime own state,
-budgets, report acceptance, and receipts.
+The official OpenAI Python SDK runs the model/tool loop in an isolated worker. The deterministic runner owns staging, state, budgets, report acceptance, and receipts.
 
 ## Architecture
 
@@ -31,7 +28,7 @@ budgets, report acceptance, and receipts.
                        staged manuscript
                               |
                               v
-                      Pi / SKILL.md
+                      OpenAI SDK worker / SKILL.md
                          /         \
                         /           \
                 RefChecker        paper-search
@@ -48,7 +45,7 @@ The design principle is:
 ```text
 CLI          = deterministic orchestration and input staging
 Skill        = citation-auditing methodology
-Pi           = agent reasoning and tool selection
+OpenAI SDK   = agent reasoning and tool selection
 PyMuPDF4LLM  = PDF-only input conversion
 RefChecker   = bibliographic verification
 paper-search = cited-paper evidence retrieval
@@ -59,7 +56,7 @@ paper-search = cited-paper evidence retrieval
 Prerequisites:
 
 - Python 3.11+
-- Pi (`pi`) configured with a model/provider
+- OpenAI-compatible provider configured through environment variables
 - RefChecker CLI (`academic-refchecker`)
 - paper-search-mcp CLI (`paper-search`)
 
@@ -82,13 +79,18 @@ Or:
 ./install.sh
 ```
 
+The `--provider` value is a logical provider name. Configure an OpenAI-compatible
+endpoint with `CITATIONCHECKER_BASE_URL` (or the provider-specific
+`CITATIONCHECKER_<PROVIDER>_BASE_URL`) and use the corresponding device-local
+API-key environment variable; credentials are never written to run artifacts.
+
 Check the machine:
 
 ```bash
 citationchecker doctor
 ```
 
-`doctor` verifies Pi, RefChecker, paper-search, and PyMuPDF4LLM.
+`doctor` verifies the OpenAI SDK, RefChecker, paper-search, and PyMuPDF4LLM.
 
 ## Usage
 
@@ -100,7 +102,7 @@ When source is available, pass the project directory:
 citationchecker check ./my-paper
 ```
 
-CitationChecker finds the likely main `.tex`, stages the project, and Pi reads LaTeX directly. No PDF conversion is performed.
+CitationChecker finds the likely main `.tex`, stages the project, and the SDK worker reads LaTeX directly. No PDF conversion is performed.
 
 You can also pass a single file:
 
@@ -122,7 +124,7 @@ For PDF-only input, CitationChecker uses PyMuPDF4LLM once during staging:
 paper.pdf -> manuscript.md
 ```
 
-Pi reads `manuscript.md` for citation contexts, while RefChecker still receives the original PDF.
+The SDK worker reads `manuscript.md` for citation contexts, while RefChecker still receives the original PDF.
 
 ### Inspect or dry-run
 
@@ -154,8 +156,6 @@ runs/<timestamp>-<paper>/
 ├── response.txt
 ├── trajectory.jsonl
 ├── state.json
-├── extension/
-│   └── citation_tools.ts
 └── receipt.json
 ```
 
@@ -172,13 +172,13 @@ citationchecker verify runs/.../workspace/output/citation-report.md
 paired ablation. A completed run has `stop_reason=completed`; budget,
 provider, tool, timeout, and report failures remain non-success receipts.
 `trajectory.jsonl` is the replayable event log and `state.json` is the
-code-maintained task state. The Pi adapter is pinned to 0.85.1 in the receipt.
+code-maintained task state. Receipts identify `agent_backend: "openai-sdk"` and include SDK usage, tool counts, provider, model, and stop reason.
 
 ## Why this is an agent rather than a fixed pipeline
 
 Input normalization is deterministic: use LaTeX directly when available; otherwise convert the PDF with PyMuPDF4LLM.
 
-The citation audit itself is conditional. RefChecker is used first. Pi only escalates to `paper-search` when a real or recoverable cited paper needs semantic support checking. It can stop at the abstract when that is sufficient, or escalate to full text for quantitative or scope-sensitive claims.
+The citation audit itself is conditional. RefChecker is used first. The SDK worker only escalates to `paper-search` when a real or recoverable cited paper needs semantic support checking. It can stop at the abstract when that is sufficient, or escalate to full text for quantitative or scope-sensitive claims.
 
 The Python runtime does **not** decide whether a citation is scientifically valid.
 

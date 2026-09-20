@@ -1,7 +1,7 @@
 """Public ``citationchecker`` command.
 
 The CLI is intentionally deterministic: it stages inputs, checks host tools,
-launches Pi, and mechanically validates the final artifacts. Citation reasoning
+launches the SDK worker, and mechanically validates the final artifacts. Citation reasoning
 lives in SKILL.md and is performed by the harness model.
 """
 

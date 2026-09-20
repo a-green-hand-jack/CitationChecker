@@ -5,9 +5,7 @@ import json
 import shutil
 import subprocess
 from dataclasses import asdict, dataclass
-
-EXPECTED_PI_VERSION = "0.85.1"
-
+from importlib.metadata import PackageNotFoundError, version
 
 @dataclass
 class Check:
@@ -40,19 +38,18 @@ def _probe(name: str, executable: str, args: list[str]) -> Check:
 def _probe_python_package(name: str, module: str) -> Check:
     try:
         mod = importlib.import_module(module)
-        version = getattr(mod, "version", None) or getattr(mod, "__version__", None) or "installed"
-        return Check(name=name, command=f"python:{module}", found=True, detail=str(version))
+        try:
+            installed = version(module)
+        except PackageNotFoundError:
+            installed = getattr(mod, "__version__", None) or "installed"
+        return Check(name=name, command=f"python:{module}", found=True, detail=str(installed))
     except Exception as exc:
         return Check(name=name, command=f"python:{module}", found=False, detail=str(exc))
 
 
 def run_doctor(as_json: bool = False) -> int:
-    pi = _probe("Pi harness", "pi", ["--version"])
-    if pi.found and pi.detail != EXPECTED_PI_VERSION:
-        pi.found = False
-        pi.detail = f"requires {EXPECTED_PI_VERSION}; found {pi.detail}"
     checks = [
-        pi,
+        _probe_python_package("OpenAI Python SDK", "openai"),
         _probe("RefChecker", "academic-refchecker", ["--help"]),
         _probe("paper-search-mcp CLI", "paper-search", ["sources"]),
         _probe_python_package("PDF conversion", "pymupdf4llm"),
