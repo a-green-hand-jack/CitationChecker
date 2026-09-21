@@ -67,7 +67,10 @@ The Markdown begins with `# Citation Audit Report`. Include every registered ID,
 its claim, reference, two judgments, evidence depth, reason, and available source
 location/evidence artifact. The JSON has `manuscript`, `summary`, and `citations`.
 Each citation requires nonempty `citation`, `claim`, `reference`, `reason`, plus
-`reference_status`, `support`, and `evidence_depth` using the labels above.
+`reference_status`, `support`, and `evidence_depth` using the labels above. In the
+JSON, `citations[].citation` MUST be the exact registered citation-context ID,
+with one entry per registered ID; do not use the bibliography key or a quoted
+manuscript sentence there.
 
 `summary` contains integer counts: `total_citations`, `verified`, `not_found`,
 `metadata_mismatch`, `unverifiable`, `supported`, `partially_supported`,

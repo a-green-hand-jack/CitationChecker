@@ -45,6 +45,36 @@ def as_json(value: Any) -> Any:
     return value
 
 
+def _replay_safe_messages(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Copy history for the wire, repairing tool-call arguments the endpoint rejects.
+
+    A function-calling API requires every historical ``tool_calls[].arguments`` to
+    be valid JSON. A model can emit malformed or truncated JSON, and replaying it
+    verbatim makes the provider reject the whole request (HTTP 400), wedging the
+    loop with no recovery. The original message stays in ``messages`` and in the
+    ``model_response`` trajectory event; only this replayed copy is repaired.
+    """
+    repaired: list[dict[str, Any]] = []
+    for message in messages:
+        clone = copy.deepcopy(message)
+        calls = clone.get("tool_calls") if isinstance(clone, dict) else None
+        if isinstance(calls, list):
+            for call in calls:
+                function = call.get("function") if isinstance(call, dict) else None
+                if not isinstance(function, dict):
+                    continue
+                raw = function.get("arguments")
+                if not isinstance(raw, str):
+                    function["arguments"] = "{}"
+                    continue
+                try:
+                    json.loads(raw)
+                except (ValueError, TypeError):
+                    function["arguments"] = json.dumps({"_malformed_arguments": raw}, ensure_ascii=False)
+        repaired.append(clone)
+    return repaired
+
+
 def _usage(response: dict[str, Any]) -> dict[str, int | None]:
     raw = response.get("usage") or {}
     if not isinstance(raw, dict):
@@ -99,7 +129,7 @@ def run_agent_loop(client: Any, *, model: str, system: str, prompt: str,
         # Append state only after complete assistant/tool exchanges. Keep the
         # frozen system prefix and all original assistant messages unchanged.
         state_message = {"role": "user", "content": "Runtime state (code-generated):\n" + json.dumps(snapshot)}
-        request = {"model": model, "messages": copy.deepcopy(messages) + [state_message],
+        request = {"model": model, "messages": _replay_safe_messages(messages) + [state_message],
                    "tools": tools, "tool_choice": "auto", "max_tokens": max_output_tokens}
         if max_tokens is not None:
             request["max_tokens"] = min(max_output_tokens, max_tokens - totals["total"])

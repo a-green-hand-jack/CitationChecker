@@ -159,6 +159,46 @@ def test_malformed_arguments_have_paired_events_and_recovery(ctx, capsys):
     assert [e["call_id"] for e in events if e["kind"] == "tool_result"] == ["c1", "c2"]
 
 
+def test_malformed_arguments_are_repaired_for_wire_but_original_is_logged(ctx, capsys):
+    # A provider rejects a request that replays invalid JSON arguments, so the
+    # wire copy must be valid while the logged original stays verbatim.
+    client = FakeClient([response([call(raw="not-json")]), response([call(cid="c2")])])
+    run(client, ctx, max_steps=2)
+    replayed = next(m for m in client.requests[1]["messages"] if m["role"] == "assistant")
+    assert json.loads(replayed["tool_calls"][0]["function"]["arguments"]) == {"_malformed_arguments": "not-json"}
+    events = [json.loads(line) for line in capsys.readouterr().out.splitlines()]
+    original = next(e for e in events if e["kind"] == "model_response")["response"]["choices"][0]["message"]
+    assert original["tool_calls"][0]["function"]["arguments"] == "not-json"
+
+
+def test_verify_references_default_timeout_is_generous(ctx, monkeypatch):
+    seen = {}
+    def refcheck(target, timeout):
+        seen["timeout"] = timeout
+        return {"ok": True, "checked_target": "./input/main.tex"}
+    monkeypatch.setattr(ctx, "_refcheck", refcheck)
+    ctx.dispatch("inspect_workspace", {"operation": "register", "citation_ids": ["ref_a"]})
+    assert ctx.dispatch("verify_references", {})["ok"] and seen["timeout"] == 180
+
+
+def test_timeout_failure_is_retryable_and_actionable(ctx):
+    result = ctx.external(sys.executable, ["-c", "import time; time.sleep(5)"], 0.1)
+    assert result["error"]["kind"] == "timeout" and result["error"]["retryable"] is True
+    assert "timeout_seconds" in result["error"]["next_action"]
+
+
+def test_report_rejection_names_the_registered_id_contract(ctx):
+    ctx.dispatch("inspect_workspace", {"operation": "register", "citation_ids": ["ctx-1"]})
+    ctx.state["successful_tool_counts"]["verify_references"] = 1
+    bad = submission()
+    bad["report_json"]["citations"][0]["citation"] = "ref_a"  # bibliography key, not the registered context ID
+    result = ctx.dispatch("write_report", bad)
+    assert not result["ok"] and result["error"]["kind"] == "invalid_report"
+    payload = json.loads(result["error"]["message"])
+    assert payload["missing"] == ["ctx-1"]
+    assert "exact registered context ID" in payload["hint"]
+
+
 def test_model_provider_error_has_unknown_usage(ctx):
     result = run(FakeClient([RuntimeError("provider failed")]), ctx)
     assert result["stop_reason"] == "provider_error" and result["usage"]["total"] is None

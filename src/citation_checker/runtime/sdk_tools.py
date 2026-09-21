@@ -59,7 +59,7 @@ TOOL_SCHEMAS = [
         "max_results": _integer(1, 5), "max_chars": _integer(500, MAX_CHARS),
         "timeout_seconds": _integer(5, 180),
     }, ("operation",)),
-    _tool("write_report", "Submit both reports after a successful RefChecker observation. Checks structure and registered citation coverage, not scientific truth. Repair any validation errors.", {
+    _tool("write_report", "Submit both reports after a successful RefChecker observation. citations[].citation must be the exact registered citation-context ID, once per registered ID. Checks structure, counts, and registered coverage, not scientific truth. Repair any validation errors.", {
         "markdown": _string(500000),
         "report_json": {"type": "object", "properties": {
             "manuscript": _string(), "summary": {"type": "object"},
@@ -191,7 +191,14 @@ class SDKToolContext:
                    **_bounded(text), "_stdout": stdout, "_stderr": stderr}
         if not payload["ok"]:
             transient = reason is None and bool(re.search(r"\b(429|502|503|504)\b|rate.limit|temporar", text, re.I))
-            payload.update(error_payload(reason or "nonzero_exit", reason or f"Command exited {child.returncode}", transient))
+            error = error_payload(reason or "nonzero_exit", reason or f"Command exited {child.returncode}", transient)
+            if reason == "timeout":
+                # A slow scholarly CLI is a retry signal, not a deterministic dead
+                # end: the fix is a larger timeout, not abandoning the run.
+                error["error"].update(retryable=True, next_action=(
+                    "Retry once with a larger timeout_seconds (up to 180), or use one explicit staged .bib target."
+                    " Do not repeat the identical call unchanged."))
+            payload.update(error)
         return payload
 
     def failure(self, name: str, args: Any, result: dict) -> dict:
@@ -301,14 +308,14 @@ class SDKToolContext:
         target = self.safe_path(p.get("target") or manifest["refchecker_target"], ("input",))
         if target.suffix.lower() not in {".tex", ".bib", ".pdf", ".md", ".txt"}:
             raise ValueError("Unsupported RefChecker input")
-        result = self._refcheck(target, p.get("timeout_seconds", 120))
+        result = self._refcheck(target, p.get("timeout_seconds", 180))
         if not result["ok"] and target.suffix.lower() == ".tex" and result.get("error", {}).get("kind") not in {"timeout", "missing_executable", "output_limit"}:
             bibs = sorted(target.parent.glob("*.bib"))
             if len(bibs) == 1:
                 # Preserve every original bibliographic field, including wrong years.
                 # NEVER substitute a cited arXiv ID: that audits a different paper.
                 bib = self.safe_path(str(bibs[0].relative_to(self.workspace)), ("input",))
-                fallback = self._refcheck(bib, p.get("timeout_seconds", 120))
+                fallback = self._refcheck(bib, p.get("timeout_seconds", 180))
                 fallback.update(fallback_from=result["checked_target"], primary_result=result)
                 result = fallback
             elif len(bibs) > 1:
@@ -359,7 +366,10 @@ class SDKToolContext:
         normalized = [aliases.get(item, item) for item in ids if isinstance(item, str)]
         coverage = len(normalized) == len(ids) and sorted(normalized) == sorted(expected)
         if not ok or not coverage:
-            return error_payload("invalid_report", json.dumps({"errors": errors, "missing": [item for item in expected if item not in normalized]}))
+            return error_payload("invalid_report", json.dumps({
+                "errors": errors,
+                "missing": [item for item in expected if item not in normalized],
+                "hint": "Set citations[].citation to the exact registered context ID; every registered ID must appear exactly once."}))
         self.state.update(citation_aliases=aliases, processed_citation_ids=expected,
                           pending_citation_ids=[], report_verified=True, stop_reason="completed")
         return {"ok": True, "markdown_path": "./output/citation-report.md",
